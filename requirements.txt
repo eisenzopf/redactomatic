@@ -1,0 +1,2 @@
+spacy==2.3.2
+commonregex==1.5.4
