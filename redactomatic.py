@@ -9,12 +9,21 @@ import re
 from spacy.lang.en import English
 from spacy.pipeline import EntityRuler
 
+## CONSTANTS
+#conversation_id_column = 0
+#speaker_column = 1
+#date_column = 2
+#utterance_column = 3
+
+conversation_id_column = 0
+speaker_column = 6
+date_column = 1
+utterance_column = 5
+
 ## FUNCTIONS
 def redact_date(text):
     docx = nlp(text)
     redacted_sentences = []
-    for ent in docx.ents:
-        ent.merge()
     for token in docx:
         if token.ent_type_ == 'DATE':
             redacted_sentences.append("[DATE]")
@@ -25,8 +34,6 @@ def redact_date(text):
 def redact_place(text):
     docx = nlp(text)
     redacted_sentences = []
-    for ent in docx.ents:
-        ent.merge()
     for token in docx:
         if token.ent_type_ == 'GPE':
             redacted_sentences.append("[GPE]")
@@ -37,8 +44,6 @@ def redact_place(text):
 def redact_money(text):
     docx = nlp(text)
     redacted_sentences = []
-    for ent in docx.ents:
-        ent.merge()
     for token in docx:
         if token.ent_type_ == 'MONEY':
             redacted_sentences.append("[MONEY]")
@@ -49,8 +54,6 @@ def redact_money(text):
 def redact_person(text):
     docx = nlp(text)
     redacted_sentences = []
-    for ent in docx.ents:
-        ent.merge()
     for token in docx:
         if token.ent_type_ == 'PERSON':
             redacted_sentences.append("[PERSON]")
@@ -61,8 +64,6 @@ def redact_person(text):
 def redact_org(text):
     docx = nlp(text)
     redacted_sentences = []
-    for ent in docx.ents:
-        ent.merge()
     for token in docx:
         if token.ent_type_ == 'ORG':
             redacted_sentences.append("[ORG]")
@@ -70,24 +71,31 @@ def redact_org(text):
             redacted_sentences.append(token.string)
     return "".join(redacted_sentences)
 
+def redact_ordinal(text):
+    docx = nlp(text)
+    redacted_sentences = []
+    for token in docx:
+        if token.ent_type_ == 'ORDINAL':
+            redacted_sentences.append("[ORDINAL]")
+        else:
+            redacted_sentences.append(token.string)
+    return "".join(redacted_sentences)
+
+def redact_cardinal(text):
+    docx = nlp(text)
+    redacted_sentences = []
+    for token in docx:
+        if token.ent_type_ == 'CARDINAL':
+            redacted_sentences.append("[CARDINAL]")
+        else:
+            redacted_sentences.append(token.string)
+    return "".join(redacted_sentences)
+
 ## MAIN
 nlp = spacy.load("en_core_web_lg")
-#nlp = English()
+
 ruler = EntityRuler(nlp)
 patterns = [{"label": "ORG", "pattern": "Apple"},
-            {"label": "ORG", "pattern": "TracFone Wireless"},
-            {"label": "ORG", "pattern": [{"LOWER": "FedEX"}]},
-            {"label": "ORG", "pattern": "TracFone Wireless"},
-            {"label": "ORG", "pattern": [{"LOWER": "Virgin"},{"LOWER": "Mobile"}]},
-            {"label": "ORG", "pattern": "Virgin Mobile"},
-            {"label": "ORG", "pattern": "Straight Talk"},
-            {"label": "ORG", "pattern": "Straight Talk Wireless"},
-            {"label": "ORG", "pattern": "Candy Crush LOL"},
-            {"label": "ORG", "pattern": "Auto-Refill"},
-            {"label": "ORG", "pattern": "SafeLink Wireless"},
-            {"label": "ORG", "pattern": "Verizon"},
-            {"label": "ORG", "pattern": "Levi"},
-            {"label": "ORG", "pattern": "NET10"},
             {"label": "PERSON", "pattern": "Cherry"},
             {"label": "PERSON", "pattern": "Cris"},
             {"label": "PERSON", "pattern": "Ana"},
@@ -119,14 +127,28 @@ for arg in sys.argv[1:]:
             if len(row) < 3:
                 continue
             if line_count == 0:
-                # Find conversation id
-                conversation_id = engagement_id.search(row[0])
-                #print ("engagement id =",conversation_id.group())
+                # Header
+                print (row)
             elif line_count > 1:
                 # Parse text
-                text = row[2]
+                text = row[utterance_column]
                 from commonregex import CommonRegex
                 parsed_text = CommonRegex(text)
+
+                # Redact org
+                text = redact_org(text)
+
+                # Redact dates
+                text = redact_date(text)
+
+                # Redact Names
+                text = redact_person(text)
+
+                 # Redact places
+                text = redact_place(text)
+
+                # Redact money
+                text = redact_money(text)
 
                 # Redact IMEI
                 imei_number = imei.search(text)
@@ -158,35 +180,25 @@ for arg in sys.argv[1:]:
                     text = text.replace(zip_code.group(),"[ZIP]",5)
                     #print("Zip:",zip_code.group())
 
-                # Redact dates
-                text = redact_date(text)
-
-                # Redact money
-                text = redact_money(text)
-
                 # Redact last 4 of phone, PIN, or card
                 last_four_num = last_four.search(text)
                 if last_four_num:
                     text = text.replace(last_four_num.group(),"[LAST_FOUR]",5)
                     #print("Last Four:",last_four_num.group())
 
-                # Redact Names
-                text = redact_person(text)
+                # Redact ordinal
+                text = redact_ordinal(text)
+
+                # Redact cardinal
+                text = redact_cardinal(text)
 
                 # Set speaker
-                if re.match('Agent',row[1]):
-                    speaker = "agent"
+                if re.match('Agent',row[speaker_column]):
+                    speaker = "Agent"
                 else:
-                    speaker = "client"
+                    speaker = "Client"
 
                 # print CSV
-                print(f'"{conversation_id.group()}","{speaker}","{row[0]}","{text}"')
+                print(f'"{row[0]}","{speaker}","{row[date_column]}","{text}"')
 
-                ##print(results)
-                ##print(f'{row[1]}: {row[2]}')
-                #doc = nlp(row[2])
-                #for ent in doc.ents:
-                    #if ent.label_ == 'PERSON' or ent.label_ == 'ORG':
-                        #print(f'{engagement_id.group()} {ent.label_} {ent.text}')
-                    ##print(ent.text, ent.start_char, ent.end_char, ent.label_)
             line_count += 1
