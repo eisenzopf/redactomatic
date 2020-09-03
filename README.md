@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # RedactoMatic
 
 RedactoMatic is a new project that aims to safely remove and tokenize personally identifiable information (PII) from conversation data. The project is in its early stages and the output of this project should be considered unsafe; meaning that the code is not at the stage where it will reliably remove PII data from a conversation file.
