@@ -8,6 +8,7 @@ import sys
 import re
 from spacy.lang.en import English
 from spacy.pipeline import EntityRuler
+from commonregex import CommonRegex
 
 ## CONSTANTS
 #conversation_id_column = 0
@@ -116,7 +117,7 @@ engagement_id = re.compile('\d+')
 imei = re.compile('\d{14,20}')
 zip = re.compile('^\d{5}(-\d{4})?$')
 last_four = re.compile('\d{4}')
-cardinal_regex = re.compile(r'one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|fourty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|THIRTEEN|FOURTEEN|FIFTEEN|SIXTEEN|SEVENTEEN|EIGHTEEN|NINETEEN|TWENTY|THIRTY|FOURTY|FIFTY|SIXTY|SEVENTY|EIGHTY|NINETY|HUNDRED|THOUSAND|MILLION')
+cardinal_regex = re.compile(r'zero|oh|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|fourty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|ZERO|OH|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|THIRTEEN|FOURTEEN|FIFTEEN|SIXTEEN|SEVENTEEN|EIGHTEEN|NINETEEN|TWENTY|THIRTY|FOURTY|FIFTY|SIXTY|SEVENTY|EIGHTY|NINETY|HUNDRED|THOUSAND|MILLION')
 ordinal_regex = re.compile(r'first|second|third|fourth|fifth|sixth|seventh|eighth|nineth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fourtieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundredth|thousandth|FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINETH|TENTH|ELEVENTH|TWELFTH|THIRTEENTH|FOURTEENTH|FIFTEENTH|SIXTEENTH|SEVENTEENTH|EIGHTEENTH|NINETEENTH|TWENTIETH|THIRTIETH|FOURTIETH|FIFTIETH|SIXTIETH|SEVENTIETH|EIGHTIETH|NINETIETH|HUNDREDTH|THOUSANDTHS')
 spaces = re.compile('\s+')
 dotdot = re.compile(r'\.\.\.')
@@ -137,7 +138,6 @@ for arg in sys.argv[1:]:
             elif line_count > 0:
                 # Parse text
                 text = row[utterance_column]
-                from commonregex import CommonRegex
                 parsed_text = CommonRegex(text)
 
                 # Redact org
