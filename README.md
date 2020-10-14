@@ -1,6 +1,6 @@
 # RedactoMatic
 
-RedactoMatic is a new project that aims to safely remove and tokenize personally identifiable information (PII) from conversation data. The project is in its early stages and the output of this project should be considered unsafe; meaning that the code is not at the stage where it will reliably remove PII data from a conversation file.
+RedactoMatic removes personally identifiable information (PII) from conversation data. It works with transcribed calls AND chat logs. Please report bugs and feel free to make features requests.
 
 ## Installation
 
@@ -10,14 +10,20 @@ To install RedactoMatic, run:
 sh setup.sh
 ```
 
-This will install required Python libraries and download the large Spacy model.
+This will install required Python libraries and download the small and large Spacy models.
 
 ## Usage
 
-The current iteration of the code expects you to provide a CSV file from the commandline. Redacted output will be printed to STDOUT.
+The current iteration of the code expects you to provide a CSV file from the commandline.
 
 ```sh
-python redactomatic.py input.csv > output.csv
+usage: redactomatic.py [-h] --column COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE
+```
+
+You can specify one or more input files but only one output file. You must also specify which column in the input CSV(s) to redact. For example, if the CSV input file(s) contain text in the 2nd column that you would like to redact, you would set the  --column flag to 2.
+
+```sh
+Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv
 ```
 
 ## License
@@ -27,8 +33,8 @@ Please see the [LICENSE](LICENSE)
 ## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall
-be dual licensed as above, without any additional terms or conditions.
+for inclusion in the work by you, as defined in the MIT license, shall
+be licensed as above, without any additional terms or conditions.
 
 Please see the [Contribution Guidelines](CONTRIBUTING.md).
 
@@ -38,4 +44,4 @@ Jonathan Eisenzopf
 
 ## Copyright
 
-This application is provided by [Discourse.ai](https://www.discourse.ai) as Open Source software.
+Copyright 2020, [Discourse.ai](https://www.discourse.ai), All rights reserved.
