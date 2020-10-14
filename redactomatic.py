@@ -13,10 +13,11 @@ def main():
     texts = redact.clean(texts) # chats-yes, voice-yes
 
     df.iloc[:, args.column-1] = texts
-    print(df.to_csv(index=False))
-    #print(texts)
+    #print(df.to_csv(index=False))
+    df.to_csv(args.outputfile, index=False)
+
+    print("Done. Output file is",args.outputfile)
 
 
 if __name__ == "__main__":
     main()
-

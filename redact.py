@@ -7,9 +7,10 @@ import pandas as pd
 
 
 def config_args():
-    parser = argparse.ArgumentParser(description='Redact call transcriptions or chat logs. Output goes to <STDOUT>')
+    parser = argparse.ArgumentParser(description='Redact call transcriptions or chat logs.')
     parser.add_argument('--column', type=int, required=True, help='the CSV column number containing the text to redact.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
+    parser.add_argument('--outputfile', required=True, help='CSV output files')
     return parser.parse_args()
 
 
@@ -61,21 +62,20 @@ def address(texts):
     
 
 def cardinal(texts):
-    print("Redacting cardinals (Regex)")
+    print("Redacting cardinal (Regex)")
     pattern = regex.compile("""
     (?xi)           # free-spacing mode
-(?(DEFINE)
+  (?(DEFINE)
   (?<one_to_9>  
-  (?:f(?:ive|our)|s(?:even|ix)|t(?:hree|wo)|(?:ni|(^|\W)o)ne|eight)
+  (?:\m(one|two|three|four|five|six|seven|eight|nine)\M)
   ) # end one_to_9 definition
 
   (?<ten_to_19>  
-  (?:(?:(?:s(?:even|ix)|f(?:our|if)|nine)te|e(?:ighte|lev))en|
-                                          (^|\W)t(?:(?:hirte)?en|welve)) 
+  (?:\m(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)\M) 
   ) # end ten_to_19 definition
 
   (?<two_digit_prefix>
-  (?:s(?:even|ix)|t(?:hir|wen)|f(?:if|or)|eigh|nine)ty
+  (?:\m(s(?:even|ix)|t(?:hir|wen)|f(?:if|or)|eigh|nine)ty)\M
   ) # end two_digit_prefix definition
 
   (?<one_to_99>
@@ -109,11 +109,11 @@ def cardinal(texts):
   ) # end one_to_999_999_999_999_999 definition
 
   (?<bignumber>
-  (((\s)zero(\s|\.)|(\s)oh(\s|\.)|(?&one_to_999_999_999_999_999)(\s|\.)))
+  ((\mzero\M|\moh\M|(?&one_to_999_999_999_999_999)))
   ) # end bignumber definition
 
   (?<zero_to_9>
-  (?&one_to_9)|zero
+  (?&one_to_9)
   ) # end zero to 9 definition
 
   (?<decimals>
