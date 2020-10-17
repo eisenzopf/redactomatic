@@ -4,6 +4,7 @@ import sys
 import spacy
 import regex
 import pandas as pd
+import numpy as np
 
 
 def config_args():
@@ -19,8 +20,10 @@ def df_load_files(args):
     for file in args.inputfile:
         print("Loading " + file + "...")
         dfs.append(pd.read_csv(file))
-    big_frame = pd.concat(dfs, ignore_index=True)
-    return big_frame
+    df = pd.concat(dfs, ignore_index=True)
+    df.iloc[:, args.column-1].replace('', np.nan, inplace=True)
+    df.dropna(axis='index',subset=[df.columns[5]], inplace=True)
+    return df
 
 
 def load_files(args):
