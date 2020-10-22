@@ -26,6 +26,12 @@ You can specify one or more input files but only one output file. You must also 
 Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv
 ```
 
+You can optionally anonymize redacted information by including the --anonymize switch.
+
+```sh
+Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv --anonymize
+```
+
 ## License
 
 Please see the [LICENSE](LICENSE)
