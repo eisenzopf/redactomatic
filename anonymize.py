@@ -4,6 +4,7 @@ import csv
 import random
 import re
 import os
+from datetime import date
 
 
 def cardinal(texts):
@@ -58,11 +59,94 @@ def digits2words(digits):
     return words
 
 
+def event(texts):
+    print("Anonymizing events...")
+    ordinal = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
+    new_texts = []
+    def callback(match):
+        return random.choice(ordinal)
+    for text in texts:
+        new_text = re.sub(r"\[EVENT\]",callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+
+
+def fac(texts):
+    print("Anonymizing fac...")
+    new_texts = []
+    for text in texts:
+        new_text = re.sub(r"\[FAC\]","",text)
+        new_texts.append(new_text)
+    return new_texts
+
+
 def gpe(texts):
     print("Anonymizing places...")
     new_texts = []
     for text in texts:
         new_text = re.sub(r"\[GPE\]",'CITI', text)
+        new_texts.append(new_text)
+    return new_texts
+
+
+def language(texts):
+    print("Anonymizing language...")
+    language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
+    new_texts = []
+    def callback(match):
+        return random.choice(language)
+    for text in texts:
+        new_text = re.sub(r"\[LANGUAGE\]", callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+
+
+def laughter(texts):
+    print("Anonymizing laughter...")
+    new_texts = []
+    for text in texts:
+        new_text = re.sub(r"\[LAUGHTER\]","",text)
+        new_texts.append(new_text)
+    return new_texts
+
+
+def law(texts):
+    print("Anonymizing law...")
+    new_texts = []
+    for text in texts:
+        new_text = re.sub(r"\[LAW\]","",text)
+        new_texts.append(new_text)
+    return new_texts
+
+
+def loc(texts):
+    print("Anonymizing loc...")
+    new_texts = []
+    for text in texts:
+        new_text = re.sub(r"\[OC\]","",text)
+        new_texts.append(new_text)
+    return new_texts
+
+
+def money(texts):
+    print("Anonymizing money...")
+    new_texts = []
+    def callback(match):
+        return digits2words(str(random.randrange(200,500))).upper()
+    for text in texts:
+        new_text = re.sub(r"\[MONEY\]",callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+
+def norp(texts):
+    print("Anonymizing NORPs (nationality, religious or political organizations)...")
+    new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
+    def callback(match):
+        name = df['Nationality'].sample()
+        return name.values[0].upper()
+    for text in texts:
+        new_text = re.sub(r"\[NORP\]",callback, text)
         new_texts.append(new_text)
     return new_texts
 
@@ -88,6 +172,55 @@ def person(texts):
         return name.values[0].upper()
     for text in texts:
         new_text = re.sub(r"\[PERSON\]",callback, text)
+        new_texts.append(new_text)
+    return new_texts
+
+
+def product(texts):
+    print("Anonymizing products...")
+    product = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    new_texts = []
+    def callback(match):
+        return random.choice(product)
+    for text in texts:
+        new_text = re.sub(r"\[PRODUCT\]",callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+
+
+def quantity(texts):
+    print("Anonymizing quantities...")
+    ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    new_texts = []
+    def callback(match):
+        return random.choice(ordinal)
+    for text in texts:
+        new_text = re.sub(r"\[QUANTITY\]",callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+    
+
+def time(texts):
+    print("Anonymizing time...")
+    day = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelvth","thirteenth","fourteenth","fifteenth","sixteenth"]
+    month = ["january","february","march","april","may","june","july","august","september","october","november","december"]
+    new_texts = []
+    def callback(match):
+        return (random.choice(month) + " " +  random.choice(day))
+    for text in texts:
+        new_text = re.sub(r"\[TIME\]",callback, text).upper()
+        new_texts.append(new_text)
+    return new_texts
+
+
+def work_of_art(texts):
+    print("Anonymizing works of art...")
+    new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
+    def callback(match):
+        return str(df['Title'].sample().values[0]).upper()
+    for text in texts:
+        new_text = re.sub(r"\[WORK_OF_ART\]",callback, text)
         new_texts.append(new_text)
     return new_texts
 

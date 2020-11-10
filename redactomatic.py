@@ -8,7 +8,7 @@ def main():
     # load data into a Pandas Dataframe
     df = redact.df_load_files(args)
 
-    # Redact specified column
+    # redact specified column
     texts = redact.ner_ml(df, args)
     texts = redact.ccard(texts) # chat-yes, voice-no
     texts = redact.address(texts) # chat-yes, voice-no
@@ -17,23 +17,36 @@ def main():
     texts = redact.ordinal(texts) # voice-yes, chat-yes
     texts = redact.cardinal(texts) # voice-yes, chat-yes
 
-    # Anonymize
+    # anonymize if flag was passed
     if args.anonymize:
         texts = anonymize.cardinal(texts) # chats-no, voice=yes
         texts = anonymize.ordinal(texts) # chats-no, voice=yes
+        texts = anonymize.quantity(texts) # chats-no, voice=yes
         texts = anonymize.zip(texts) # chats-no, voice=yes
         texts = anonymize.company(texts) # chats-no, voice=yes
         texts = anonymize.person(texts) # chats-no, voice=yes
         texts = anonymize.date(texts) # chats-no, voice=yes
         texts = anonymize.gpe(texts) # chats-no, voice=yes
+        texts = anonymize.work_of_art(texts) # chats-yes, voice=yes
+        texts = anonymize.event(texts) # chats-yes, voice=yes
+        texts = anonymize.norp(texts) # chats-yes, voice=yes
+        texts = anonymize.money(texts) # chats-no, voice=yes
+        texts = anonymize.time(texts) # chats-no, voice=yes
+        texts = anonymize.laughter(texts) # chats-yes, voice=yes
+        texts = anonymize.product(texts) # chats-yes, voice=yes
+        texts = anonymize.language(texts) # chats-yes, voice=yes
+        texts = anonymize.law(texts) # chats-yes, voice=yes
+        texts = anonymize.fac(texts) # chats-yes, voice=yes
+        texts = anonymize.loc(texts) # chats-yes, voice=yes
+        # add ability to anonymize only
+
+
         
-    # Data Cleanup
+    # data cleanup
     texts = redact.clean(texts) # chats-yes, voice-yes
 
     # write the redacted data back to the Dataframe
     df.iloc[:, args.column-1] = texts
-
-    # anonymize if the flag was passed
 
     # write the updated CSV to disk
     df.to_csv(args.outputfile, index=False)
