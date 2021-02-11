@@ -22,7 +22,8 @@ def df_load_files(args):
         dfs.append(pd.read_csv(file))
     df = pd.concat(dfs, ignore_index=True)
     df.iloc[:, args.column-1].replace('', np.nan, inplace=True)
-    df.dropna(axis='index',subset=[df.columns[5]], inplace=True)
+    #df.dropna(axis='index',subset=[df.columns[5]], inplace=True)
+    df.dropna(axis='index',subset=[df.columns[args.column-1]], inplace=True)
     return df
 
 

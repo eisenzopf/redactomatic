@@ -32,7 +32,7 @@ def company(texts):
     return new_texts
 
 
-def date(texts):
+def adate(texts):
     print("Anonymizing dates...")
     new_texts = []
     relative_dates = ['today','yesterday','last monday', 'last tuesday', 'last wednesday', 'last thursday', 'last friday', 'last saturday', 'last sunday']
@@ -61,10 +61,10 @@ def digits2words(digits):
 
 def event(texts):
     print("Anonymizing events...")
-    ordinal = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
+    events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
     new_texts = []
     def callback(match):
-        return random.choice(ordinal)
+        return random.choice(events)
     for text in texts:
         new_text = re.sub(r"\[EVENT\]",callback, text).upper()
         new_texts.append(new_text)
@@ -72,7 +72,7 @@ def event(texts):
 
 
 def fac(texts):
-    print("Anonymizing fac...")
+    print("Anonymizing facility names...")
     new_texts = []
     for text in texts:
         new_text = re.sub(r"\[FAC\]","",text)
@@ -84,7 +84,7 @@ def gpe(texts):
     print("Anonymizing places...")
     new_texts = []
     for text in texts:
-        new_text = re.sub(r"\[GPE\]",'CITI', text)
+        new_text = re.sub(r"\[GPE\]",'', text)
         new_texts.append(new_text)
     return new_texts
 
@@ -123,7 +123,7 @@ def loc(texts):
     print("Anonymizing loc...")
     new_texts = []
     for text in texts:
-        new_text = re.sub(r"\[OC\]","",text)
+        new_text = re.sub(r"\[LOC\]","",text)
         new_texts.append(new_text)
     return new_texts
 
@@ -180,10 +180,11 @@ def product(texts):
     print("Anonymizing products...")
     product = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     new_texts = []
-    def callback(match):
-        return random.choice(product)
+    #def callback(match):
+        #return random.choice(product)
     for text in texts:
-        new_text = re.sub(r"\[PRODUCT\]",callback, text).upper()
+        #new_text = re.sub(r"\[PRODUCT\]",callback, text).upper()
+        new_text = re.sub(r"\[PRODUCT\]","",text)
         new_texts.append(new_text)
     return new_texts
 
@@ -192,10 +193,11 @@ def quantity(texts):
     print("Anonymizing quantities...")
     ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     new_texts = []
-    def callback(match):
-        return random.choice(ordinal)
+    #def callback(match):
+        #return random.choice(ordinal)
     for text in texts:
-        new_text = re.sub(r"\[QUANTITY\]",callback, text).upper()
+        #new_text = re.sub(r"\[QUANTITY\]",callback, text).upper()
+        new_text = re.sub(r"\[QUANTITY\]","",text)
         new_texts.append(new_text)
     return new_texts
     

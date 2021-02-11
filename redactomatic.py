@@ -19,19 +19,19 @@ def main():
 
     # anonymize if flag was passed
     if args.anonymize:
-        texts = anonymize.cardinal(texts) # chats-no, voice=yes
-        texts = anonymize.ordinal(texts) # chats-no, voice=yes
-        texts = anonymize.quantity(texts) # chats-no, voice=yes
+        texts = anonymize.cardinal(texts) # chats-yes, voice=yes
+        texts = anonymize.ordinal(texts) # chats-yes, voice=yes
+        texts = anonymize.quantity(texts) # chats-yes, voice=yes
         texts = anonymize.zip(texts) # chats-no, voice=yes
-        texts = anonymize.company(texts) # chats-no, voice=yes
-        texts = anonymize.person(texts) # chats-no, voice=yes
-        texts = anonymize.date(texts) # chats-no, voice=yes
-        texts = anonymize.gpe(texts) # chats-no, voice=yes
+        texts = anonymize.company(texts) # chats-yes, voice=yes
+        texts = anonymize.person(texts) # chats-yes, voice=yes
+        texts = anonymize.adate(texts) # chats-yes, voice=yes
+        texts = anonymize.gpe(texts) # chats-yes, voice=yes
         texts = anonymize.work_of_art(texts) # chats-yes, voice=yes
         texts = anonymize.event(texts) # chats-yes, voice=yes
         texts = anonymize.norp(texts) # chats-yes, voice=yes
-        texts = anonymize.money(texts) # chats-no, voice=yes
-        texts = anonymize.time(texts) # chats-no, voice=yes
+        texts = anonymize.money(texts) # chats-yes, voice=yes
+        texts = anonymize.time(texts) # chats-yes, voice=yes
         texts = anonymize.laughter(texts) # chats-yes, voice=yes
         texts = anonymize.product(texts) # chats-yes, voice=yes
         texts = anonymize.language(texts) # chats-yes, voice=yes
