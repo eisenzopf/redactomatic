@@ -81,10 +81,14 @@ def fac(texts):
 
 
 def gpe(texts):
-    print("Anonymizing places...")
+    print("Anonymizing country, city, state...")
     new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
+    def callback(match):
+        gpe = df.sample()
+        return gpe.values[0][0].upper()
     for text in texts:
-        new_text = re.sub(r"\[GPE\]",'', text)
+        new_text = re.sub(r"\[GPE\]",callback, text)
         new_texts.append(new_text)
     return new_texts
 
