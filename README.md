@@ -33,7 +33,7 @@ This will install required Python libraries and download the small (en_core_web_
 The current iteration of the code expects you to provide a CSV file from the commandline.
 
 ```sh
-usage: redactomatic.py [-h] --column COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE [--anonymize] [--large]
+usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE [--anonymize] [--large]
 ```
 
 ### Basic Example
