@@ -2,44 +2,54 @@ import redact
 import anonymize
 
 def main():
+    #initialize entity map
+    entity_map = {} 
+    
     # get command line params
     args = redact.config_args()
 
     # load data into a Pandas Dataframe
     df = redact.df_load_files(args)
 
-    # redact specified column
-    texts = redact.ner_ml(df, args)
-    texts = redact.ccard(texts) # chat-yes, voice-no
-    texts = redact.address(texts) # chat-yes, voice-no
-    texts = redact.zip(texts) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-    texts = redact.phone(texts) # chat-yes, voice-no
-    texts = redact.ordinal(texts) # voice-yes, chat-yes
-    texts = redact.cardinal(texts) # voice-yes, chat-yes
+    # redact specified column with Spacy Entities
+    texts, entity_map, curr_id, ids = redact.ner_ml(df, args)
+    # redact specified column with regex methods, for chat and NOT voice
+    texts, entity_map, curr_id = redact.ccard(texts, entity_map, curr_id, ids) # chat-yes, voice-no
+    texts, entity_map, curr_id = redact.address(texts, entity_map, curr_id, ids) # chat-yes, voice-no
+    texts, entity_map, curr_id = redact.zipC(texts, entity_map, curr_id, ids) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
+    texts, entity_map, curr_id = redact.phone(texts, entity_map, curr_id, ids) # chat-yes, voice-no
+    # redact specified column with regex methods, for chat AND voice
+    texts, entity_map, curr_id = redact.ordinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
+    texts, entity_map, curr_id = redact.cardinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
+    
+    #reverse keys and values in entity_map for anonymization
+    entity_map = {c_id:{v:"" for k,v in e_map.items()} for c_id,e_map in entity_map.items()}
 
     # anonymize if flag was passed
     if args.anonymize:
-        texts = anonymize.cardinal(texts) # chats-yes, voice=yes
-        texts = anonymize.ordinal(texts) # chats-yes, voice=yes
-        texts = anonymize.quantity(texts) # chats-yes, voice=yes
-        texts = anonymize.zip(texts) # chats-no, voice=yes
-        texts = anonymize.company(texts) # chats-yes, voice=yes
-        texts = anonymize.person(texts) # chats-yes, voice=yes
-        texts = anonymize.adate(texts) # chats-yes, voice=yes
-        texts = anonymize.gpe(texts) # chats-yes, voice=yes
-        texts = anonymize.work_of_art(texts) # chats-yes, voice=yes
-        texts = anonymize.event(texts) # chats-yes, voice=yes
-        texts = anonymize.norp(texts) # chats-yes, voice=yes
-        texts = anonymize.money(texts) # chats-yes, voice=yes
-        texts = anonymize.time(texts) # chats-yes, voice=yes
-        texts = anonymize.laughter(texts) # chats-yes, voice=yes
-        texts = anonymize.product(texts) # chats-yes, voice=yes
-        texts = anonymize.language(texts) # chats-yes, voice=yes
-        texts = anonymize.law(texts) # chats-yes, voice=yes
-        texts = anonymize.fac(texts) # chats-yes, voice=yes
-        texts = anonymize.loc(texts) # chats-yes, voice=yes
-        # add ability to anonymize only
+        texts, entity_map = anonymize.cardinal(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.ordinal(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.zipC(texts, entity_map, ids) # chats-no, voice=yes
+        texts, entity_map = anonymize.company(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.person(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.adate(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.gpe(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.work_of_art(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.language(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.event(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.norp(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.money(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.time(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.perc(texts, entity_map, ids) # chats-yes, voice=yes
 
+        #These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label
+        texts, entity_map = anonymize.laughter(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.product(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.quantity(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.law(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.fac(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.loc(texts, entity_map, ids) # chats-yes, voice=yes
+        # add ability to anonymize only?
 
         
     # data cleanup
