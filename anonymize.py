@@ -160,7 +160,7 @@ def laughter(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  "" if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
