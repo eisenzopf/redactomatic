@@ -120,3 +120,4 @@ Copyright 2020, Jonathan Eisenzopf, All rights reserved.
 ## Contributors
 
 Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes.
+Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
