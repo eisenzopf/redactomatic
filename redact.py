@@ -102,6 +102,7 @@ def ner_ml(df, args):
                     end = start + len(name)
                     newString = newString[:start] + "[" + e.label_ +"-"+ str(c) + "]" + newString[end:]
                     eCount += 1 
+        newString = newString.replace('$','')
         new_texts.append(newString)
     return new_texts, entity_map, eCount, ids
 

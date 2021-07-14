@@ -5,64 +5,14 @@ import random
 import re
 import os
 from datetime import date
+import inflect
+
+inflector = inflect.engine()
 
 def generalized_callback(pattern, selector, entity_map,id):
     #wanted to write a generalized callback, 
     #but it interfered with entity updating
     pass
-
-def cardinal(texts, entity_map, ids):
-    print("Anonymizing cardinals...")
-    #cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-    t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
-    v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-    if args.modality == 'text':
-        cardinal = ["0","1","2","3","4","5","6","7","8","9"]
-    else:
-        cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-    
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  random.choice(cardinal) if entity_map[i][m_id] == '' else entity_map[i][m_id]
-        entity_map[i][m_id] = r
-        return r
-    for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[CARDINAL-\d+\]",lambda x: callback(x,id), text).upper()
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def perc(texts, entity_map, ids):
-    print("Anonymizing cardinals...")
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  digits2words(str(random.randrange(0,99))).upper()+"%" if entity_map[i][m_id] == '' else entity_map[i][m_id]
-        entity_map[i][m_id] = r
-        return r
-    for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[PERCENT-\d+\]",lambda x: callback(x,id), text).upper()
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-def company(texts, entity_map, ids):
-    print("Anonymizing names (organizations)...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0].split()[0].upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
-        entity_map[i][m_id] = r
-        return r
-    for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[ORG-\d+\]", lambda x: callback(x,id) , text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
 
 
 def adate(texts, entity_map, ids):
@@ -86,6 +36,76 @@ def adate(texts, entity_map, ids):
         return r
     for text,id in zip(texts,ids):
         new_text = re.sub(r"\[DATE-\d+\]",lambda x: callback(x,id), text)
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def cardinal(texts, entity_map, ids, modality):
+    print("Anonymizing cardinals...")
+
+    t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
+    v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+
+    if modality == 'text':
+        cardinal = t_cardinal
+    else:
+        cardinal = v_cardinal
+    
+    new_texts = []
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        r =  random.choice(cardinal) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[CARDINAL-\d+\]",lambda x: callback(x,id), text).upper()
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def ccard(texts, entity_map, ids, modality):
+    print("Anonymizing credit card numbers...")
+
+    ccnumber = "";
+    length = 16
+    new_texts = []
+
+    while len(ccnumber) <= (length - 1):
+        digit = str(random.randrange(0,9))
+        ccnumber += digit
+
+    if modality == 'text':
+        ccard = ccnumber
+    else:
+        ccard = digits2words(ccnumber).upper()
+
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        r =  ccard if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[CARD_NUMBER-\d+\]", lambda x: callback(x,id) , text)
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def company(texts, entity_map, ids):
+    print("Anonymizing names (organizations)...")
+    new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
+
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        r =  df.sample().values[0][0].split()[0].upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[ORG-\d+\]", lambda x: callback(x,id) , text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -206,13 +226,19 @@ def loc(texts, entity_map, ids):
     return new_texts,entity_map
 
 
-def money(texts, entity_map, ids):
+def money(texts, entity_map, ids, modality):
     print("Anonymizing money...")
+
+    if modality == 'text':
+        money = '$' + str(random.randrange(200,500))
+    else:
+        money = inflector.number_to_words(random.randrange(200,500)).upper() + " DOLLARS"
+
     new_texts = []
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  digits2words(str(random.randrange(200,500))).upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  money if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -236,9 +262,17 @@ def norp(texts, entity_map, ids):
     return new_texts, entity_map
 
 
-def ordinal(texts, entity_map, ids):
+def ordinal(texts, entity_map, ids, modality):
     print("Anonymizing ordinals...")
-    ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    #ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
+    
+    if modality == 'text':
+        ordinal = t_ordinal
+    else:
+        ordinal = v_ordinal
+    
     new_texts = []
     def callback(match, i):
         tag = match.group()
@@ -248,6 +282,27 @@ def ordinal(texts, entity_map, ids):
         return r
     for text,id in zip(texts, ids):
         new_text = re.sub(r"\[ORDINAL+-\d+\]",lambda x: callback(x,id), text).upper()
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def perc(texts, entity_map, ids, modality):
+    print("Anonymizing cardinals...")
+
+    if modality == 'text':
+        perc = str.join(str(random.randrange(1,100)),"%")
+    else:
+        perc = digits2words(str(random.randrange(200,500))).upper() + ' PERCENT'
+
+    new_texts = []
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        r =  perc if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[PERCENT-\d+\]",lambda x: callback(x,id), text).upper()
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -265,6 +320,32 @@ def person(texts, entity_map, ids):
         return r
     for text,id in zip(texts,ids):
         new_text = re.sub(r"\[PERSON+-\d+\]",lambda x: callback(x,id), text)
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def phone(texts, entity_map, ids, modality):
+    print("Anonymizing phone numbers...")
+
+    area_code = str(random.randrange(200,999))
+    exchange = str(random.randrange(200,999))
+    number = str(random.randrange(1000,9999))
+
+    if modality == 'text':
+        phone = area_code + "-" + exchange + "-" + number
+    else:
+        phone = digits2words(str(area_code + exchange + number).upper())
+    
+    new_texts = []
+
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        r =  phone if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[PHONE-\d+\]", lambda x: callback(x,id) , text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -337,14 +418,22 @@ def work_of_art(texts, entity_map, ids):
     return new_texts, entity_map
 
 
-def zipC(texts, entity_map, ids):
+def zipC(texts, entity_map, ids, modality):
     print("Anonymizing zip codes...")
+
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/zip_code_database.csv')
+
+    if modality == 'text':
+        zipC = df['zip'].sample().values[0]
+    else:
+        zipC = digits2words(str(df['zip'].sample().values[0])).upper()
+
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  digits2words(str(df['zip'].sample().values[0])).upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        #r =  digits2words(str(df['zip'].sample().values[0])).upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  zipC if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
