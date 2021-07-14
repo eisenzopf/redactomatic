@@ -8,16 +8,27 @@ def main():
     # get command line params
     args = redact.config_args()
 
+    # validate command line params
+    if args.modality == "text":
+        pass
+    elif args.modality == "voice":
+        pass
+    else:
+        print("--modality command line value must be either text or voice")
+        exit()
+
     # load data into a Pandas Dataframe
     df = redact.df_load_files(args)
 
     # redact specified column with Spacy Entities
     texts, entity_map, curr_id, ids = redact.ner_ml(df, args)
+
     # redact specified column with regex methods, for chat and NOT voice
     texts, entity_map, curr_id = redact.ccard(texts, entity_map, curr_id, ids) # chat-yes, voice-no
     texts, entity_map, curr_id = redact.address(texts, entity_map, curr_id, ids) # chat-yes, voice-no
     texts, entity_map, curr_id = redact.zipC(texts, entity_map, curr_id, ids) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
     texts, entity_map, curr_id = redact.phone(texts, entity_map, curr_id, ids) # chat-yes, voice-no
+    
     # redact specified column with regex methods, for chat AND voice
     texts, entity_map, curr_id = redact.ordinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
     texts, entity_map, curr_id = redact.cardinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
@@ -27,7 +38,7 @@ def main():
 
     # anonymize if flag was passed
     if args.anonymize:
-        texts, entity_map = anonymize.cardinal(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.cardinal(texts, entity_map, id, args.modality) # chats-yes, voice=yes
         texts, entity_map = anonymize.ordinal(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.zipC(texts, entity_map, ids) # chats-no, voice=yes
         texts, entity_map = anonymize.company(texts, entity_map, ids) # chats-yes, voice=yes

@@ -13,7 +13,14 @@ def generalized_callback(pattern, selector, entity_map,id):
 
 def cardinal(texts, entity_map, ids):
     print("Anonymizing cardinals...")
-    cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+    #cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+    t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
+    v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+    if args.modality == 'text':
+        cardinal = ["0","1","2","3","4","5","6","7","8","9"]
+    else:
+        cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+    
     new_texts = []
     def callback(match, i):
         tag = match.group()

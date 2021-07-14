@@ -13,6 +13,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
     parser.add_argument('--outputfile', required=True, help='CSV output files')
+    parser.add_argument('--modality', required=True, help='the modality of the input file(s), either text or voice')
     parser.add_argument('--anonymize', action='store_true', help='include to anonymize redacted data')
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
     return parser.parse_args()
@@ -302,6 +303,10 @@ def phone(texts, entity_map, eCount, ids):
     print("Redacting phone (Regex)...")
     pattern = regex.compile("""((?:(?<![\d-])(?:\+?\d{1,3}[-.\s*]?)?(?:\(?\d{3}\)?[-.\s*]?)?\d{3}[-.\s*]?\d{4}(?![\d-]))|(?:(?<![\d-])(?:(?:\(\+?\d{2}\))|(?:\+?\d{2}))\s*\d{2}\s*\d{3}\s*\d{4}(?![\d-])))""", regex.IGNORECASE)
     return the_redactor(pattern, "PHONE", texts, entity_map, eCount, ids)
+
+def validate_params():
+    if args.modality != "text":
+        raise argparse.ArgumentTypeError
 
 def zipC(texts, entity_map, eCount, ids):
     print("Redacting zip (Regex)...")
