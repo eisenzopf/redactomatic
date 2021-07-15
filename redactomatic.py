@@ -38,6 +38,7 @@ def main():
 
     # anonymize if flag was passed
     if args.anonymize:
+        texts, entity_map = anonymize.address(texts, entity_map, ids, args.modality) # text-yes, voice=yes
         texts, entity_map = anonymize.ccard(texts, entity_map, ids, args.modality) # text-yes, voice=yes
         texts, entity_map = anonymize.phone(texts, entity_map, ids, args.modality) # text-yes, voice=yes
         texts, entity_map = anonymize.cardinal(texts, entity_map, ids, args.modality) # text-yes, voice=yes
@@ -45,14 +46,14 @@ def main():
         texts, entity_map = anonymize.zipC(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
         texts, entity_map = anonymize.company(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.person(texts, entity_map, ids) # chats-yes, voice=yes
-        texts, entity_map = anonymize.adate(texts, entity_map, ids) # chats-yes, voice=yes
+        texts, entity_map = anonymize.atime(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
+        texts, entity_map = anonymize.adate(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
         texts, entity_map = anonymize.gpe(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.work_of_art(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.language(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.event(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.norp(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.money(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
-        texts, entity_map = anonymize.time(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.perc(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
 
         #These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label

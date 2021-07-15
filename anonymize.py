@@ -15,27 +15,76 @@ def generalized_callback(pattern, selector, entity_map,id):
     pass
 
 
-def adate(texts, entity_map, ids):
+def adate(texts, entity_map, ids, modality):
     print("Anonymizing dates...")
     new_texts = []
-    relative_dates = ['today','yesterday','last monday', 'last tuesday', 'last wednesday', 'last thursday', 'last friday', 'last saturday', 'last sunday']
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     ordinal_days = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty first", "twenty second", "twenty third", "twenty fourth", "twenty fifth", "twenty sixth", "twenty seventh", "twenty eighth"]
-    def md():
-        mode = random.choice([0,1])
-        if mode == 1:
-            return random.choice(relative_dates).upper()
-        else:
-            date = random.choice(months).upper() + " " + random.choice(ordinal_days).upper()
-            return date
+
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  md() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if modality == 'text':
+            date = str(random.randrange(1,12)) + "/" + str(random.randrange(1,28))
+        else:
+            date = random.choice(months).upper() + " " + random.choice(ordinal_days).upper()
+
+        r =  date if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
+        
     for text,id in zip(texts,ids):
         new_text = re.sub(r"\[DATE-\d+\]",lambda x: callback(x,id), text)
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def address(texts, entity_map, ids, modality):
+    print("Anonymizing addresses...")
+    new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/street-names.csv')
+
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        streets = df['Streets'].sample()
+        street = streets.values[0]
+
+        if modality == 'text':
+            number = str(random.randrange(100,500))
+        else:
+            number = inflector.number_to_words(random.randrange(100,500))
+        address = number + " " + street + " "
+        r =  address if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+    
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[ADDRESS-\d+\]",lambda x: callback(x,id), text).upper()
+        new_texts.append(new_text)
+    return new_texts, entity_map
+
+
+def atime(texts, entity_map, ids, modality):
+    print("Anonymizing time...")
+    hours = ["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+    minutes = ["oh one","oh two","oh three","oh four","oh five","oh six","oh seven","oh nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
+    new_texts = []
+    
+    def callback(match, i):
+        tag = match.group()
+        m_id = int(tag[tag.rindex('-')+1:-1])
+        if modality == 'text':
+            time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
+        else:
+            time = str(random.choice(hours)).upper() + " " + str(random.choice(minutes)).upper() + " " + str(random.choice(["AM","PM"]))  
+        r =  time if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        entity_map[i][m_id] = r
+        return r
+        
+    for text,id in zip(texts,ids):
+        new_text = re.sub(r"\[TIME-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -229,15 +278,14 @@ def loc(texts, entity_map, ids):
 def money(texts, entity_map, ids, modality):
     print("Anonymizing money...")
 
-    if modality == 'text':
-        money = '$' + str(random.randrange(200,500))
-    else:
-        money = inflector.number_to_words(random.randrange(200,500)).upper() + " DOLLARS"
-
     new_texts = []
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
+        if modality == 'text':
+            money = '$' + str(random.randrange(200,500))
+        else:
+            money = inflector.number_to_words(random.randrange(200,500)).upper() + " DOLLARS"
         r =  money if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
@@ -290,9 +338,9 @@ def perc(texts, entity_map, ids, modality):
     print("Anonymizing cardinals...")
 
     if modality == 'text':
-        perc = str.join(str(random.randrange(1,100)),"%")
+        perc = str(random.randrange(1,100)) + "%"
     else:
-        perc = digits2words(str(random.randrange(200,500))).upper() + ' PERCENT'
+        perc = inflector.number_to_words(str(random.randrange(1,100))).upper() + " PERCENT"
 
     new_texts = []
     def callback(match, i):
@@ -379,23 +427,6 @@ def quantity(texts, entity_map, ids):
     for text,id in zip(texts,ids):
         #new_text = re.sub(r"\[QUANTITY\]",callback, text).upper()
         new_text = re.sub(r"\[QUANTITY+-\d+\]",lambda x: callback(x,id),text).upper()
-        new_texts.append(new_text)
-    return new_texts, entity_map
-    
-
-def time(texts, entity_map, ids):
-    print("Anonymizing time...")
-    day = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelvth","thirteenth","fourteenth","fifteenth","sixteenth"]
-    month = ["january","february","march","april","may","june","july","august","september","october","november","december"]
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  (random.choice(month) + " " +  random.choice(day)) if entity_map[i][m_id] == '' else entity_map[i][m_id]
-        entity_map[i][m_id] = r
-        return r
-    for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[TIME+-\d+\]",lambda x: callback(x,id), text).upper()
         new_texts.append(new_text)
     return new_texts, entity_map
 
