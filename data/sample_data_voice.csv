@@ -6,28 +6,28 @@
 1011432,Agent,2019-08-11 00:00:25,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
 1011432,Client,2019-08-11 00:00:30,I'm paying with my debit card.
 1011432,Agent,2019-08-11 00:00:35,What amount are you trying to pay?
-1011432,Client,2019-08-11 00:00:40,$500.43
+1011432,Client,2019-08-11 00:00:40,Five hundred dollars and fourty three cents
 1011432,Agent,2019-08-11 00:00:45,What is the name of the bank for your debit card?
-1011432,Client,2019-08-11 00:00:50,Sorry I meant $500 even. My bank is Wells Fargo.
+1011432,Client,2019-08-11 00:00:50,Sorry I meant five hundred even. My bank is Wells Fargo.
 1011432,Agent,2019-08-11 00:01:00,Can you please confirm the debit card number for me please?
-1011432,Client,2019-08-11 00:01:05,It's 4012 0000 9876 5439
+1011432,Client,2019-08-11 00:01:05,It's four oh one two zero zero zero zero nine eight seven six five four three nine
 1011432,Agent,2019-08-11 00:01:10,and the expiration?
-1011432,Client,2019-08-11 00:01:15,12/23
+1011432,Client,2019-08-11 00:01:15,July of two thousand twenty three
 1011432,Agent,2019-08-11 00:01:20,And the CV code?
 1011432,Client,2019-08-11 00:01:25,What is that?
 1011432,Agent,2019-08-11 00:01:30,It's a three digit number usually on the back of your debit card next to the signature strip.
-1011432,Client,2019-08-11 00:01:35,Oh ok. It's 412
-1011432,Agent,2019-08-11 00:01:36,Do I have your authorization to run your debit card in the amount of $500?
+1011432,Client,2019-08-11 00:01:35,Oh ok. It's four one two
+1011432,Agent,2019-08-11 00:01:36,Do I have your authorization to run your debit card in the amount of five hundred dollars?
 1011432,Client,2019-08-11 00:01:37,Yes.
 1011432,Agent,2019-08-11 00:02:10,Ok one moment please while I run your debit card.
 1011432,Client,2019-08-11 00:02:30,Ok
 1011432,Agent,2019-08-11 00:03:42,The system is telling me that it needs your physical address associated with the card.
-1011432,Client,2019-08-11 00:04:25,Ok. It's 413 main street in Deluth GA. The zip is 55812.
+1011432,Client,2019-08-11 00:04:25,Ok. It's four one three main street in Deluth Georgia. The zip is five five eight one two.
 1011432,Agent,2019-08-11 00:05:30,I also need a phone number associated with the account.
-1011432,Client,2019-08-11 00:06:35,It’s probably my cell phone. That's 218-730-4300
+1011432,Client,2019-08-11 00:06:35,It’s probably my cell phone. That's two one eight seven three oh four three oh oh.
 1011432,Agent,2019-08-11 00:06:50,Thank you for that information. I will try running the transaction again.
 1011432,Client,2019-08-11 00:07:12,Ok thanks.
-1011432,Agent,2019-08-11 00:08:15,The payment was successful. You should get an email confirmation that a payment in the amount of $500 was made on August 11th at 11:59 AM. Is there anything else I can help you with?
-1011432,Client,2019-08-11 00:09:12,And you're 100% sure it went through?
+1011432,Agent,2019-08-11 00:08:15,The payment was successful. You should get an email confirmation that a payment in the amount of five hundred dollars was made on August eleventh at eleven fifty nine AM. Is there anything else I can help you with?
+1011432,Client,2019-08-11 00:09:12,And you're one hundred percent sure it went through?
 1011432,Agent,2019-08-11 00:09:46,Yes the payment was successful.
 1011432,Client,2019-08-11 00:10:15,Nope that's it.
