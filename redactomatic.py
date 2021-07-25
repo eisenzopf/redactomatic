@@ -4,6 +4,12 @@ import anonymize
 def main():
     #initialize entity map
     entity_map = {} 
+
+    # initialize entity value dict
+    entity_values = {}
+
+    # unique entity key
+    curr_id = 0
     
     # get command line params
     args = redact.config_args()
@@ -18,20 +24,23 @@ def main():
         exit()
 
     # load data into a Pandas Dataframe
-    df = redact.df_load_files(args)
+    df, texts, ids = redact.df_load_files(args)
+
+    # first pass replaces text phrases that should be ignored and stored them in entity_values
+    texts, entity_map, curr_id, entity_values  = redact.ignore_phrases(texts, entity_map, curr_id, ids, entity_values)
 
     # redact specified column with Spacy Entities
-    texts, entity_map, curr_id, ids = redact.ner_ml(df, args)
+    texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args)
 
     # redact specified column with regex methods, for chat and NOT voice
-    texts, entity_map, curr_id = redact.ccard(texts, entity_map, curr_id, ids) # chat-yes, voice-no
-    texts, entity_map, curr_id = redact.address(texts, entity_map, curr_id, ids) # chat-yes, voice-no
-    texts, entity_map, curr_id = redact.zipC(texts, entity_map, curr_id, ids) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-    texts, entity_map, curr_id = redact.phone(texts, entity_map, curr_id, ids) # chat-yes, voice-no
-    
+    texts, entity_map, curr_id, entity_values = redact.ccard(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+    texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+    texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
+    texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+
     # redact specified column with regex methods, for chat AND voice
-    texts, entity_map, curr_id = redact.ordinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
-    texts, entity_map, curr_id = redact.cardinal(texts, entity_map, curr_id, ids) # voice-yes, chat-yes
+    texts, entity_map, curr_id, entity_values = redact.ordinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
+    texts, entity_map, curr_id, entity_values = redact.cardinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
     
     #reverse keys and values in entity_map for anonymization
     entity_map = {c_id:{v:"" for k,v in e_map.items()} for c_id,e_map in entity_map.items()}
@@ -56,17 +65,16 @@ def main():
         texts, entity_map = anonymize.money(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
         texts, entity_map = anonymize.perc(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
 
-        #These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label
+        # These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label
         texts, entity_map = anonymize.laughter(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.product(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.quantity(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.law(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.fac(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.loc(texts, entity_map, ids) # chats-yes, voice=yes
-        # add ability to anonymize only?
 
-        
     # data cleanup
+    texts = redact.replace_ignore(texts,entity_values)
     texts = redact.clean(texts) # chats-yes, voice-yes
 
     # write the redacted data back to the Dataframe
@@ -74,6 +82,10 @@ def main():
 
     # write the updated CSV to disk
     df.to_csv(args.outputfile, index=False)
+
+    # write audit log
+    redact.write_audit_log(entity_values)
+
 
     print("Done. Output file is",args.outputfile)
 

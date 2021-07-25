@@ -129,3 +129,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 output.csv
+audit_log.csv
