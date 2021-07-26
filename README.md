@@ -22,6 +22,10 @@ If the optional command-line *--anonymize* switch is included, Redactomatic will
 
 Redactomatic supports both transcribed voice and chat conversation types. This is especially important as most other tools do not properly support ordinals, cardinals, currency, and other numeric types that used spelled numbers. For example, *five nine six eight* might not be correctly recognized and redacted by some other tools. Redactomatic supports both numeric and spelled cardinals and ordinals and operates in either *text* or *voice* mode as specified by the *--modality* command-line parameter.
 
+### Dictionary of phrases to ignore
+
+Redactomatic includes the ability to ignore key phrases. This comes in handy when redactomatic would otherwise tag something as PII that shouldn't be. For example, if a conversation includes the phrase, *"May I please have your first and last name"*, is the word *first* an ordinal? No it's not. Under normal conditions, Redactomatic would redact the word *first*. In the case where we use the *--anonymize* flag, it would assign a random ordinal in it's place. For example, the previous phrase might have been replaced with, *"May I please have your eighth and last name"*. This obviously doesn't make any sense. We can solve this problem by configuring Redactomatic to ignore the phrase, *"first and"*. We would do this by adding it to the file *ignore.json*. Every time Redactomatic runs, it will load the ignore dictionary from this file. You can add as many additional phrases as you like.
+
 ## Installation
 
 To install RedactoMatic, run:
