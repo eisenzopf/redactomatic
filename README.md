@@ -44,7 +44,7 @@ Once installed, redactomatic needs at a minimum the 1. name of the input convers
 usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE]
 ```
 
-## Example 1: Redact a text file
+### Example 1: Redact a text file
 
 The following command will use the sample input file included in the Redactomatic distribution [data/sample_data.csv](data/sample_data.csv) and create an output file called output.csv:
 
@@ -54,7 +54,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 If you review the sample data file, you will notice that the first column contains the conversation ID and that the fourth column contains the text we want to redact.
 
-## Example 2: Anonymize a voice transcribed file with anonymization
+### Example 2: Anonymize a voice transcribed file with anonymization
 
 In this second example, we are going to use a sample voice transcribed conversation and we are going to also anonymize the PII tags. This will replaced all PII with randomized values with context. When we say "with context", we mean that Redactomatic temporarily remembers when the same PII entity value has been used in the conversation and will replace it with the same randomized value. For example, If Mary is talking to John, we would first redact Mary as [PERSON-1] and John as [PERSON-2]. If we turn on anonymization via the *--anonymization* command-line parameter, Redactomatic will replace all instances of [PERSON-1] with the same randomized name so that the anonymized output is more coherent.
 
