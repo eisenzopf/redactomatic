@@ -18,6 +18,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--modality', required=True, help='the modality of the input file(s), either text or voice')
     parser.add_argument('--anonymize', action='store_true', help='include to anonymize redacted data')
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
+    parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
     return parser.parse_args()
 
 
@@ -342,8 +343,9 @@ def update_entity_values(id,value,entity_values):
     return entity_values
 
 
-def write_audit_log(entity_values):
-    a_file = open(os.getcwd() + "/audit_log.csv", "w")
+def write_audit_log(filename, entity_values):
+    print("Writing log to " + filename)
+    a_file = open(os.getcwd() + "/" + filename, "w")
     writer = csv.writer(a_file)
     for key, value in entity_values.items():
         writer.writerow([key, value])

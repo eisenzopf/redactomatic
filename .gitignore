@@ -130,3 +130,4 @@ dmypy.json
 .pyre/
 output.csv
 audit_log.csv
+log.csv

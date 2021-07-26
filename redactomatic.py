@@ -84,8 +84,8 @@ def main():
     df.to_csv(args.outputfile, index=False)
 
     # write audit log
-    redact.write_audit_log(entity_values)
-
+    if args.log:
+        redact.write_audit_log(args.log, entity_values)
 
     print("Done. Output file is",args.outputfile)
 

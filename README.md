@@ -8,15 +8,19 @@ Many companies have security, privacy, and regulatory standards that require the
 
 ## How it works
 
-Redactomatic is a multi-pass redaction tool with an optional anonymization function. The first redaction pass utilizes the Spacy 2 named entity recognition library. The Subsequent passes utilize regular expressions. The reason two passes are needed is that Spacy does not always match every entity that it needs to. The second pass usually catches what Spacy misses. However, we can't guarantee that it will catch every entity. Testing and validating the output for your data is highly recommended.
+Redactomatic is a multi-pass redaction tool with an optional anonymization function and reads in CSV files as input. When PII is detected, it is removed and replaced with an entity tag, like **[ORDINAL]**. If the *--anonymization* flag is added, Redactomatic will replace PII entity tags with randomized values. For example, **[PERSON]** might be replaced by the name John. This is useful when sharing datasets that need PII removed but also need some real world like value. The first redaction pass utilizes the Spacy 3 named entity recognition library. You have the option of using the large Spacy library if you add the *--large* command-line parameter, which will increase the number of correctly recognized PII entities, but will also take longer. After the Spacy NER pass, the subsequent passes utilize regular expressions. The reason multiple passes are needed is that machine learning libraries like Spacy are not reliable and cannot catch all PII. That is obviously not acceptable for financial services and other regulated industries. While large companies use this tool for mission critical applications, please test and validate the results before using it in production and report any anomalies to the authors.
 
 ### Redaction
 
-It currently assumes that each row in the input CSV file specified by *--inputfile* consists of a piece of text in the *--column* command line parameter. It does not currently support other input formats like JSON. Only one column may be specifed at a time from the command line and no other columns will be reviewed other than the one that has been specified. The script writes a new CSV file specified by *--outputfile* command-line parameter. Other than the column that is redacted and specified by *--column*, the output CSV will be in the same format with the same information as the inputfile. As Redactomatic processes each row of an input CSV file, it replaces each recognized entity in the text with an entity type tag such as **[PHONE]**, **[ZIP]**, or **[CARDINAL**.
+Redactomatic assumes that each row in the input CSV file specified by *--inputfile* consists of a piece of text in the *--column* command line parameter. It does not currently support other input formats like JSON. Only one column may be specifed at a time from the command line and no other columns will be reviewed other than the one that has been specified. The script writes a new CSV file specified by the *--outputfile* command-line parameter. Other than the column that is redacted and specified by *--column*, the output CSV will be in the same format with the same information as the inputfile. As Redactomatic processes each row of an input CSV file, it replaces each recognized entity in the text with an entity type tag such as **[PHONE]**, **[ZIP]**, or **[CARDINAL**.
 
 ### Anonymization
 
-If the optional command-line *--anonymize* switch is included, Redactomatic will replace all entity type tags with a randomized value. Numerical entity tags are anonymized using a random number generator. Text based entity tags are replaced using a random value from a corresponding data file in the [data/](data/) directory of this distribution.
+If the optional command-line *--anonymize* switch is included, Redactomatic will replace all entity type tags with a randomized value. Numerical entity tags are anonymized using a random number generator. Text based entity tags are replaced using a random value from a corresponding data file in the [data/](data/) directory of this distribution. There are quite a few different anonymization types, but not all PII entity types are supported. Please refer to the list of supported PII entities below.
+
+### Support for voice and text
+
+Redactomatic supports both transcribed voice and chat conversation types. This is especially important as most other tools do not properly support ordinals, cardinals, currency, and other numeric types that used spelled numbers. For example, *five nine six eight* might not be correctly recognized and redacted by some other tools. Redactomatic supports both numeric and spelled cardinals and ordinals and operates in either *text* or *voice* mode as specified by the *--modality* command-line parameter.
 
 ## Installation
 
@@ -30,39 +34,51 @@ This will install required Python libraries and download the small (en_core_web_
 
 ## Usage
 
-The current iteration of the code expects you to provide a CSV file from the commandline.
+Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (--modality which must be voice or text), and 3. the column in the CSV containing the text to redact (--column), the column containing the conversation ID (--idcolumn).
 
 ```sh
-usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE [--anonymize] [--large]
+usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE]
 ```
 
-### Basic Example
+## Example 1: Redact a text file
 
-You can specify one or more input files but only one output file. You must also specify which column in the input CSV(s) to redact. For example, if the CSV input file(s) contain text in the 2nd column that you would like to redact, you would set the  *--column* flag to 2.
+The following command will use the sample input file included in the Redactomatic distribution [data/sample_data.csv](data/sample_data.csv) and create an output file called output.csv:
 
 ```sh
-Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv
 ```
 
-### Anonymization Example
+If you review the sample data file, you will notice that the first column contains the conversation ID and that the fourth column contains the text we want to redact.
 
-You can optionally anonymize redacted information by including the *--anonymize* switch. This replaces the redaction entity tags with a randomized value as described above.
+## Example 2: Anonymize a voice transcribed file with anonymization
+
+In this second example, we are going to use a sample voice transcribed conversation and we are going to also anonymize the PII tags. This will replaced all PII with randomized values with context. When we say "with context", we mean that Redactomatic temporarily remembers when the same PII entity value has been used in the conversation and will replace it with the same randomized value. For example, If Mary is talking to John, we would first redact Mary as [PERSON-1] and John as [PERSON-2]. If we turn on anonymization via the *--anonymization* command-line parameter, Redactomatic will replace all instances of [PERSON-1] with the same randomized name so that the anonymized output is more coherent.
 
 ```sh
-Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv --anonymize
+python3 redactomatic.py --column 4 --idcolumn 1 --modality voice --inputfile ./data/sample_data.csv --outputfile output.csv --anonymize
 ```
 
-### Large NER Model Example
+Notice that the *--modality* parameter is now *voice* and that we have added the *--anonymize parameter, which replaces all redaction tags with randomized values.
 
-By default, Redactomatic will use the Spacy 2 *en_core_web_sm* NER model. It's fast but does not work as well as the larger *en_core_web_lg* NER model. You can tell Redactomatic to use the larger model with the *--large* switch.
+### Example 3: Using the large NER Model Example
+
+By default, Redactomatic will use the Spacy 3 *en_core_web_sm* NER model. It's fast but does not work as well as the larger *en_core_web_lg* NER model. You can tell Redactomatic to use the larger model with the *--large* switch.
 
 ```sh
-Ex.: python redactomatic.py --column 2 --inputfile input.csv --outputfile output.csv --large
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv --large
+```
+
+### Example 4: Logging recognized PII values
+
+In some cases, your security officer may want to see proof that Redactomatic has successfully removed all instances of PII data. You can turn on an audit log with the *--log* switch, but please be sure to secure the file because it will contain PII information. This feature will write a CSV file containing the redaction tag and PII entity value, one per rown.
+
+```sh
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv --log audit.csv
 ```
 
 ## Supported Languages and Regions
 
-Redactomatic currently supports English. Most entities support the US and Canada. If you would like to contribute additional languages and regions, please contact me.
+Redactomatic currently supports English. Most entities support the US and Canada. If you would like to contribute additional languages and regions, we welcome the contribution.
 
 ## Supported Entities
 
@@ -70,8 +86,8 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 
 | Entity Type | Redaction Tag  | Parsers      | Voice Support | Chat Support | Can be Anonymized |
 |-------------|----------------|--------------|-----|-----|-----|
-| Address     | [ADDRESS]      | Regex        | No  | Yes | No  |
-| Credit Card Number | [CCARD] | Regex        | No  | Yes | No  |
+| Address     | [ADDRESS]      | Regex        | No  | Yes | Yes |
+| Credit Card Number | [CCARD] | Regex        | No  | Yes | Yes |
 | Cardinal    | [CARDINAL]     | Spacy, Regex | Yes | Yes | Yes |
 | Date        | [DATE]         | Spacy        | Yes | Yes | Yes |
 | Event       | [EVENT]        | Spacy        | Yes | Yes | Yes |
@@ -84,11 +100,11 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 | Nationality, Religious or Political Organization | [NORP] | Spacy | Yes | Yes | Yes |
 | Organization| [ORG]          | Spacy        | Yes | Yes | Yes |
 | Ordinal     | [ORDINAL]      | Spacy, Regex | Yes | Yes | Yes |
-| Percent     | [PERCENT]      | Spact        | Yes | Yes | No  |
+| Percent     | [PERCENT]      | Spact        | Yes | Yes | Yes |
 | Person      | [PERSON]       | Spacy        | Yes | Yes | Yes |
-| Phone       | [PHONE]        | Regex        | No  | Yes | No  |
+| Phone       | [PHONE]        | Regex        | No  | Yes | Yes |
 | Product     | [PRODUCT]      | Spacy        | Yes | Yes | No  |
-| Quantity    | [QUANTITY]     | Spacy        | Yes | Yes | No  |
+| Quantity    | [QUANTITY]     | Spacy        | Yes | Yes | Yes |
 | Time        | [TIME]         | Spacy        | Yes | Yes | Yes |
 | Work of Art | [WORK_OF_ART]  | Spacy        | Yes | Yes | Yes |
 | Zip Code    | [ZIP]          | Regex        | No  | Yes | Yes |
