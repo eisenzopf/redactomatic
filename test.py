@@ -1,33 +1,13 @@
-import redact
-import unittest
-
-class TestStringMethods(unittest.TestCase):
-
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
-
-class TestCardinal(unittest.TestCase):
-    def test_cardinal(self):
-        # ['[CARDINAL]','[CARDINAL]','[CARDINAL]','[CARDINAL]','[CARDINAL]','[CARDINAL]']
-        matches = [
-            ["ONE","TWO","THREE", "FOUR", "FIVE", "SIX"]
-        ]
-        
-        for match in matches:
-            occurances = ['[CARDINAL]' for x in range(len(match))]
-            self.assertEqual(redact.cardinal(match), occurances)
-
-
-if __name__ == '__main__':
-    unittest.main()
+import filecmp
+text_log = "text_log.csv"
+text_redacted = "text_output.csv"
+text_anonymized = "text_output_anonymized.csv"
+voice_log = "voice_log.csv"
+voice_redacted = "voice_output.csv"
+voice_anonymized = "voice_output_anonymized.csv"
+  
+# shallow comparison
+print ("Is the text redaction log correct?:", filecmp.cmp(text_log, "test/" + text_log))
+print( "Is the redacted text output file correct?:", filecmp.cmp(text_redacted, "test/" + text_redacted))
+print ("Is the voice redaction log correct?:", filecmp.cmp(voice_log, "test/" + voice_log))
+print( "Is the redacted voice output file correct?:", filecmp.cmp(voice_redacted, "test/" + voice_redacted))

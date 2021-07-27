@@ -312,7 +312,6 @@ def norp(texts, entity_map, ids):
 
 def ordinal(texts, entity_map, ids, modality):
     print("Anonymizing ordinals...")
-    #ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
     
@@ -463,7 +462,6 @@ def zipC(texts, entity_map, ids, modality):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        #r =  digits2words(str(df['zip'].sample().values[0])).upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
         r =  zipC if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r

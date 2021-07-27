@@ -1,0 +1,33 @@
+conversation_id,speaker,date_time,text
+1011432,Agent,2019-08-11 00:00:05,Hello and thank you for contacting [ORG-1]. Before we start may I have your first and last name?
+1011432,Client,2019-08-11 00:00:10,[PERSON-3] [PERSON-2]
+1011432,Agent,2019-08-11 00:00:15,Thank you [PERSON-3]. How may I help you [DATE-4]?
+1011432,Client,2019-08-11 00:00:20,I'm trying to pay my bill but it's not working.
+1011432,Agent,2019-08-11 00:00:25,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
+1011432,Client,2019-08-11 00:00:30,I'm paying with my debit card.
+1011432,Agent,2019-08-11 00:00:35,What amount are you trying to pay?
+1011432,Client,2019-08-11 00:00:40,[MONEY-7] and fourty [MONEY-6]
+1011432,Agent,2019-08-11 00:00:45,What is the name of the bank for your debit card?
+1011432,Client,2019-08-11 00:00:50,Sorry I meant [CARDINAL-19] even. My bank is [ORG-8].
+1011432,Agent,2019-08-11 00:01:00,Can you please confirm the debit card number for me please?
+1011432,Client,2019-08-11 00:01:05,It's [DATE-9] [CARDINAL-28] [CARDINAL-28] [CARDINAL-28] [CARDINAL-28] [CARDINAL-20] [CARDINAL-26] [CARDINAL-25] [CARDINAL-24] [CARDINAL-23] [CARDINAL-22] [CARDINAL-21] [CARDINAL-20]
+1011432,Agent,2019-08-11 00:01:10,and the expiration?
+1011432,Client,2019-08-11 00:01:15,[DATE-10]
+1011432,Agent,2019-08-11 00:01:20,And the [PERSON-11] code?
+1011432,Client,2019-08-11 00:01:25,What is that?
+1011432,Agent,2019-08-11 00:01:30,It's a [CARDINAL-21] digit number usually on the back of your debit card next to the signature strip.
+1011432,Client,2019-08-11 00:01:35,[CARDINAL-36] ok. It's [CARDINAL-22] [CARDINAL-34] [CARDINAL-33]
+1011432,Agent,2019-08-11 00:01:36,Do I have your authorization to run your debit card in the amount of [MONEY-12]?
+1011432,Client,2019-08-11 00:01:37,Yes.
+1011432,Agent,2019-08-11 00:02:10,Ok [CARDINAL-34] moment please while I run your debit card.
+1011432,Client,2019-08-11 00:02:30,Ok
+1011432,Agent,2019-08-11 00:03:42,The system is telling me that it needs your physical address associated with the card.
+1011432,Client,2019-08-11 00:04:25,Ok. It's [CARDINAL-22] [CARDINAL-34] [CARDINAL-21] main street in [GPE-14]. The zip is [DATE-13].
+1011432,Agent,2019-08-11 00:05:30,I also need a phone number associated with the account.
+1011432,Client,2019-08-11 00:06:35,It’s probably my cell phone. That's [CARDINAL-33] [CARDINAL-34] [CARDINAL-26] [CARDINAL-25] [CARDINAL-21] [CARDINAL-41] [CARDINAL-22] [CARDINAL-21] [CARDINAL-41] [CARDINAL-41].
+1011432,Agent,2019-08-11 00:06:50,Thank you for that information. I will try running the transaction again.
+1011432,Client,2019-08-11 00:07:12,Ok thanks.
+1011432,Agent,2019-08-11 00:08:15,The payment was successful. You should get an email confirmation that a payment in the amount of [MONEY-12] was made on [DATE-16] at [TIME-15]. Is there anything else I can help you with?
+1011432,Client,2019-08-11 00:09:12,And you're [PERCENT-18] sure it went through?
+1011432,Agent,2019-08-11 00:09:46,Yes the payment was successful.
+1011432,Client,2019-08-11 00:10:15,Nope that's it.
