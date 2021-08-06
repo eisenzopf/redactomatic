@@ -76,7 +76,7 @@ In this second example, we are going to use a sample voice transcribed conversat
 python3 redactomatic.py --column 4 --idcolumn 1 --modality voice --inputfile ./data/sample_data.csv --outputfile output.csv --anonymize
 ```
 
-Notice that the *--modality* parameter is now *voice* and that we have added the *--anonymize parameter, which replaces all redaction tags with randomized values.
+Notice that the *--modality* parameter is now *voice* and that we have added the *--anonymize* parameter, which replaces all redaction tags with randomized values.
 
 ### Example 3: Using the large NER Model Example
 
@@ -149,7 +149,7 @@ Jonathan Eisenzopf
 
 ## Copyright
 
-Copyright 2020, Jonathan Eisenzopf, All rights reserved.
+Copyright 2021, Jonathan Eisenzopf, All rights reserved.
 
 ## Contributors
 
