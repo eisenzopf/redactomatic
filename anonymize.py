@@ -28,7 +28,7 @@ def adate(texts, entity_map, ids, modality):
         if modality == 'text':
             date = str(random.randrange(1,12)) + "/" + str(random.randrange(1,28))
         else:
-            date = random.choice(months).upper() + " " + random.choice(ordinal_days).upper()
+            date = random.choice(months) + " " + random.choice(ordinal_days)
 
         r =  date if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
@@ -61,7 +61,7 @@ def address(texts, entity_map, ids, modality):
         return r
     
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[ADDRESS-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[ADDRESS-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -78,7 +78,7 @@ def atime(texts, entity_map, ids, modality):
         if modality == 'text':
             time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
         else:
-            time = str(random.choice(hours)).upper() + " " + str(random.choice(minutes)).upper() + " " + str(random.choice(["AM","PM"]))  
+            time = str(random.choice(hours)) + " " + str(random.choice(minutes)) + " " + str(random.choice(["AM","PM"]))  
         r =  time if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
@@ -109,7 +109,7 @@ def cardinal(texts, entity_map, ids, modality):
         return r
 
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[CARDINAL-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[CARDINAL-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -128,7 +128,7 @@ def ccard(texts, entity_map, ids, modality):
     if modality == 'text':
         ccard = ccnumber
     else:
-        ccard = digits2words(ccnumber).upper()
+        ccard = digits2words(ccnumber)
 
     def callback(match, i):
         tag = match.group()
@@ -150,7 +150,7 @@ def company(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0].split()[0].upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  df.sample().values[0][0].split()[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -178,7 +178,7 @@ def event(texts, entity_map, ids):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[EVENT-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[EVENT-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -205,7 +205,7 @@ def gpe(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0].upper().split()[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  df.sample().values[0][0].split()[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -225,7 +225,7 @@ def language(texts, entity_map, ids):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[LANGUAGE+\d+\]", lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[LANGUAGE+\d+\]", lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -270,7 +270,7 @@ def loc(texts, entity_map, ids):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[LOC+-\d+\]", lambda x: callback(x,id) ,text).upper()
+        new_text = re.sub(r"\[LOC+-\d+\]", lambda x: callback(x,id) ,text)
         new_texts.append(new_text)
     return new_texts,entity_map
 
@@ -285,12 +285,12 @@ def money(texts, entity_map, ids, modality):
         if modality == 'text':
             money = '$' + str(random.randrange(200,500))
         else:
-            money = inflector.number_to_words(random.randrange(200,500)).upper() + " DOLLARS"
+            money = inflector.number_to_words(random.randrange(200,500)) + " DOLLARS"
         r =  money if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[MONEY+-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[MONEY+-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -302,7 +302,7 @@ def norp(texts, entity_map, ids):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = df['Nationality'].sample()
-        r =  name.values[0].upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  name.values[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
     for text,id in zip(texts,ids):
         new_text = re.sub(r"\[NORP+-\d+\]",lambda x: callback(x,id), text)
@@ -328,7 +328,7 @@ def ordinal(texts, entity_map, ids, modality):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts, ids):
-        new_text = re.sub(r"\[ORDINAL+-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[ORDINAL+-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -339,7 +339,7 @@ def perc(texts, entity_map, ids, modality):
     if modality == 'text':
         perc = str(random.randrange(1,100)) + "%"
     else:
-        perc = inflector.number_to_words(str(random.randrange(1,100))).upper() + " PERCENT"
+        perc = inflector.number_to_words(str(random.randrange(1,100))) + " PERCENT"
 
     new_texts = []
     def callback(match, i):
@@ -349,7 +349,7 @@ def perc(texts, entity_map, ids, modality):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[PERCENT-\d+\]",lambda x: callback(x,id), text).upper()
+        new_text = re.sub(r"\[PERCENT-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -362,7 +362,7 @@ def person(texts, entity_map, ids):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = df['name'].sample()
-        r =  name.values[0].upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  name.values[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -381,7 +381,7 @@ def phone(texts, entity_map, ids, modality):
     if modality == 'text':
         phone = area_code + "-" + exchange + "-" + number
     else:
-        phone = digits2words(str(area_code + exchange + number).upper())
+        phone = digits2words(str(area_code + exchange + number))
     
     new_texts = []
 
@@ -408,7 +408,7 @@ def product(texts, entity_map, ids):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        new_text = re.sub(r"\[PRODUCT+-\d+\]", lambda x: callback(x,id),text).upper()
+        new_text = re.sub(r"\[PRODUCT+-\d+\]", lambda x: callback(x,id),text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -424,8 +424,8 @@ def quantity(texts, entity_map, ids):
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
-        #new_text = re.sub(r"\[QUANTITY\]",callback, text).upper()
-        new_text = re.sub(r"\[QUANTITY+-\d+\]",lambda x: callback(x,id),text).upper()
+        #new_text = re.sub(r"\[QUANTITY\]",callback, text)
+        new_text = re.sub(r"\[QUANTITY+-\d+\]",lambda x: callback(x,id),text)
         new_texts.append(new_text)
     return new_texts, entity_map
 
@@ -437,11 +437,11 @@ def work_of_art(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  str(df['Title'].sample().values[0]).upper() if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  str(df['Title'].sample().values[0]) if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     def callback(match,i):
-        return str(df['Title'].sample().values[0]).upper()
+        return str(df['Title'].sample().values[0])
     for text,id in zip(texts,ids):
         new_text = re.sub(r"\[WORK_OF_ART+-\d+\]",lambda x: callback(x,id), text)
         new_texts.append(new_text)
@@ -457,7 +457,7 @@ def zipC(texts, entity_map, ids, modality):
     if modality == 'text':
         zipC = df['zip'].sample().values[0]
     else:
-        zipC = digits2words(str(df['zip'].sample().values[0])).upper()
+        zipC = digits2words(str(df['zip'].sample().values[0]))
 
     def callback(match, i):
         tag = match.group()

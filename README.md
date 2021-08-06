@@ -44,6 +44,20 @@ Once installed, redactomatic needs at a minimum the 1. name of the input convers
 usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE]
 ```
 
+### Command Line Parameters
+
+| Paramter | Description | Required?  |
+|--------------|--------------|----------|
+| column     | The column number containing the text to redact |  yes |
+| idcolumn   | the column number containing the unique conversation id | yes |
+| inputfile | The filename containing the conversations to process | yes |
+| outputfile | The filename that will contain the redacted output | yes |
+| modality | Can be voice or text depending on the type of conversations contained in the inputfile | yes |
+| anonymize | If included will replace redaction tags with randomized values. Useful if you need simulated data. | no |
+| large | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time. | no |
+| log | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes. | no |
+| uppercase | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no |
+
 ### Example 1: Redact a text file
 
 The following command will use the sample input file included in the Redactomatic distribution [data/sample_data.csv](data/sample_data.csv) and create an output file called output.csv:

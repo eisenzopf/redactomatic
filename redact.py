@@ -19,6 +19,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--anonymize', action='store_true', help='include to anonymize redacted data')
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
     parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
+    parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
     return parser.parse_args()
 
 
@@ -341,6 +342,15 @@ def update_entity_values(id,value,entity_values):
     if id not in entity_values:
         entity_values[id] = value
     return entity_values
+
+
+def convert_to_uppercase(texts):
+    print("Converting letters to uppercase...")
+    new_texts=[]
+    for text in texts:
+        new_text = text.upper()
+        new_texts.append(new_text)
+    return new_texts
 
 
 def write_audit_log(filename, entity_values):

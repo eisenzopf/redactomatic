@@ -77,6 +77,9 @@ def main():
     texts = redact.replace_ignore(texts,entity_values)
     texts = redact.clean(texts) # chats-yes, voice-yes
 
+    if args.uppercase:
+        texts = redact.convert_to_uppercase(texts)
+
     # write the redacted data back to the Dataframe
     df.iloc[:, args.column-1] = texts
 
