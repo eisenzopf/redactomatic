@@ -129,6 +129,7 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 | Phone       | [PHONE]        | Regex        | No  | Yes | Yes |
 | Product     | [PRODUCT]      | Spacy        | Yes | Yes | No  |
 | Quantity    | [QUANTITY]     | Spacy        | Yes | Yes | Yes |
+| SSN         | [SSN]          | Regex        | No  | Yes | No  |
 | Time        | [TIME]         | Spacy        | Yes | Yes | Yes |
 | Work of Art | [WORK_OF_ART]  | Spacy        | Yes | Yes | Yes |
 | Zip Code    | [ZIP]          | Regex        | No  | Yes | Yes |
