@@ -57,6 +57,7 @@ usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTF
 | large | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time. | no |
 | log | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes. | no |
 | uppercase | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no |
+| level | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean. | no |
 
 ### Example 1: Redact a text file
 
@@ -94,6 +95,10 @@ In some cases, your security officer may want to see proof that Redactomatic has
 python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv --log audit.csv
 ```
 
+## Redaction Levels
+
+You can set how strict the redaction script will be. Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
+
 ## Supported Languages and Regions
 
 Redactomatic currently supports English. Most entities support the US and Canada. If you would like to contribute additional languages and regions, we welcome the contribution.
@@ -114,6 +119,7 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 | Language    | [LANGUAGE]     | Spacy        | Yes | Yes | Yes |
 | Laughter    | [LAUGHTER]     | NICE         | Yes | No  | No  |
 | Law         | [LAW]          | Spacy        | Yes | Yes | No  |
+| Location    | [LOC]          | Spacy        | Yes | Yes | Yes |
 | Money       | [MONEY]        | Spacy        | Yes | Yes | Yes |
 | Nationality, Religious or Political Organization | [NORP] | Spacy | Yes | Yes | Yes |
 | Organization| [ORG]          | Spacy        | Yes | Yes | Yes |

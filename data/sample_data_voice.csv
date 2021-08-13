@@ -1,6 +1,8 @@
 ﻿conversation_id,speaker,date_time,text
 1011432,Agent,2019-08-11 00:00:05,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
 1011432,Client,2019-08-11 00:00:10,David Firth
+1011432,Agent,2019-08-11 00:00:10,And what is your account number?
+1011432,Client,2019-08-11 00:00:11,It's one two four nine eight seven four six two three I think.
 1011432,Agent,2019-08-11 00:00:15,Thank you David. How may I help you today?
 1011432,Client,2019-08-11 00:00:20,I'm trying to pay my bill but it's not working.
 1011432,Agent,2019-08-11 00:00:25,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
@@ -16,13 +18,15 @@
 1011432,Agent,2019-08-11 00:01:20,And the CV code?
 1011432,Client,2019-08-11 00:01:25,What is that?
 1011432,Agent,2019-08-11 00:01:30,It's a three digit number usually on the back of your debit card next to the signature strip.
-1011432,Client,2019-08-11 00:01:35,Oh ok. It's four one two
+1011432,Client,2019-08-11 00:01:31,Oh ok. It's four one two
+1011432,Agent,2019-08-11 00:01:32,When did you want the payment to process?
+1011432,Client,2019-08-11 00:01:33,Can you make the payment process tomorrow please?
 1011432,Agent,2019-08-11 00:01:36,Do I have your authorization to run your debit card in the amount of five hundred dollars?
 1011432,Client,2019-08-11 00:01:37,Yes.
 1011432,Agent,2019-08-11 00:02:10,Ok one moment please while I run your debit card.
 1011432,Client,2019-08-11 00:02:30,Ok
 1011432,Agent,2019-08-11 00:03:42,The system is telling me that it needs your physical address associated with the card.
-1011432,Client,2019-08-11 00:04:25,Ok. It's four one three main street in Deluth Georgia. The zip is five five eight one two.
+1011432,Client,2019-08-11 00:04:25,Ok. It's four one three main street in Deluth Georgia in the United States. The zip is five five eight one two.
 1011432,Agent,2019-08-11 00:05:30,I also need a phone number associated with the account.
 1011432,Client,2019-08-11 00:06:35,It’s probably my cell phone. That's two one eight seven three oh four three oh oh.
 1011432,Agent,2019-08-11 00:06:50,Thank you for that information. I will try running the transaction again.

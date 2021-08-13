@@ -1,6 +1,8 @@
 import redact
 import anonymize
 
+# allow users to pass a list of which entities they want to redact, based on a config JSON file
+
 def main():
     #initialize entity map
     entity_map = {} 
@@ -8,11 +10,18 @@ def main():
     # initialize entity value dict
     entity_values = {}
 
+    # initialize list of entities we want to redact
+    entities = []
+
     # unique entity key
     curr_id = 0
     
     # get command line params
     args = redact.config_args()
+
+    # set default redaction level to 2
+    if bool(args.level) == False:
+        args.level = 2
 
     # validate command line params
     if args.modality == "text":
@@ -23,6 +32,9 @@ def main():
         print("--modality command line value must be either text or voice")
         exit()
 
+    # get list of entities to redact from config.json
+    entities = redact.load_config(args.level)
+
     # load data into a Pandas Dataframe
     df, texts, ids = redact.df_load_files(args)
 
@@ -30,17 +42,19 @@ def main():
     texts, entity_map, curr_id, entity_values  = redact.ignore_phrases(texts, entity_map, curr_id, ids, entity_values)
 
     # redact specified column with Spacy Entities
-    texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args)
+    texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args, entities)
 
-    # redact specified column with regex methods, for chat and NOT voice
-    texts, entity_map, curr_id, entity_values = redact.ccard(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-    texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-    texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-    texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+    if args.level and args.level > 1:
+        # redact specified column with regex methods, for chat and NOT voice
+        texts, entity_map, curr_id, entity_values = redact.ccard(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+        texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+        #texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
+        texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
 
-    # redact specified column with regex methods, for chat AND voice
-    texts, entity_map, curr_id, entity_values = redact.ordinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
-    texts, entity_map, curr_id, entity_values = redact.cardinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
+    if args.level and args.level == 3:
+        # redact specified column with regex methods, for chat AND voice
+        texts, entity_map, curr_id, entity_values = redact.ordinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
+        texts, entity_map, curr_id, entity_values = redact.cardinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
     
     #reverse keys and values in entity_map for anonymization
     entity_map = {c_id:{v:"" for k,v in e_map.items()} for c_id,e_map in entity_map.items()}

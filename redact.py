@@ -20,6 +20,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
     parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
+    parser.add_argument('--level', type=int, required=False, help='sets the redaction level (1-3); default is 2')
     return parser.parse_args()
 
 
@@ -56,22 +57,24 @@ def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values):
     return new_texts, entity_map, eCount, entity_values
 
 
-def ner_ml(texts, entity_map, eCount, ids, entity_values, args):
+def ner_ml(texts, entity_map, eCount, ids, entity_values, args, entities):
     print("Redacting named entities (ML)...")
     from spacy.lang.en import English
     if args.large:
         nlp = spacy.load("en_core_web_lg")
     else:
         nlp = spacy.load("en_core_web_sm")
-    spacy_multiword_labels = ["PERSON"]
+        spacy_multiword_labels = ["PERSON"]
     new_texts = []
     #Spacy version of the_redactor function...
     for doc, d_id in zip(nlp.pipe(texts, disable=["tagger", "parser", "lemmatizer"], n_process=4, batch_size=1000),ids):
         newString = doc.text
         for e in reversed(doc.ents): #reversed to not modify the offsets of other entities when substituting
-            if e.label_ !="CARDINAL":
+            # redact if the recognized entity is in the list of entities from the config.json file
+            if e.label_ in entities:
                 name = e.text
                 value = name
+                # split name if we have a first and last name ( [PERSON] )
                 if e.label_ in spacy_multiword_labels and " " in name:
                     broken = name.split()
                     for i,n, in enumerate(reversed(broken)):
@@ -81,7 +84,7 @@ def ner_ml(texts, entity_map, eCount, ids, entity_values, args):
                         end = start + len(name)
                         entity_map, c = update_entities(name,d_id,entity_map,eCount)
                         newString = newString[:start] + " [" + e.label_ +"-"+ str(c) + "]" + newString[end:]
-                        eCount += 1 
+                        eCount += 1
                 else:
                     entity_map, c = update_entities(name,d_id,entity_map,eCount)
                     start = e.start_char
@@ -89,10 +92,11 @@ def ner_ml(texts, entity_map, eCount, ids, entity_values, args):
                     newLabel = e.label_ +"-"+ str(c)
                     newString = newString[:start] + "[" + newLabel + "]" + newString[end:]
                     entity_values = update_entity_values(newLabel,value,entity_values)
-                    eCount += 1 
+                    eCount += 1
         newString = newString.replace('$','')
         new_texts.append(newString)
     return new_texts, entity_map, eCount, ids, entity_values
+
 
 def address(texts, entity_map, eCount, ids, entity_values):
     print("Redacting address (Regex)...")
@@ -219,6 +223,21 @@ def ignore_phrases(texts, entity_map, eCount, ids, entity_values):
         pattern = regex.compile(phrase,regex.IGNORECASE)
         texts, entity_map, eCount, entity_values = the_redactor(pattern, "IGNORE", texts, entity_map, eCount, ids, entity_values)
     return texts, entity_map, eCount, entity_values
+
+
+def load_config(level):
+    print("Loading configuration...")
+    config = {}
+    entities = []
+    with open(os.getcwd() + '/config.json') as json_file:
+        config = json.load(json_file)
+    if level == 1:
+        entities = config['level-1']
+    elif level == 2:
+        entities = config['level-2']
+    elif level == 3:
+        entities = config['level-3']
+    return entities
 
 
 def ordinal(texts, entity_map, eCount, ids, entity_values):

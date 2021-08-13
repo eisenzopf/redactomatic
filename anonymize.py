@@ -150,7 +150,7 @@ def company(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0].split()[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  df.sample().values[0][0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -205,7 +205,7 @@ def gpe(texts, entity_map, ids):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0].split()[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        r =  df.sample().values[0][0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
@@ -262,11 +262,14 @@ def law(texts, entity_map, ids):
 
 def loc(texts, entity_map, ids):
     print("Anonymizing loc...")
+    # us-area-code-cities
     new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/us-area-code-cities.csv')
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        name = df['city'].sample()
+        r =  name.values[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
         entity_map[i][m_id] = r
         return r
     for text,id in zip(texts,ids):
