@@ -4,7 +4,8 @@
         "PERSON",
         "ADDRESS",
         "CCARD",
-        "MONEY"
+        "MONEY",
+        "SSN"
     ],
     "level-2": [
         "PHONE",
@@ -12,7 +13,8 @@
         "ADDRESS",
         "CCARD",
         "MONEY",
-        "LOC"
+        "LOC",
+        "SSN"
     ],
     "level-3": [
         "PHONE",
@@ -37,6 +39,7 @@
         "QUANTITY",
         "TIME",
         "WORK_OF_ART",
-        "ZIP"
+        "ZIP",
+        "SSN"
     ]
 }

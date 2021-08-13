@@ -347,6 +347,12 @@ def replace_ignore(texts,entity_values):
     return new_texts
 
 
+def ssn(texts, entity_map, eCount, ids, entity_values):
+    print("Redacting SSN (Regex)...")
+    pattern = regex.compile("""((\d{3}-?\s?\d{2}-?\s?\d{4})$)""", regex.IGNORECASE)
+    return the_redactor(pattern, "SSN", texts, entity_map, eCount, ids, entity_values)
+
+
 def update_entities(name, d_id, emap, c):
     if d_id not in emap:
         emap[d_id]={}

@@ -50,6 +50,7 @@ def main():
         texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
         #texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
         texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
+        texts, entity_map, curr_id, entity_values = redact.ssn(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
 
     if args.level and args.level == 3:
         # redact specified column with regex methods, for chat AND voice
@@ -78,6 +79,7 @@ def main():
         texts, entity_map = anonymize.norp(texts, entity_map, ids) # chats-yes, voice=yes
         texts, entity_map = anonymize.money(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
         texts, entity_map = anonymize.perc(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
+        #texts, entity_map = anonymize.ssn(texts, entity_map, ids, args.modality) # chats-yes, voice=yes
 
         # These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label
         texts, entity_map = anonymize.laughter(texts, entity_map, ids) # chats-yes, voice=yes
