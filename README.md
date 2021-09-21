@@ -62,6 +62,7 @@ usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTF
 | log | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes. | no |
 | uppercase | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no |
 | level | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean. | no |
+| noredaction | If included, will ignore the redaction pass and only anonymize recognized redaction tags. | no |
 
 ### Example 1: Redact a text file
 
@@ -97,6 +98,18 @@ In some cases, your security officer may want to see proof that Redactomatic has
 
 ```sh
 python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv --log audit.csv
+```
+
+### Example 5: Redaction and Anonymization in 2 separate passes
+
+In some cases, you may want to redact a data file and inspect it before you anonymize it. This can be done by first redacting the data file, inspecting the data, and then using the output of redaction step as input to the anonymization step.
+
+```sh
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/sample_data.csv --outputfile output.csv
+```
+
+```sh
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --noredaction
 ```
 
 ## Redaction Levels
