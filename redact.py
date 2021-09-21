@@ -21,6 +21,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
     parser.add_argument('--level', type=int, required=False, help='sets the redaction level (1-3); default is 2')
+    parser.add_argument('--noredaction', action='store_true', help='turn off redaction')
     return parser.parse_args()
 
 
@@ -38,16 +39,21 @@ def df_load_files(args):
 
 
 #Tracking ID-TEXT connection, find match to pattern of type label; keeping entities map updated
-def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values):
+def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values, group=1):
     new_texts = []
     for text, d_id in zip(texts,ids):
         matches = list(pattern.finditer(text))
         newString = text
         for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
-            name = e.group()
+            if group != 1 and e.captures(group):
+                    name = e.captures(group)[0]
+                    start = e.span(group)[0]
+            else:
+                name = e.group()
+                start = e.span()[0]
+
             if not (label == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
                 entity_map, c = update_entities(name,d_id,entity_map,eCount)
-                start = e.span()[0]
                 end = start + len(name)
                 newLabel = label+ "-"+str(c)
                 newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
@@ -60,11 +66,11 @@ def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values):
 def ner_ml(texts, entity_map, eCount, ids, entity_values, args, entities):
     print("Redacting named entities (ML)...")
     from spacy.lang.en import English
+    spacy_multiword_labels = ["PERSON"]
     if args.large:
         nlp = spacy.load("en_core_web_lg")
     else:
         nlp = spacy.load("en_core_web_sm")
-        spacy_multiword_labels = ["PERSON"]
     new_texts = []
     #Spacy version of the_redactor function...
     for doc, d_id in zip(nlp.pipe(texts, disable=["tagger", "parser", "lemmatizer"], n_process=4, batch_size=1000),ids):
@@ -214,6 +220,12 @@ def dates(texts,entity_map,eCount,ids):
     pass
 
 
+def email(texts, entity_map, eCount, ids, entity_values):
+    print("Redacting email (Regex)...")
+    pattern = regex.compile("""[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}""", regex.IGNORECASE)
+    return the_redactor(pattern, "EMAIL", texts, entity_map, eCount, ids, entity_values)
+
+
 def ignore_phrases(texts, entity_map, eCount, ids, entity_values):
     print("Redacting ignore phrases (Regex)...")
     entity_values = {}
@@ -237,7 +249,7 @@ def load_config(level):
         entities = config['level-2']
     elif level == 3:
         entities = config['level-3']
-    return entities
+    return entities, config['redaction-order'], config['anon-map']
 
 
 def ordinal(texts, entity_map, eCount, ids, entity_values):
@@ -349,8 +361,8 @@ def replace_ignore(texts,entity_values):
 
 def ssn(texts, entity_map, eCount, ids, entity_values):
     print("Redacting SSN (Regex)...")
-    pattern = regex.compile("""((\d{3}-?\s?\d{2}-?\s?\d{4})$)""", regex.IGNORECASE)
-    return the_redactor(pattern, "SSN", texts, entity_map, eCount, ids, entity_values)
+    pattern = regex.compile("""(^|\s)(?<ssn>(?!000|666)[0-8][0-9]{2}(-|\s)?(?!00)[0-9]{2}(-|\s)?(?!0000)[0-9]{4})(\s|$|\.)""", regex.IGNORECASE)
+    return the_redactor(pattern, "SSN", texts, entity_map, eCount, ids, entity_values,"ssn")
 
 
 def update_entities(name, d_id, emap, c):
@@ -389,5 +401,5 @@ def write_audit_log(filename, entity_values):
 
 def zipC(texts, entity_map, eCount, ids, entity_values):
     print("Redacting zip (Regex)...")
-    pattern = regex.compile("""(^(?<full>(?<part1>[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1})(?:[ ](?=\d))?(?<part2>\d{1}[A-Z]{1}\d{1}))$)|((?<zip>(?!00[02-5]|099|213|269|34[358]|353|419|42[89]|51[789]|529|53[36]|552|5[67]8|5[78]9|621|6[348]2|6[46]3|659|69[4-9]|7[034]2|709|715|771|81[789]|8[3469]9|8[4568]8|8[6-9]6|8[68]7|9[02]9|987)\d{5})\-?(?<plus4>[0-9]{4})?)""", regex.IGNORECASE)
-    return the_redactor(pattern, "ZIP", texts, entity_map, eCount, ids, entity_values)
+    pattern = regex.compile("""((?<full>(?<part1>[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1})(?:[ ](?=\d))?(?<part2>\d{1}[A-Z]{1}\d{1}))$)|((^|\s{1})(?<zip>(?!00[02-5]|099|213|269|34[358]|353|419|42[89]|51[789]|529|53[36]|552|5[67]8|5[78]9|621|6[348]2|6[46]3|659|69[4-9]|7[034]2|709|715|771|81[789]|8[3469]9|8[4568]8|8[6-9]6|8[68]7|9[02]9|987)\d{5})(\s|\.|$|\-(?<plus4>[0-9]{4})?))""", regex.IGNORECASE)
+    return the_redactor(pattern, "ZIP", texts, entity_map, eCount, ids, entity_values, "zip")

@@ -36,6 +36,10 @@ sh setup.sh
 
 This will install required Python libraries and download the small (en_core_web_sm) and large (en_core_web_lg) Spacy models.
 
+## Hardware Requirements
+
+By default, Redactomatic will use the Spacy small ML model. However, if you plan to use the large model via the *--large* command line flag, be sure that the machine is utilizing a GPU capable of running large Transformer models. Also, you will need memory at least four times as large as the input data file. You can reduce this requirement by breaking up input files into smaller pieces and including each of them with the *--inputfile* flag.
+
 ## Usage
 
 Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (--modality which must be voice or text), and 3. the column in the CSV containing the text to redact (--column), the column containing the conversation ID (--idcolumn).
@@ -113,6 +117,7 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 | Credit Card Number | [CCARD] | Regex        | No  | Yes | Yes |
 | Cardinal    | [CARDINAL]     | Spacy, Regex | Yes | Yes | Yes |
 | Date        | [DATE]         | Spacy        | Yes | Yes | Yes |
+| Email       | [EMAIL]        | Regex        | No  | Yes | Yes |
 | Event       | [EVENT]        | Spacy        | Yes | Yes | Yes |
 | Facility    | [FAC]          | Spacy        | Yes | Yes | No  |
 | Country, City, State | [GPE] | Spacy        | Yes | Yes | No  |
@@ -124,12 +129,12 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 | Nationality, Religious or Political Organization | [NORP] | Spacy | Yes | Yes | Yes |
 | Organization| [ORG]          | Spacy        | Yes | Yes | Yes |
 | Ordinal     | [ORDINAL]      | Spacy, Regex | Yes | Yes | Yes |
-| Percent     | [PERCENT]      | Spact        | Yes | Yes | Yes |
+| Percent     | [PERCENT]      | Spacy        | Yes | Yes | Yes |
 | Person      | [PERSON]       | Spacy        | Yes | Yes | Yes |
 | Phone       | [PHONE]        | Regex        | No  | Yes | Yes |
 | Product     | [PRODUCT]      | Spacy        | Yes | Yes | No  |
 | Quantity    | [QUANTITY]     | Spacy        | Yes | Yes | Yes |
-| SSN         | [SSN]          | Regex        | No  | Yes | No  |
+| SSN         | [SSN]          | Regex        | No  | Yes | Yes |
 | Time        | [TIME]         | Spacy        | Yes | Yes | Yes |
 | Work of Art | [WORK_OF_ART]  | Spacy        | Yes | Yes | Yes |
 | Zip Code    | [ZIP]          | Regex        | No  | Yes | Yes |

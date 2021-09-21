@@ -2,7 +2,11 @@
 1011432,Agent,2019-08-11 00:00:05,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
 1011432,Client,2019-08-11 00:00:10,David Firth
 1011432,Agent,2019-08-11 00:00:10,And what is your account number?
-1011432,Client,2019-08-11 00:00:11,It's 1249874623 I think. My SSN is 123-432-4321 or 123 432 4321 or 1234324321.
+1011432,Client,2019-08-11 00:00:11,It's 1249874623 I think.
+1011432,Agent,2019-08-11 00:00:11,And your social security number?
+1011432,Client,2019-08-11 00:00:12,It's 234-23-2343.
+1011432,Agent,2019-08-11 00:00:12,And what is your email address?
+1011432,Client,2019-08-11 00:00:13,It's eisen@discourse.ai
 1011432,Agent,2019-08-11 00:00:15,Thank you David. How may I help you today?
 1011432,Client,2019-08-11 00:00:20,I'm trying to pay my bill but it's not working.
 1011432,Agent,2019-08-11 00:00:25,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
