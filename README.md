@@ -109,7 +109,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 ```
 
 ```sh
-python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --noredaction
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --anonymize --noredaction
 ```
 
 ## Redaction Levels
