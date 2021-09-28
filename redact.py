@@ -10,7 +10,7 @@ import numpy as np
 
 
 def config_args(): # add --anonymize
-    parser = argparse.ArgumentParser(description='Redact call transcriptions or chat logs.')
+    parser = argparse.ArgumentParser(description='Redactomatic v1.3. Redact call transcriptions or chat logs.')
     parser.add_argument('--column', type=int, required=True, help='the CSV column number containing the text to redact.')
     parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
