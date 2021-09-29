@@ -30,7 +30,15 @@ def adate(texts, entity_map, ids, modality, anon_map):
         else:
             date = random.choice(months) + " " + random.choice(ordinal_days)
 
-        r =  date if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        if i not in entity_map:
+            entity_map[i]={}
+            r = date
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = date
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
         
@@ -58,7 +66,11 @@ def address(texts, entity_map, ids, modality, anon_map):
             number = inflector.number_to_words(random.randrange(100,500))
         address = number + " " + street + " "
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = address
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = address
         else:
             r = entity_map[i][m_id]
@@ -99,7 +111,16 @@ def atime(texts, entity_map, ids, modality, anon_map):
             time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
         else:
             time = str(random.choice(hours)) + " " + str(random.choice(minutes)) + " " + str(random.choice(["AM","PM"]))  
-        r =  time if entity_map[i][m_id] == '' else entity_map[i][m_id]
+        
+        if i not in entity_map:
+            entity_map[i]={}
+            r = time
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = time
+        else:
+            r = entity_map[i][m_id]
+        
         entity_map[i][m_id] = r
         return r
         
@@ -125,7 +146,16 @@ def cardinal(texts, entity_map, ids, modality, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  random.choice(cardinal) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = random.choice(cardinal)
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = random.choice(cardinal)
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -156,7 +186,11 @@ def ccard(texts, entity_map, ids, modality, anon_map):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = ccard
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = ccard
         else:
             r = entity_map[i][m_id]
@@ -180,7 +214,16 @@ def company(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = df.sample().values[0][0]
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = df.sample().values[0][0]
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -208,7 +251,11 @@ def email(texts, entity_map, ids, modality, anon_map):
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = df['name'].sample()
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = name.values[0] + "@gmail.com"
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = name.values[0] + "@gmail.com"
         else:
             r = entity_map[i][m_id]
@@ -230,7 +277,16 @@ def event(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  random.choice(events) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = random.choice(events)
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = random.choice(events)
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -247,7 +303,16 @@ def fac(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = ""
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = ""
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -265,7 +330,16 @@ def gpe(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  df.sample().values[0][0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = df.sample().values[0][0]
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = df.sample().values[0][0]
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -283,7 +357,16 @@ def language(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  random.choice(language) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = random.choice(language)
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = random.choice(language)
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -300,7 +383,16 @@ def laughter(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = ""
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = ""
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -317,7 +409,16 @@ def law(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = ""
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = ""
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -337,7 +438,16 @@ def loc(texts, entity_map, ids, anon_map):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = df['city'].sample()
-        r =  name.values[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = name.values[0]
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = name.values[0]
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -348,7 +458,7 @@ def loc(texts, entity_map, ids, anon_map):
     return new_texts,entity_map
 
 
-def money(texts, entity_map, ids, modality, anon_map):
+def money (texts, entity_map, ids, modality, anon_map):
     print("Anonymizing money...")
     new_texts = []
     def callback(match, i):
@@ -359,7 +469,11 @@ def money(texts, entity_map, ids, modality, anon_map):
         else:
             money = inflector.number_to_words(random.randrange(200,500)) + " DOLLARS"
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = money
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = money
         else:
             r = entity_map[i][m_id]
@@ -373,7 +487,8 @@ def money(texts, entity_map, ids, modality, anon_map):
         new_texts.append(new_text)
     return new_texts, entity_map
 
-def norp(texts, entity_map, ids, anon_map):
+
+def norp (texts, entity_map, ids, anon_map):
     print("Anonymizing NORPs (nationality, religious or political organizations)...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
@@ -381,8 +496,18 @@ def norp(texts, entity_map, ids, anon_map):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = df['Nationality'].sample()
-        r =  name.values[0] if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = name.values[0]
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = name.values[0]
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
+        return r
 
     this_regex = anon_regex("NORP", anon_map)
     for text,id in zip(texts,ids):
@@ -391,7 +516,7 @@ def norp(texts, entity_map, ids, anon_map):
     return new_texts, entity_map
 
 
-def ordinal(texts, entity_map, ids, modality, anon_map):
+def ordinal (texts, entity_map, ids, modality, anon_map):
     print("Anonymizing ordinals...")
     v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
@@ -405,7 +530,16 @@ def ordinal(texts, entity_map, ids, modality, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r = random.choice(ordinal) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = random.choice(ordinal)
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = random.choice(ordinal)
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -416,7 +550,7 @@ def ordinal(texts, entity_map, ids, modality, anon_map):
     return new_texts, entity_map
 
 
-def perc(texts, entity_map, ids, modality, anon_map):
+def perc (texts, entity_map, ids, modality, anon_map):
     print("Anonymizing cardinals...")
 
     if modality == 'text':
@@ -428,7 +562,16 @@ def perc(texts, entity_map, ids, modality, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  perc if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = perc
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = perc
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -439,7 +582,7 @@ def perc(texts, entity_map, ids, modality, anon_map):
     return new_texts, entity_map
 
 
-def person(texts, entity_map, ids, df, anon_map):
+def person (texts, entity_map, ids, df, anon_map):
     print("Anonymizing names (people)...")
     new_texts = []
     def callback(match, i):
@@ -447,7 +590,11 @@ def person(texts, entity_map, ids, df, anon_map):
         m_id = int(tag[tag.rindex('-')+1:-1])
         name = str(df['name'].sample().values[0])
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = name
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = name
         else:
             r = entity_map[i][m_id]
@@ -480,7 +627,11 @@ def phone(texts, entity_map, ids, modality, anon_map):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
 
-        if m_id not in entity_map[i]:
+        if i not in entity_map:
+            entity_map[i]={}
+            r = phone
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = phone
         else:
             r = entity_map[i][m_id]
@@ -498,12 +649,21 @@ def phone(texts, entity_map, ids, modality, anon_map):
 
 def product(texts, entity_map, ids, anon_map):
     print("Anonymizing products...")
-    product = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+    product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
     new_texts = []
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = random.choice(product)
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = random.choice(product)
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -516,12 +676,20 @@ def product(texts, entity_map, ids, anon_map):
 
 def quantity(texts, entity_map, ids, anon_map):
     print("Anonymizing quantities...")
-    ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
     new_texts = []
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  "[]" if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = str(random.randrange(1000,9999))
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = str(random.randrange(1000,9999))
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -549,10 +717,16 @@ def ssn(texts, entity_map, ids, modality, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        if m_id not in entity_map[i]:
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = ssn
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = ssn
         else:
             r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
 
@@ -570,7 +744,16 @@ def work_of_art(texts, entity_map, ids, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        r =  str(df['Title'].sample().values[0]) if entity_map[i][m_id] == '' else entity_map[i][m_id]
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = str(df['Title'].sample().values[0])
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
+            r = str(df['Title'].sample().values[0])
+        else:
+            r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return r
     def callback(match,i):
@@ -597,10 +780,16 @@ def zipC(texts, entity_map, ids, modality, anon_map):
     def callback(match, i):
         tag = match.group()
         m_id = int(tag[tag.rindex('-')+1:-1])
-        if m_id not in entity_map[i]:
+
+        if i not in entity_map:
+            entity_map[i]={}
+            r = zipC
+        elif m_id not in entity_map[i]:
+            entity_map[i][m_id]={}
             r = zipC
         else:
             r = entity_map[i][m_id]
+
         entity_map[i][m_id] = r
         return str(r)
 

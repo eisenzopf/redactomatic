@@ -93,7 +93,7 @@
         "ORG": [ "ORG" ],
         "PASSWORD": [ "PASSWORD", "password" ],
         "PERCENT": [ "PERCENT" ],
-        "PERSON": [ "PHONE_NUMBER" ],
+        "PERSON": [ "PERSON" ],
         "PHONE": [ "PHONE_NUMBER", "VODACOMDIREC-PHONE_NUMBER", "phoneNumber" ],
         "PHONE_NUMBER": [ "PHONE" ],
         "PRODUCT": [ "PRODUCT" ],
