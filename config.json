@@ -5,7 +5,8 @@
         "ADDRESS",
         "CCARD",
         "MONEY",
-        "SSN"
+        "SSN",
+        "PIN"
     ],
     "level-2": [
         "PHONE",
@@ -16,7 +17,8 @@
         "LOC",
         "EMAIL",
         "SSN",
-        "ZIP"
+        "ZIP",
+        "PIN"
     ],
     "level-3": [
         "PHONE",
@@ -43,7 +45,8 @@
         "WORK_OF_ART",
         "ZIP",
         "SSN",
-        "EMAIL"
+        "EMAIL",
+        "PIN"
     ],
     "redaction-order": [
         "PERSON",
@@ -69,16 +72,17 @@
         "QUANTITY",
         "TIME",
         "WORK_OF_ART",
+        "PIN",
         "ORDINAL",
         "CARDINAL"
     ],
     "anon-map": {
         "ADDRESS": [ "ADDRESS", "streetAddress" ],
-        "CARDINAL": [ "DIGITS", "digits" ],
+        "CARDINAL": [ "CARDINAL", "DIGITS", "digits" ],
         "CCARD": [ "CCARD", "creditCardNumber" ],
         "CREDENTIALS": [ "credentials" ],
         "DATE": [ "DATE" ],
-        "EMAIL": [ "EMAIL_ADDRESS", "emailAddress" ],
+        "EMAIL": [ "EMAIL", "EMAIL_ADDRESS", "emailAddress" ],
         "EVENT": [ "EVENT" ],
         "FAC": [ "FAC" ],
         "GPE": [ "GPE" ],
@@ -94,7 +98,7 @@
         "PASSWORD": [ "PASSWORD", "password" ],
         "PERCENT": [ "PERCENT" ],
         "PERSON": [ "PERSON" ],
-        "PHONE": [ "PHONE_NUMBER", "VODACOMDIREC-PHONE_NUMBER", "phoneNumber" ],
+        "PHONE": [ "PHONE", "PHONE_NUMBER", "VODACOMDIREC-PHONE_NUMBER", "phoneNumber" ],
         "PHONE_NUMBER": [ "PHONE" ],
         "PRODUCT": [ "PRODUCT" ],
         "QUANTITY": [ "QUANTITY" ],
@@ -103,6 +107,11 @@
         "URL": [ "URL" ],
         "USERNAME": [ "USERNAME", "username" ],
         "WORK_OF_ART": [ "WORK_OF_ART" ],
-        "ZIP": [ "ZIP", "zipcode" ]
+        "ZIP": [ "ZIP", "zipcode" ],
+        "PIN": [ "PIN" ]
+    },
+    "token-map": {
+        "ZIP": [ "<ZIP/>" ],
+        "PIN": [ "<PIN/>" ]
     }
 }

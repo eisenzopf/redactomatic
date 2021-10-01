@@ -10,7 +10,7 @@ import numpy as np
 
 
 def config_args(): # add --anonymize
-    parser = argparse.ArgumentParser(description='Redactomatic v1.4. Redact call transcriptions or chat logs.')
+    parser = argparse.ArgumentParser(description='Redactomatic v1.5. Redact call transcriptions or chat logs.')
     parser.add_argument('--column', type=int, required=True, help='the CSV column number containing the text to redact.')
     parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
@@ -113,7 +113,7 @@ def address(texts, entity_map, eCount, ids, entity_values):
 def cardinal(texts, entity_map, eCount, ids, entity_values):
     print("Redacting cardinals (Regex)...")
     pattern = regex.compile("""
-    (?xi)           # free-spacing mode
+(?xi)           # free-spacing mode
   (?(DEFINE)
   (?<one_to_9>  
   (?:\m(one|two|three|four|five|six|seven|eight|nine)\M)
@@ -214,6 +214,15 @@ def clean(texts):
     return new_texts
 
 
+def convert_to_uppercase(texts):
+    print("Converting letters to uppercase...")
+    new_texts=[]
+    for text in texts:
+        new_text = text.upper()
+        new_texts.append(new_text)
+    return new_texts
+
+
 def dates(texts,entity_map,eCount,ids):
     print("Redacting dates (Regex) ...")
     pattern = ""
@@ -249,7 +258,7 @@ def load_config(level):
         entities = config['level-2']
     elif level == 3:
         entities = config['level-3']
-    return entities, config['redaction-order'], config['anon-map']
+    return entities, config['redaction-order'], config['anon-map'], config['token-map']
 
 
 def ordinal(texts, entity_map, eCount, ids, entity_values):
@@ -342,6 +351,42 @@ def phone(texts, entity_map, eCount, ids, entity_values):
     return the_redactor(pattern, "PHONE", texts, entity_map, eCount, ids, entity_values)
 
 
+def phone_voice(texts, entity_map, eCount, ids, entity_values):
+    print("Redacting voice transcribed phone (Regex)...")
+    pattern = regex.compile("""
+    (?xi)           # free-spacing mode
+    (?(DEFINE)
+        (?<one_to_9>  
+        (?:(one|two|three|four|five|six|seven|eight|nine|0z))
+        ) # end one_to_9 definition
+    )
+    (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)[\s,]{1,2}
+    (?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)[\s,]{1,2}
+    (?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+    """, regex.IGNORECASE)
+    return the_redactor(pattern, "PHONE", texts, entity_map, eCount, ids, entity_values)
+
+
+def pin(texts, entity_map, eCount, ids, entity_values):
+    print(" Redacting pin (Regex)...")
+    pattern = regex.compile("""(^|\s)(?:(\d{4}))\s*?""", regex.IGNORECASE)
+    return the_redactor(pattern, "PIN", texts, entity_map, eCount, ids, entity_values)
+
+
+def pin_voice(texts, entity_map, eCount, ids, entity_values):
+    print(" Redacting voice transcribed pin (Regex)...")
+    pattern = regex.compile("""
+    (?xi)           # free-spacing mode
+    (?(DEFINE)
+        (?<one_to_9> 
+        (?:(one|two|three|four|five|six|seven|eight|nine|0z))
+        ) # end one_to_9 definition
+    )
+    (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+    """, regex.IGNORECASE)
+    return the_redactor(pattern, "PIN", texts, entity_map, eCount, ids, entity_values)
+
+
 def replace_ignore(texts,entity_values):
     print("Re-inserting ignored text...")
     new_texts = []
@@ -381,15 +426,6 @@ def update_entity_values(id,value,entity_values):
     return entity_values
 
 
-def convert_to_uppercase(texts):
-    print("Converting letters to uppercase...")
-    new_texts=[]
-    for text in texts:
-        new_text = text.upper()
-        new_texts.append(new_text)
-    return new_texts
-
-
 def write_audit_log(filename, entity_values):
     print("Writing log to " + filename)
     a_file = open(os.getcwd() + "/" + filename, "w")
@@ -403,3 +439,17 @@ def zipC(texts, entity_map, eCount, ids, entity_values):
     print("Redacting zip (Regex)...")
     pattern = regex.compile("""((?<full>(?<part1>[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1})(?:[ ](?=\d))?(?<part2>\d{1}[A-Z]{1}\d{1}))$)|((^|\s{1})(?<zip>(?!00[02-5]|099|213|269|34[358]|353|419|42[89]|51[789]|529|53[36]|552|5[67]8|5[78]9|621|6[348]2|6[46]3|659|69[4-9]|7[034]2|709|715|771|81[789]|8[3469]9|8[4568]8|8[6-9]6|8[68]7|9[02]9|987)\d{5})(\s|\.|$|\-(?<plus4>[0-9]{4})?))""", regex.IGNORECASE)
     return the_redactor(pattern, "ZIP", texts, entity_map, eCount, ids, entity_values, "zip")
+
+
+def zip_voice(texts, entity_map, eCount, ids, entity_values):
+    print(" Redacting voice transcribed zip (Regex)...")
+    pattern = regex.compile("""
+    (?xi)           # free-spacing mode
+    (?(DEFINE)
+        (?<one_to_9>  
+        (?:(one|two|three|four|five|six|seven|eight|nine|0z))
+        ) # end one_to_9 definition
+    )
+    (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+    """, regex.IGNORECASE)
+    return the_redactor(pattern, "ZIP", texts, entity_map, eCount, ids, entity_values)
