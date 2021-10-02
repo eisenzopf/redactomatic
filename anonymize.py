@@ -22,28 +22,25 @@ def adate(texts, entity_map, ids, modality, anon_map, token_map):
     ordinal_days = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty first", "twenty second", "twenty third", "twenty fourth", "twenty fifth", "twenty sixth", "twenty seventh", "twenty eighth"]
 
     def callback(match, i):
-        tag = match.group()
-        this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
         if modality == 'text':
             date = str(random.randrange(1,12)) + "/" + str(random.randrange(1,28))
         else:
             date = random.choice(months) + " " + random.choice(ordinal_days)
-
-        if i not in entity_map:
-            entity_map[i]={}
+        tag = match.group()
+        this_match = re.search('-', tag)
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = date
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = date
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = date
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
         
     this_regex = anon_regex("DATE", anon_map, token_map)
@@ -59,31 +56,29 @@ def address(texts, entity_map, ids, modality, anon_map, token_map):
     df = pd.read_csv(os.getcwd() + '/data/street-names.csv')
 
     def callback(match, i):
-        tag = match.group()
         streets = df['Streets'].sample()
         street = streets.values[0]
-        this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
         if modality == 'text':
             number = str(random.randrange(100,500))
         else:
             number = inflector.number_to_words(random.randrange(100,500))
         address = number + " " + street + " "
 
-        if i not in entity_map:
-            entity_map[i]={}
+        tag = match.group()
+        this_match = re.search('-', tag)
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = address
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = address
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = address
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
     
     this_regex = anon_regex("ADDRESS", anon_map, token_map)
@@ -106,7 +101,7 @@ def anon_regex(type, anon_map, token_map):
     if type in token_map.keys():
         for entity in token_map[type]:
             if counter == 0:
-                this_regex = "\[" + entity + "-\d+\]"
+                this_regex = entity
             else:
                 this_regex = this_regex + "|" + entity
             counter = counter + 1
@@ -120,28 +115,25 @@ def atime(texts, entity_map, ids, modality, anon_map, token_map):
     new_texts = []
     
     def callback(match, i):
-        tag = match.group()
-        this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
         if modality == 'text':
             time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
         else:
             time = str(random.choice(hours)) + " " + str(random.choice(minutes)) + " " + str(random.choice(["AM","PM"]))  
-        
-        if i not in entity_map:
-            entity_map[i]={}
+        tag = match.group()
+        this_match = re.search('-', tag)
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = time
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = time
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = time
-        else:
-            r = entity_map[i][m_id]
-        
-        entity_map[i][m_id] = r
         return r
         
     this_regex = anon_regex("TIME", anon_map, token_map)
@@ -153,10 +145,8 @@ def atime(texts, entity_map, ids, modality, anon_map, token_map):
 
 def cardinal(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing cardinals...")
-
     t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
     v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-
     if modality == 'text':
         cardinal = t_cardinal
     else:
@@ -164,23 +154,22 @@ def cardinal(texts, entity_map, ids, modality, anon_map, token_map):
     
     new_texts = []
     def callback(match, i):
+        this_cardinal = random.choice(cardinal)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = random.choice(cardinal)
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = random.choice(cardinal)
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = this_cardinal
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = this_cardinal
         return r
 
     this_regex = anon_regex("CARDINAL", anon_map, token_map)
@@ -192,38 +181,33 @@ def cardinal(texts, entity_map, ids, modality, anon_map, token_map):
 
 def ccard(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing credit card numbers...")
-
-    ccnumber = ""
-    length = 16
     new_texts = []
 
-    while len(ccnumber) <= (length - 1):
-        digit = str(random.randrange(0,9))
-        ccnumber += digit
-
-    if modality == 'text':
-        ccard = ccnumber
-    else:
-        ccard = digits2words(ccnumber)
-
     def callback(match, i):
+        ccnumber = ""
+        length = 16
+        while len(ccnumber) <= (length - 1):
+            digit = str(random.randrange(0,9))
+            ccnumber += digit
+        if modality == 'text':
+            ccard = str(ccnumber)
+        else:
+            ccard = digits2words(ccnumber)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = ccard
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = ccard
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = ccard
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("CCARD", anon_map, token_map)
@@ -240,23 +224,22 @@ def company(texts, entity_map, ids, anon_map, token_map):
     df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
 
     def callback(match, i):
+        company = df.sample().values[0][0]
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = df.sample().values[0][0]
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = df.sample().values[0][0]
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = company
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = company
         return r
 
     this_regex = anon_regex("ORG", anon_map, token_map)
@@ -279,24 +262,23 @@ def email(texts, entity_map, ids, modality, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
     def callback(match, i):
-        tag = match.group()
         name = df['name'].sample()
+        email = name.values[0] + "@gmail.com"
+        tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = name.values[0] + "@gmail.com"
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = name.values[0] + "@gmail.com"
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = email
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = email
         return r
 
     this_regex = anon_regex("EMAIL", anon_map, token_map)
@@ -311,23 +293,22 @@ def event(texts, entity_map, ids, anon_map, token_map):
     events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
     new_texts = []
     def callback(match, i):
+        event = random.choice(events)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = random.choice(events)
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = random.choice(events)
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = event
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = event
         return r
 
     this_regex = anon_regex("EVENT", anon_map, token_map)
@@ -343,21 +324,19 @@ def fac(texts, entity_map, ids, anon_map, token_map):
     def callback(match, i):
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = ""
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = ""
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = ""
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("FAC", anon_map, token_map)
@@ -372,23 +351,22 @@ def gpe(texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
     def callback(match, i):
+        gpe = df.sample().values[0][0]
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = df.sample().values[0][0]
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = df.sample().values[0][0]
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = gpe
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = gpe
         return r
 
     this_regex = anon_regex("GPE", anon_map, token_map)
@@ -403,23 +381,22 @@ def language(texts, entity_map, ids, anon_map, token_map):
     language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
     new_texts = []
     def callback(match, i):
+        this_language = random.choice(language)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = random.choice(language)
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = random.choice(language)
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = this_language
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = this_language
         return r
 
     this_regex = anon_regex("LANGUAGE", anon_map, token_map)
@@ -435,21 +412,19 @@ def laughter(texts, entity_map, ids, anon_map, token_map):
     def callback(match, i):
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = ""
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = ""
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = ""
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("LAUGHTER", anon_map, token_map)
@@ -465,21 +440,19 @@ def law(texts, entity_map, ids, anon_map, token_map):
     def callback(match, i):
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = ""
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = ""
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = ""
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("LAW", anon_map, token_map)
@@ -495,24 +468,23 @@ def loc(texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/us-area-code-cities.csv')
     def callback(match, i):
-        tag = match.group()
         name = df['city'].sample()
+        loc = name.values[0]
+        tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = name.values[0]
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = name.values[0]
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = loc
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = loc
         return r
 
     this_regex = anon_regex("LOC", anon_map, token_map)
@@ -526,28 +498,25 @@ def money (texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing money...")
     new_texts = []
     def callback(match, i):
-        tag = match.group()
-        this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
         if modality == 'text':
             money = '$' + str(random.randrange(200,500))
         else:
-            money = inflector.number_to_words(random.randrange(200,500)) + " DOLLARS"
-
-        if i not in entity_map:
-            entity_map[i]={}
+            money = inflector.number_to_words(random.randrange(200,500)) + " dollars"
+        tag = match.group()
+        this_match = re.search('-', tag)
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = money
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = money
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = money
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("MONEY", anon_map, token_map)
@@ -562,24 +531,23 @@ def norp (texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
     def callback(match, i):
-        tag = match.group()
         name = df['Nationality'].sample()
+        norp = name.values[0]
+        tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = name.values[0]
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = name.values[0]
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = norp
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = norp
         return r
 
     this_regex = anon_regex("NORP", anon_map, token_map)
@@ -601,23 +569,22 @@ def ordinal (texts, entity_map, ids, modality, anon_map, token_map):
     
     new_texts = []
     def callback(match, i):
+        number = random.choice(ordinal)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = random.choice(ordinal)
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = random.choice(ordinal)
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = number
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = number
         return r
 
     this_regex = anon_regex("ORDINAL", anon_map, token_map)
@@ -629,31 +596,27 @@ def ordinal (texts, entity_map, ids, modality, anon_map, token_map):
 
 def perc (texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing cardinals...")
-
-    if modality == 'text':
-        perc = str(random.randrange(1,100)) + "%"
-    else:
-        perc = inflector.number_to_words(str(random.randrange(1,100))) + " PERCENT"
-
     new_texts = []
     def callback(match, i):
+        if modality == 'text':
+            perc = str(random.randrange(1,100)) + "%"
+        else:
+            perc = inflector.number_to_words(str(random.randrange(1,100))) + " PERCENT"
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = perc
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = perc
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = perc
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("PERCENT", anon_map, token_map)
@@ -670,21 +633,19 @@ def person (texts, entity_map, ids, df, anon_map, token_map):
         tag = match.group()
         name = str(df['name'].sample().values[0])
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = name
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = name
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = name
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("PERSON", anon_map, token_map)
@@ -696,36 +657,31 @@ def person (texts, entity_map, ids, df, anon_map, token_map):
 
 def phone(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing phone numbers...")
-
-    area_code = str(random.randrange(200,999))
-    exchange = str(random.randrange(200,999))
-    number = str(random.randrange(1000,9999))
-
-    if modality == 'text':
-        phone = area_code + "-" + exchange + "-" + number
-    else:
-        phone = digits2words(str(area_code + exchange + number))
-    
     new_texts = []
 
     def callback(match, i):
+        area_code = str(random.randrange(200,999))
+        exchange = str(random.randrange(200,999))
+        number = str(random.randrange(1000,9999))
+        if modality == 'text':
+            phone = area_code + "-" + exchange + "-" + number
+        else:
+            phone = digits2words(str(area_code + exchange + number))
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = phone
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = phone
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = phone
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("PHONE", anon_map, token_map)
@@ -738,34 +694,31 @@ def phone(texts, entity_map, ids, modality, anon_map, token_map):
 
 def pin(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing PIN numbers...")
-    rand_4d = str(random.randrange(1000,9999))
-
-    if modality == 'voice':
-        pin = digits2words(str(rand_4d))
-    
     new_texts = []
 
     def callback(match, i):
+        rand_4d = str(random.randrange(1000,9999))
+        if modality == 'voice':
+            pin = digits2words(str(rand_4d))
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = pin
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = pin
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = pin
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("PIN", anon_map, token_map)
+    print("PIN regex is " + this_regex)
 
     for text,id in zip(texts,ids):
         new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
@@ -778,23 +731,22 @@ def product(texts, entity_map, ids, anon_map, token_map):
     product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
     new_texts = []
     def callback(match, i):
+        this_product = random.choice(product)
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = random.choice(product)
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = random.choice(product)
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = this_product
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = this_product
         return r
 
     this_regex = anon_regex("PRODUCT", anon_map, token_map)
@@ -808,23 +760,22 @@ def quantity(texts, entity_map, ids, anon_map, token_map):
     print("Anonymizing quantities...")
     new_texts = []
     def callback(match, i):
+        quantity = str(random.randrange(1000,9999))
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = str(random.randrange(1000,9999))
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = str(random.randrange(1000,9999))
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = quantity
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = quantity
         return r
 
     this_regex = anon_regex("QUANTITY", anon_map, token_map)
@@ -836,36 +787,31 @@ def quantity(texts, entity_map, ids, anon_map, token_map):
 
 def ssn(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing Social Security numbers...")
-
-    first = str(random.randrange(200,999))
-    second = str(random.randrange(10,99))
-    third = str(random.randrange(1000,9999))
-
-    if modality == 'text':
-        ssn = first + "-" + second + "-" + third
-    else:
-        ssn = digits2words(str(first + second + third))
-
     new_texts = []
 
     def callback(match, i):
+        first = str(random.randrange(200,999))
+        second = str(random.randrange(10,99))
+        third = str(random.randrange(1000,9999))
+        if modality == 'text':
+            ssn = first + "-" + second + "-" + third
+        else:
+            ssn = digits2words(str(first + second + third))
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = ssn
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = ssn
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = ssn
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
         return r
 
     this_regex = anon_regex("SSN", anon_map, token_map)
@@ -879,27 +825,25 @@ def work_of_art(texts, entity_map, ids, anon_map, token_map):
     print("Anonymizing works of art...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
+
     def callback(match, i):
+        work = str(df['Title'].sample().values[0])
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
-            r = str(df['Title'].sample().values[0])
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = str(df['Title'].sample().values[0])
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = work
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
+            r = work
         return r
-    def callback(match,i):
-        return str(df['Title'].sample().values[0])
 
     this_regex = anon_regex("WORK_OF_ART", anon_map, token_map)
     for text,id in zip(texts,ids):
@@ -910,37 +854,32 @@ def work_of_art(texts, entity_map, ids, anon_map, token_map):
 
 def zipC(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing zip codes...")
-
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/zip_code_database.csv')
 
-    if modality == 'text':
-        zipC = df['zip'].sample().values[0]
-    else:
-        zipC = digits2words(str(df['zip'].sample().values[0]))
-
     def callback(match, i):
+        if modality == 'text':
+            zipC = str(df['zip'].sample().values[0])
+        else:
+            zipC = digits2words(str(df['zip'].sample().values[0]))
         tag = match.group()
         this_match = re.search('-', tag)
-        if this_match:
-            m_id = int(tag[tag.rindex('-')+1:-1])
-        else:
-            m_id = 0
-
-        if i not in entity_map:
-            entity_map[i]={}
+        if this_match:   # handling for ENTITY-dddd tags
+            m_id = int(tag[tag.rindex('-')+1:-1])   # create entity_map if we are anonymizing a previously redacted file 
+            if i not in entity_map:
+                entity_map[i]={}
+            if m_id not in entity_map[i]:
+                entity_map[i][m_id]={}
+            if bool(entity_map[i][m_id]):    # if we have an existing value in the entity_map, use it, otherwise use a new one and save it to the entity_map for context
+                r = entity_map[i][m_id]
+            else:
+                r = zipC
+                entity_map[i][m_id] = r
+        else:   # for token mapped tags, we don't care about the entity_map, just randomize a value
             r = zipC
-        elif m_id not in entity_map[i]:
-            entity_map[i][m_id]={}
-            r = zipC
-        else:
-            r = entity_map[i][m_id]
-
-        entity_map[i][m_id] = r
-        return str(r)
+        return r
 
     this_regex = anon_regex("ZIP", anon_map, token_map)
-
     for text,id in zip(texts,ids):
         new_text = re.sub(this_regex, lambda x: callback(x,id), text)
         new_texts.append(new_text)

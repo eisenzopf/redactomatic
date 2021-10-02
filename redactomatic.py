@@ -54,7 +54,7 @@ def main():
             if redactor == "CCARD" and "CCARD" in entities: texts, entity_map, curr_id, entity_values = redact.ccard(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
             if redactor == "ADDRESS" and "ADDRESS" in entities: texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
             if redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-            if args.modality == 'voice' and redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
+            if args.modality == 'voice' and redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.zip_voice(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
             if redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
             if args.modality == 'voice' and redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.phone_voice(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
             if redactor == "EMAIL" and "EMAIL" in entities: texts, entity_map, curr_id, entity_values = redact.email(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-yes

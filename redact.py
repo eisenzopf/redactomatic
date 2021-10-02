@@ -10,7 +10,7 @@ import numpy as np
 
 
 def config_args(): # add --anonymize
-    parser = argparse.ArgumentParser(description='Redactomatic v1.5. Redact call transcriptions or chat logs.')
+    parser = argparse.ArgumentParser(description='Redactomatic v1.6. Redact call transcriptions or chat logs.')
     parser.add_argument('--column', type=int, required=True, help='the CSV column number containing the text to redact.')
     parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
@@ -62,6 +62,20 @@ def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values, 
         new_texts.append(newString)
     return new_texts, entity_map, eCount, entity_values
 
+def update_entities(name, d_id, emap, c):
+    if d_id not in emap:
+        emap[d_id]={}
+    if name not in emap[d_id]: #more robust way?
+        emap[d_id][name] = c
+    else:
+        c = emap[d_id][name]
+    return emap, c
+
+
+def update_entity_values(id,value,entity_values):
+    if id not in entity_values:
+        entity_values[id] = value
+    return entity_values
 
 def ner_ml(texts, entity_map, eCount, ids, entity_values, args, entities):
     print("Redacting named entities (ML)...")
@@ -190,7 +204,7 @@ def cardinal(texts, entity_map, eCount, ids, entity_values):
 def ccard(texts, entity_map, eCount, ids, entity_values):
     print("Redacting credit card (Regex)...")
     pattern = regex.compile("""(?:\d[ -]*?){13,16}""", regex.IGNORECASE)
-    return the_redactor(pattern, "CARD_NUMBER", texts, entity_map, eCount, ids, entity_values)
+    return the_redactor(pattern, "CCARD", texts, entity_map, eCount, ids, entity_values)
 
 
 def clean(texts):
@@ -357,7 +371,7 @@ def phone_voice(texts, entity_map, eCount, ids, entity_values):
     (?xi)           # free-spacing mode
     (?(DEFINE)
         (?<one_to_9>  
-        (?:(one|two|three|four|five|six|seven|eight|nine|0z))
+        (?:(one|two|three|four|five|six|seven|eight|nine|0z|oh))
         ) # end one_to_9 definition
     )
     (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)[\s,]{1,2}
@@ -368,13 +382,13 @@ def phone_voice(texts, entity_map, eCount, ids, entity_values):
 
 
 def pin(texts, entity_map, eCount, ids, entity_values):
-    print(" Redacting pin (Regex)...")
+    print("Redacting pin (Regex)...")
     pattern = regex.compile("""(^|\s)(?:(\d{4}))\s*?""", regex.IGNORECASE)
     return the_redactor(pattern, "PIN", texts, entity_map, eCount, ids, entity_values)
 
 
 def pin_voice(texts, entity_map, eCount, ids, entity_values):
-    print(" Redacting voice transcribed pin (Regex)...")
+    print("Redacting voice transcribed pin (Regex)...")
     pattern = regex.compile("""
     (?xi)           # free-spacing mode
     (?(DEFINE)
@@ -408,22 +422,6 @@ def ssn(texts, entity_map, eCount, ids, entity_values):
     print("Redacting SSN (Regex)...")
     pattern = regex.compile("""(^|\s)(?<ssn>(?!000|666)[0-8][0-9]{2}(-|\s)?(?!00)[0-9]{2}(-|\s)?(?!0000)[0-9]{4})(\s|$|\.)""", regex.IGNORECASE)
     return the_redactor(pattern, "SSN", texts, entity_map, eCount, ids, entity_values,"ssn")
-
-
-def update_entities(name, d_id, emap, c):
-    if d_id not in emap:
-        emap[d_id]={}
-    if name not in emap[d_id]: #more robust way?
-        emap[d_id][name] = c
-    else:
-        c = emap[d_id][name]
-    return emap, c
-
-
-def update_entity_values(id,value,entity_values):
-    if id not in entity_values:
-        entity_values[id] = value
-    return entity_values
 
 
 def write_audit_log(filename, entity_values):

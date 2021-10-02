@@ -111,7 +111,9 @@
         "PIN": [ "PIN" ]
     },
     "token-map": {
-        "ZIP": [ "<ZIP/>" ],
-        "PIN": [ "<PIN/>" ]
+        "ZIP": [ "<ZIP\/>" ],
+        "PIN": [ "<PIN\/>", "<CVV\/>" ],
+        "CCARD": [ "<ccNum\/>" ],
+        "DATE": [ "<expDate\/>" ]
     }
 }
