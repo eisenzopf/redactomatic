@@ -700,6 +700,8 @@ def pin(texts, entity_map, ids, modality, anon_map, token_map):
         rand_4d = str(random.randrange(1000,9999))
         if modality == 'voice':
             pin = digits2words(str(rand_4d))
+        else:
+            pin = rand_4d
         tag = match.group()
         this_match = re.search('-', tag)
         if this_match:   # handling for ENTITY-dddd tags
@@ -718,8 +720,6 @@ def pin(texts, entity_map, ids, modality, anon_map, token_map):
         return r
 
     this_regex = anon_regex("PIN", anon_map, token_map)
-    print("PIN regex is " + this_regex)
-
     for text,id in zip(texts,ids):
         new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
         new_texts.append(new_text)

@@ -22,7 +22,7 @@
 1011432,Agent,2019-08-11 00:01:20,And the CV code?
 1011432,Client,2019-08-11 00:01:25,What is that?
 1011432,Agent,2019-08-11 00:01:30,It's a three digit number usually on the back of your debit card next to the signature strip.
-1011432,Client,2019-08-11 00:01:31,Oh ok. It's 412
+1011432,Client,2019-08-11 00:01:31,Oh ok. It's <CVV/> or 412 
 1011432,Agent,2019-08-11 00:01:32,When did you want the payment to process?
 1011432,Client,2019-08-11 00:01:33,Can you make the payment process tomorrow please?
 1011432,Agent,2019-08-11 00:01:36,Do I have your authorization to run your debit card in the amount of $500?
@@ -30,11 +30,11 @@
 1011432,Agent,2019-08-11 00:02:10,Ok one moment please while I run your debit card.
 1011432,Client,2019-08-11 00:02:30,Ok
 1011432,Agent,2019-08-11 00:03:42,The system is telling me that it needs your physical address associated with the card.
-1011432,Client,2019-08-11 00:04:25,Ok. It's 413 main street in Deluth GA in the United States. The zip is 55812.
+1011432,Client,2019-08-11 00:04:25,Ok. It's 413 main street in Deluth GA in the United States. The zip is 55812 or <ZIP/>.
 1011432,Agent,2019-08-11 00:05:30,I also need a phone number associated with the account.
 1011432,Client,2019-08-11 00:06:35,It’s probably my cell phone. That's 218-730-4300. It could also be my land line which is 591-268-5591
 1011432,Agent,2019-08-11 00:06:50,And what is your four digit PIN code?
-1011432,Client,2019-08-11 00:06:51,I believe it's 1168
+1011432,Client,2019-08-11 00:06:51,I believe it's <PIN/>. Or it could be 1168
 1011432,Agent,2019-08-11 00:06:50,Thank you for that information. I will try running the transaction again.
 1011432,Client,2019-08-11 00:07:12,Ok thanks.
 1011432,Agent,2019-08-11 00:08:15,The payment was successful. You should get an email confirmation that a payment in the amount of $500 was made on August 11th at 11:59 AM. Is there anything else I can help you with?

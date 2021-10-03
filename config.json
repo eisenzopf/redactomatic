@@ -79,9 +79,9 @@
     "anon-map": {
         "ADDRESS": [ "ADDRESS", "streetAddress" ],
         "CARDINAL": [ "CARDINAL", "DIGITS", "digits" ],
-        "CCARD": [ "CCARD", "creditCardNumber" ],
+        "CCARD": [ "CCARD", "creditCardNumber", "ccNum" ],
         "CREDENTIALS": [ "credentials" ],
-        "DATE": [ "DATE" ],
+        "DATE": [ "DATE", "expDate" ],
         "EMAIL": [ "EMAIL", "EMAIL_ADDRESS", "emailAddress" ],
         "EVENT": [ "EVENT" ],
         "FAC": [ "FAC" ],
@@ -112,7 +112,7 @@
     },
     "token-map": {
         "ZIP": [ "<ZIP\/>" ],
-        "PIN": [ "<PIN\/>", "<CVV\/>" ],
+        "PIN": [ "\\<PIN\\/\\>", "\\<CVV\\/\\>" ],
         "CCARD": [ "<ccNum\/>" ],
         "DATE": [ "<expDate\/>" ]
     }
