@@ -23,6 +23,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
     parser.add_argument('--level', type=int, required=False, help='sets the redaction level (1-3); default is 2')
     parser.add_argument('--noredaction', action='store_true', help='turn off redaction')
+    parser.add_argument('--seed', type=int, required=False, help='a seed value for anonymization random selection; default is None i.e. truly random.',default=None)
     return parser.parse_args()
 
 

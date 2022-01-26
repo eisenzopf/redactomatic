@@ -78,8 +78,7 @@ def address(texts, entity_map, ids, modality, anon_map, token_map):
     df = pd.read_csv(os.getcwd() + '/data/street-names.csv')
 
     def callback(match, i):
-        streets = df['Streets'].sample()
-        street = streets.values[0]
+        street = str(random.choice(df['Streets']))
         if modality == 'text':
             number = str(random.randrange(100,500))
         else:
@@ -170,7 +169,7 @@ def company(texts, entity_map, ids, anon_map, token_map):
     df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
 
     def callback(match, i):
-        company = df.sample().values[0][0]
+        company = str(random.choice(df['Company']))
         tag = match.group()
         return persist_entity_value(i,tag,company,entity_map)
 
@@ -194,8 +193,9 @@ def email(texts, entity_map, ids, modality, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
     def callback(match, i):
-        name = df['name'].sample()
-        email = name.values[0] + "@gmail.com"
+        name = str(random.choice(df['name']))
+
+        email = name + "@gmail.com"
         tag = match.group()
         return persist_entity_value(i,tag,email,entity_map)
 
@@ -241,7 +241,7 @@ def gpe(texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
     def callback(match, i):
-        gpe = df.sample().values[0][0]
+        gpe = str(random.choice(df. iloc[:, 0]))
         tag = match.group()
         return persist_entity_value(i,tag,gpe,entity_map)
 
@@ -303,8 +303,7 @@ def loc(texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/us-area-code-cities.csv')
     def callback(match, i):
-        name = df['city'].sample()
-        loc = name.values[0]
+        loc = str(random.choice(df['city']))
         tag = match.group()
         return persist_entity_value(i,tag,loc,entity_map)
 
@@ -338,10 +337,9 @@ def norp (texts, entity_map, ids, anon_map, token_map):
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
     def callback(match, i):
-        name = df['Nationality'].sample()
-        norp = name.values[0]
+        norp = str(random.choice(df['Nationality']))
         tag = match.group()
-        return persist_entity_value(i,tag,name,entity_map)
+        return persist_entity_value(i,tag,norp,entity_map)
 
     this_regex = anon_regex("NORP", anon_map, token_map)
     for text,id in zip(texts,ids):
@@ -392,10 +390,12 @@ def perc (texts, entity_map, ids, modality, anon_map, token_map):
 
 def person (texts, entity_map, ids, df, anon_map, token_map):
     print("Anonymizing names (people)...")
+    df.sample(random_state=1)
+
     new_texts = []
     def callback(match, i):
         tag = match.group()
-        name = str(df['name'].sample().values[0])
+        name = str(random.choice(df['name']))
         return persist_entity_value(i,tag,name,entity_map)
 
     this_regex = anon_regex("PERSON", anon_map, token_map)
@@ -507,7 +507,7 @@ def work_of_art(texts, entity_map, ids, anon_map, token_map):
     df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
 
     def callback(match, i):
-        work = str(df['Title'].sample().values[0])
+        work = str(random.choice(df['Title']))
         tag = match.group()
         return persist_entity_value(i,tag,work,entity_map)
 
@@ -525,9 +525,9 @@ def zipC(texts, entity_map, ids, modality, anon_map, token_map):
 
     def callback(match, i):
         if modality == 'text':
-            zipC = str(df['zip'].sample().values[0])
+            zipC = str(random.choice(df['zip']))
         else:
-            zipC = digits2words(str(df['zip'].sample().values[0]))
+            zipC = digits2words(str(random.choice(df['zip'])))
         tag = match.group()
         return persist_entity_value(i,tag,zipC,entity_map)
 

@@ -4,6 +4,7 @@ import entity_map as em
 import pandas as pd
 import numpy as np
 import os
+import random
 
 def main():
     #initialize entity map
@@ -73,10 +74,15 @@ def main():
     # anonymize if flag was passed
     entity_map=em.EntityMap()
     if args.anonymize:
-        if "ADDRESS" in entities: texts, entity_map = anonymize.address(texts, entity_map, ids, args.modality, anon_map, token_map) # text-yes, voice=yes
-        if "CCARD" in entities: texts, entity_map = anonymize.ccard(texts, entity_map, ids, args.modality, anon_map, token_map) # text-yes, voice=yes
-        if "PHONE" in entities: texts, entity_map = anonymize.phone(texts, entity_map, ids, args.modality, anon_map, token_map) # text-yes, voice=yes
-        #if "CARDINAL" in entities: texts, entity_map = anonymize.cardinal(texts, entity_map, ids, args.modality, anon_map, token_map) # text-yes, voice=yes
+        #Seed the random number generator if determinism is required
+        if (args.seed is not None):
+            print("Using fixed random seed: ",args.seed)
+            random.seed(args.seed)
+
+        if "ADDRESS" in entities: texts, entity_map = anonymize.address(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
+        if "CCARD" in entities: texts, entity_map = anonymize.ccard(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
+        if "PHONE" in entities: texts, entity_map = anonymize.phone(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
+        #if "CARDINAL" in entities: texts, entity_map = anonymize.cardinal(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-no, voice=no   
         if "ORDINAL" in entities: texts, entity_map = anonymize.ordinal(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
         if "ZIP" in entities: texts, entity_map = anonymize.zipC(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
         if "ORG" in entities: texts, entity_map = anonymize.company(texts, entity_map, ids, anon_map, token_map) # chats-yes, voice=yes
