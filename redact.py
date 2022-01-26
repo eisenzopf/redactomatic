@@ -7,6 +7,7 @@ import spacy
 import regex
 import pandas as pd
 import numpy as np
+import entity_map as em
 
 
 def config_args(): # add --anonymize
@@ -39,12 +40,22 @@ def df_load_files(args):
 
 
 #Tracking ID-TEXT connection, find match to pattern of type label; keeping entities map updated
+# pattern: the regex used to match the target entity.
+# label: contains IGNORE,ADDRESS,CCARD,EMAIL,PHONE,PIN,SSN,ZIP
+# texts : an array of texts to be redacted
+# entity_map : a map to keep track of indexes assoigned to redacted words to enable restoration of consitent anonymized words later.
+# eCount : a unique entity key, ready for the next discovered entity
+# ids: an array of conversation-ids (aligns with the texts in length and content)
+# entity_values: a dictionary to keep the substituted entity values keyed by their substituted labels (e.g. ) entity_values["PIN-45"=1234]
+# group:  contains the target match group for the regex. By default the whole match is used but this can be a named match (e.g. group='zip')
+
 def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values, group=1):
     new_texts = []
     for text, d_id in zip(texts,ids):
         matches = list(pattern.finditer(text))
         newString = text
         for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
+            #name=entity-text found by pattern
             if group != 1 and e.captures(group):
                     name = e.captures(group)[0]
                     start = e.span(group)[0]
@@ -53,7 +64,7 @@ def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values, 
                 start = e.span()[0]
 
             if not (label == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
-                entity_map, c = update_entities(name,d_id,entity_map,eCount)
+                c = entity_map.update_entities(name,d_id,eCount,label)
                 end = start + len(name)
                 newLabel = label+ "-"+str(c)
                 newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
@@ -61,16 +72,6 @@ def the_redactor(pattern, label, texts, entity_map, eCount, ids, entity_values, 
                 eCount += 1
         new_texts.append(newString)
     return new_texts, entity_map, eCount, entity_values
-
-def update_entities(name, d_id, emap, c):
-    if d_id not in emap:
-        emap[d_id]={}
-    if name not in emap[d_id]: #more robust way?
-        emap[d_id][name] = c
-    else:
-        c = emap[d_id][name]
-    return emap, c
-
 
 def update_entity_values(id,value,entity_values):
     if id not in entity_values:
@@ -102,11 +103,11 @@ def ner_ml(texts, entity_map, eCount, ids, entity_values, args, entities):
                         name = n
                         start = e.start_char + sum([len(w)+1 for w in broken[:i]])
                         end = start + len(name)
-                        entity_map, c = update_entities(name,d_id,entity_map,eCount)
+                        c = entity_map.update_entities(name,d_id,eCount,e.label_)
                         newString = newString[:start] + " [" + e.label_ +"-"+ str(c) + "]" + newString[end:]
                         eCount += 1
                 else:
-                    entity_map, c = update_entities(name,d_id,entity_map,eCount)
+                    c = entity_map.update_entities(name,d_id,eCount,e.label_)
                     start = e.start_char
                     end = start + len(name)
                     newLabel = e.label_ +"-"+ str(c)
