@@ -36,6 +36,26 @@ sh setup.sh
 
 This will install required Python libraries and download the small (en_core_web_sm) and large (en_core_web_lg) Spacy models.
 
+## Test
+
+To test the new installation run:
+
+```sh
+sh test.sh
+```
+
+This should report a number of clean test results as shown below:
+
+```Is the text redaction log correct?: True
+Is the redacted text output file correct?: True
+Is the redacted and anonymized text output file correct?: True
+Is the voice redaction log correct?: True
+Is the redacted voice output file correct?: True
+Is the redacted and anonymized voice output file correct?: True
+Is the anonymized text output file correct?: True
+Is the anonymized voice output file correct?: True
+```
+
 ## Hardware Requirements
 
 By default, Redactomatic will use the Spacy small ML model. However, if you plan to use the large model via the *--large* command line flag, be sure that the machine is utilizing a GPU capable of running large Transformer models. Also, you will need memory at least four times as large as the input data file. You can reduce this requirement by breaking up input files into smaller pieces and including each of them with the *--inputfile* flag.
@@ -45,7 +65,7 @@ By default, Redactomatic will use the Spacy small ML model. However, if you plan
 Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (--modality which must be voice or text), and 3. the column in the CSV containing the text to redact (--column), the column containing the conversation ID (--idcolumn).
 
 ```sh
-usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE]
+usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]
 ```
 
 ### Command Line Parameters
@@ -63,6 +83,7 @@ usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTF
 | uppercase | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no |
 | level | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean. | no |
 | noredaction | If included, will ignore the redaction pass and only anonymize recognized redaction tags. | no |
+| seed | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results. | No |
 
 ### Example 1: Redact a text file
 
@@ -157,6 +178,8 @@ The following entities are supported by Redactomatic. The Spacy [English NER mod
 
 The [data/](data/) directory contains a number of files that are used to anonymize recognized entities. As additional entity types are added for different geographies and languages, the number and size of files will grow. Please see the [data file README](data/README.md) for more information.
 
+The [test/](test/) directory contains a number of files that are used to verify the test results (see the Test section). These files are not neccessary to the operation of Redactomatic.
+
 ## License
 
 Please see the [LICENSE](LICENSE)
@@ -168,6 +191,14 @@ for inclusion in the work by you, as defined in the MIT license, shall
 be licensed as above, without any additional terms or conditions.
 
 Please see the [Contribution Guidelines](CONTRIBUTING.md).
+
+## Known Issues
+
+The anonmymization of **[CARDINAL]** is not complete.  This tag is not anonymized.
+
+The following entity types are referenced in the *anon-map* section in *config.json* but are not yet implemented for redaction or anonymization: **[CREDENTIALS]**, **[IPADDRESS]**, **[PASSWORD]**, **[URL]**, **[USERNAME]**.  
+
+Implementations for these will be welcomed from contributors.
 
 ## Authors
 
@@ -181,3 +212,4 @@ Copyright 2021, Jonathan Eisenzopf, All rights reserved.
 
 Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes.
 Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
+Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring and submitting bug fixes.
