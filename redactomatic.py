@@ -1,6 +1,7 @@
 import redact
 import anonymize
 import entity_map as em
+import entity_rules as er
 import pandas as pd
 import numpy as np
 import os
@@ -72,29 +73,39 @@ def main():
     # load data into a Pandas Dataframe
     df, texts, ids = df_load_files(args)
 
+    #Load the rules files. Use data/core-defs.yml if no rules files are given.
+    entity_rules = er.EntityRules()
+    for file in args.rulefile or ['data/core-defs.yml']:
+        print("Loading rulefile " + file + "...")
+        entity_rules.load_rulefile_yaml(file)
+
     # first pass replaces text phrases that should be ignored and stored them in entity_values
     texts, entity_map, curr_id, entity_values  = redact.ignore_phrases(texts, entity_map, curr_id, ids, entity_values)
 
     if args.noredaction:
         pass
     else:
+        if not "#SPACY#" in redaction_order:
+            #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
+            redaction_order.append("#SPACY#")
+        
         for redactor in redaction_order:
-        # redact specified column with regex methods, for chat and NOT voice
-            if redactor == "SSN" and "SSN" in entities: texts, entity_map, curr_id, entity_values = redact.ssn(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-            if redactor == "CCARD" and "CCARD" in entities: texts, entity_map, curr_id, entity_values = redact.ccard(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-            if redactor == "ADDRESS" and "ADDRESS" in entities: texts, entity_map, curr_id, entity_values = redact.address(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-            if redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.zipC(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-            if args.modality == 'voice' and redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.zip_voice(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
-            if redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.phone(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-            if args.modality == 'voice' and redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.phone_voice(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
-            if redactor == "EMAIL" and "EMAIL" in entities: texts, entity_map, curr_id, entity_values = redact.email(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-yes
-            if redactor == "ORDINAL" and "ORDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.ordinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
-            if redactor == "CARDINAL" and "CARDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.cardinal(texts, entity_map, curr_id, ids, entity_values) # voice-yes, chat-yes
-            if redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.pin(texts, entity_map, curr_id, ids, entity_values) # chat-yes, voice-no
-            if args.modality == 'voice' and redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.pin_voice(texts, entity_map, curr_id, ids, entity_values) # chat-no, voice-yes
-
-        # redact specified column with Spacy Entities
-        texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args, entities)
+            # redact specified column with regex methods, for chat and NOT voice
+            if redactor == "SSN" and "SSN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"SSN", "ssn", "ssn") # chat-yes, voice-no
+            if redactor == "CCARD" and "CCARD" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules, "CCARD","ccard") # chat-yes, voice-no
+            if redactor == "ADDRESS" and "ADDRESS" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ADDRESS","address") # chat-yes, voice-no
+            if redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ZIP","zip-text","zip") # chat-yes, voice-no supports US zip+4 and Canadian postal codes
+            if args.modality == 'voice' and redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ZIP","zip-voice") # chat-no, voice-yes
+            if redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PHONE","phone-text") # chat-yes, voice-no
+            if args.modality == 'voice' and redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PHONE","phone-voice") # chat-no, voice-yes
+            if redactor == "EMAIL" and "EMAIL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"EMAIL","email") # chat-yes, voice-yes
+            if redactor == "ORDINAL" and "ORDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ORDINAL","ordinal") # voice-yes, chat-yes
+            if redactor == "CARDINAL" and "CARDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"CARDINAL","cardinal") # voice-yes, chat-yes
+            if redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PIN","pin-text") # chat-yes, voice-no
+            if args.modality == 'voice' and redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PIN","pin-voice") # chat-no, voice-yes
+            
+            #SPACY is not an entity so always run it and pass the entities to it so that it can decide what to add itself.
+            if redactor == "#SPACY#": texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args, entities)
 
     #Put the text back that we do not want to allow to be redacted
     texts = redact.replace_ignore(texts,entity_values)
