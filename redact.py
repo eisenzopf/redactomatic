@@ -1,4 +1,3 @@
-import argparse
 import csv
 import json
 import os
@@ -8,37 +7,6 @@ import regex
 import pandas as pd
 import numpy as np
 import entity_map as em
-
-
-def config_args(): # add --anonymize
-    parser = argparse.ArgumentParser(description='Redactomatic v1.6. Redact call transcriptions or chat logs.')
-    parser.add_argument('--column', type=int, required=True, help='the CSV column number containing the text to redact.')
-    parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
-    parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
-    parser.add_argument('--outputfile', required=True, help='CSV output files')
-    parser.add_argument('--modality', required=True, help='the modality of the input file(s), either text or voice')
-    parser.add_argument('--anonymize', action='store_true', help='include to anonymize redacted data')
-    parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
-    parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
-    parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
-    parser.add_argument('--level', type=int, required=False, help='sets the redaction level (1-3); default is 2')
-    parser.add_argument('--noredaction', action='store_true', help='turn off redaction')
-    parser.add_argument('--seed', type=int, required=False, help='a seed value for anonymization random selection; default is None i.e. truly random.',default=None)
-    return parser.parse_args()
-
-
-def df_load_files(args):
-    dfs = []
-    for file in args.inputfile:
-        print("Loading " + file + "...")
-        dfs.append(pd.read_csv(file))
-    df = pd.concat(dfs, ignore_index=True)
-    df.iloc[:, args.column-1].replace('', np.nan, inplace=True)
-    df.dropna(axis='index',subset=[df.columns[args.column-1]], inplace=True)
-    texts = df.iloc[:, args.column-1].tolist()
-    ids = df.iloc[:, args.idcolumn-1].tolist()
-    return df, texts, ids
-
 
 #Tracking ID-TEXT connection, find match to pattern of type label; keeping entities map updated
 # pattern: the regex used to match the target entity.

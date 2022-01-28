@@ -163,7 +163,7 @@ def ccard(texts, entity_map, ids, modality, anon_map, token_map):
     return new_texts, entity_map
 
 
-def company(texts, entity_map, ids, anon_map, token_map):
+def company(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing names (organizations)...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
@@ -206,7 +206,7 @@ def email(texts, entity_map, ids, modality, anon_map, token_map):
     return new_texts, entity_map
 
 
-def event(texts, entity_map, ids, anon_map, token_map):
+def event(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing events...")
     events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
     new_texts = []
@@ -222,7 +222,7 @@ def event(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def fac(texts, entity_map, ids, anon_map, token_map):
+def fac(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing facility names...")
     new_texts = []
     def callback(match, i):
@@ -236,7 +236,7 @@ def fac(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def gpe(texts, entity_map, ids, anon_map, token_map):
+def gpe(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing country, city, state...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
@@ -252,7 +252,7 @@ def gpe(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def language(texts, entity_map, ids, anon_map, token_map):
+def language(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing language...")
     language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
     new_texts = []
@@ -268,7 +268,7 @@ def language(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def laughter(texts, entity_map, ids, anon_map, token_map):
+def laughter(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing laughter...")
     new_texts = []
     def callback(match, i):
@@ -282,7 +282,7 @@ def laughter(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def law(texts, entity_map, ids, anon_map, token_map):
+def law(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing law...")
     new_texts = []
     def callback(match, i):
@@ -297,7 +297,7 @@ def law(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def loc(texts, entity_map, ids, anon_map, token_map):
+def loc(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing loc...")
     # us-area-code-cities
     new_texts = []
@@ -332,7 +332,7 @@ def money (texts, entity_map, ids, modality, anon_map, token_map):
     return new_texts, entity_map
 
 
-def norp (texts, entity_map, ids, anon_map, token_map):
+def norp (texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing NORPs (nationality, religious or political organizations)...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
@@ -388,11 +388,11 @@ def perc (texts, entity_map, ids, modality, anon_map, token_map):
         new_texts.append(new_text)
     return new_texts, entity_map
 
-def person (texts, entity_map, ids, df, anon_map, token_map):
+def person (texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing names (people)...")
-    df.sample(random_state=1)
-
     new_texts = []
+    df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
+
     def callback(match, i):
         tag = match.group()
         name = str(random.choice(df['name']))
@@ -448,7 +448,7 @@ def pin(texts, entity_map, ids, modality, anon_map, token_map):
     return new_texts, entity_map
 
 
-def product(texts, entity_map, ids, anon_map, token_map):
+def product(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing products...")
     product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
     new_texts = []
@@ -464,7 +464,7 @@ def product(texts, entity_map, ids, anon_map, token_map):
     return new_texts, entity_map
 
 
-def quantity(texts, entity_map, ids, anon_map, token_map):
+def quantity(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing quantities...")
     new_texts = []
     def callback(match, i):
@@ -501,7 +501,7 @@ def ssn(texts, entity_map, ids, modality, anon_map, token_map):
     return new_texts, entity_map
 
 
-def work_of_art(texts, entity_map, ids, anon_map, token_map):
+def work_of_art(texts, entity_map, ids, modality, anon_map, token_map):
     print("Anonymizing works of art...")
     new_texts = []
     df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
