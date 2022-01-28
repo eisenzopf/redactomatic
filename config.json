@@ -73,6 +73,7 @@
         "TIME",
         "WORK_OF_ART",
         "PIN",
+        "#SPACY#",
         "ORDINAL",
         "CARDINAL"
     ],
@@ -112,7 +113,7 @@
     },
     "token-map": {
         "ZIP": [ "<ZIP\/>" ],
-        "PIN": [ "\\<PIN\\/\\>", "\\<CVV\\/\\>" ],
+        "PIN": [ "<PIN\/>", "<CVV\/>" ],
         "CCARD": [ "<ccNum\/>" ],
         "DATE": [ "<expDate\/>" ]
     }

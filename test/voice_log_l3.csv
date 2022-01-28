@@ -1,0 +1,36 @@
+IGNORE-0,first and
+IGNORE-1,today
+IGNORE-2,CV
+IGNORE-4,tomorrow
+PHONE-5, one two four nine eight seven four six two three
+PHONE-6," five nine one, two six eight, five five nine one"
+PHONE-7, two one eight seven three oh four three oh oh
+ZIP-8, two three four two three
+ZIP-9, nine eight seven six five
+ZIP-10, five five eight one two
+EMAIL-11,eisen@discourse.ai
+PIN-12, two three four three
+PIN-13, one one six eight
+ORG-14,General Corporation
+PERSON-16,David
+ORDINAL-18,first
+MONEY-19,three cents
+MONEY-20,Five hundred dollars
+ORG-21,Wells Fargo
+CARDINAL-22,five hundred
+CARDINAL-23,four three nine
+CARDINAL-24,zero
+DATE-25,four oh one two
+DATE-26,July of two thousand twenty three
+CARDINAL-27,three
+CARDINAL-28,four
+MONEY-29,five hundred dollars
+GPE-30,the United States
+GPE-31,Deluth Georgia
+ORG-33,PIN
+TIME-35,eleven fifty nine AM
+DATE-36,August eleventh
+PERCENT-38,one hundred percent
+CARDINAL-42,two
+CARDINAL-43,one
+CARDINAL-44,Oh
