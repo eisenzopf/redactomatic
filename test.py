@@ -33,5 +33,5 @@ print( "Is the L3 redacted voice output file correct?:", filecmp.cmp(voice_redac
 #print( "Is the L3 redacted and anonymized voice output file correct?:", filecmp.cmp(voice_redact_anonymized_l3, "test/" + voice_redact_anonymized_l3))
 
 # Check anonumization only
-#print( "Is the anonymized text output file correct?:", filecmp.cmp(text_anonymized_only, "test/" + text_anonymized_only))
-#print( "Is the anonymized voice output file correct?:", filecmp.cmp(voice_anonymized_only, "test/" + voice_anonymized_only))
+print( "Is the anonymized text output file correct?:", filecmp.cmp(text_anonymized_only, "test/" + text_anonymized_only))
+print( "Is the anonymized voice output file correct?:", filecmp.cmp(voice_anonymized_only, "test/" + voice_anonymized_only))

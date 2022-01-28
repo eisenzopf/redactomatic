@@ -96,14 +96,14 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Agent,11/08/2019 00:03,the zip is four nine two six five,ZIP,1,
 1011432,Agent,11/08/2019 00:03,the same zip is four nine two six five,ZIP,1,
 1011432,Agent,11/08/2019 00:03,a new zip is four nine two seven six,ZIP,2,
-1011432,Agent,11/08/2019 00:00,"digits, an alias for cardinal is nine",DIGITS,1,CARDINAL
-1011432,Agent,11/08/2019 00:00,"digits, an alias for cardinal is zero",digits,1,CARDINAL
-1011432,Agent,11/08/2019 00:00,"creditcardnumber, an alias for ccard is four seven eight eight five seven seven five eight seven seven three five two four seven",creditCardNumber,1,CCARD
-1011432,Agent,11/08/2019 00:00,"ccnum, an alias for ccard is four four eight eight eight eight six four three seven eight five one five zero three",ccNum,1,CCARD
-1011432,Agent,11/08/2019 00:00,"email_address, an alias for email is Armando@gmail.com",EMAIL_ADDRESS,1,EMAIL
-1011432,Agent,11/08/2019 00:00,"emailaddress, an alias for email is Dessa@gmail.com",emailAddress,1,EMAIL
-1011432,Agent,11/08/2019 00:00,a token alias for zip is four nine two seven seven,<ZIP/>,1,ZIP
-1011432,Agent,11/08/2019 00:00,a token alias for pin is five two zero four,<PIN/>,1,PIN
-1011432,Agent,11/08/2019 00:00,a token alias for pin is seven nine three zero,<CVV/>,1,PIN
-1011432,Agent,11/08/2019 00:00,a token alias for ccard is one zero zero four three one eight two four three three zero six zero zero five,<ccNum/>,1,CCARD
-1011432,Agent,11/08/2019 00:00,a token alias for date is February first,<expDate/>,1,DATE
+1011432,Agent,11/08/2019 00:00,an alias for cardinal is nine,DIGITS,1,CARDINAL
+1011432,Agent,11/08/2019 00:00,an alias for cardinal is zero,digits,1,CARDINAL
+1011432,Agent,11/08/2019 00:00,an alias for ccard is four seven eight eight five seven seven five eight seven seven three five two four seven,creditCardNumber,1,CCARD
+1011432,Agent,11/08/2019 00:00,an alias for ccard is four four eight eight eight eight six four three seven eight five one five zero three,ccNum,1,CCARD
+1011432,Agent,11/08/2019 00:00,an alias for email is Armando@gmail.com,EMAIL_ADDRESS,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an alias for email is Dessa@gmail.com,emailAddress,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an token for zip is four nine two seven seven,<ZIP/>,1,ZIP
+1011432,Agent,11/08/2019 00:00,an token for pin is five two zero four,<PIN/>,1,PIN
+1011432,Agent,11/08/2019 00:00,an token for pin is seven nine three zero,<CVV/>,1,PIN
+1011432,Agent,11/08/2019 00:00,an token for ccard is one zero zero four three one eight two four three three zero six zero zero five,<ccNum/>,1,CCARD
+1011432,Agent,11/08/2019 00:00,an token for date is February first,<expDate/>,1,DATE

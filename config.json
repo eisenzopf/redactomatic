@@ -49,6 +49,7 @@
         "PIN"
     ],
     "redaction-order": [
+        "_IGNORE_",
         "PERSON",
         "ADDRESS",
         "SSN",
@@ -73,7 +74,7 @@
         "TIME",
         "WORK_OF_ART",
         "PIN",
-        "#SPACY#",
+        "_SPACY_",
         "ORDINAL",
         "CARDINAL"
     ],

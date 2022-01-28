@@ -131,3 +131,6 @@ dmypy.json
 output.csv
 audit_log.csv
 log.csv
+custom-data/custom-defs.yml
+custom-data/custom-test.yml
+data/custom.yml

@@ -2,6 +2,7 @@ import redact
 import anonymize
 import entity_map as em
 import entity_rules as er
+import entity_values as ev
 import pandas as pd
 import numpy as np
 import os
@@ -14,12 +15,12 @@ def config_args(): # add --anonymize
     parser.add_argument('--idcolumn', type=int, required=True, help='the CSV column number containing the conversation ids.')
     parser.add_argument('--inputfile', nargs='+', required=True, help='CSV input files(s) to redact')
     parser.add_argument('--outputfile', required=True, help='CSV output files')
-    parser.add_argument('--modality', required=True, help='the modality of the input file(s), either text or voice')
+    parser.add_argument('--modality', required=True, choices=['text', 'voice'], help='the modality of the input file(s), either text or voice')
     parser.add_argument('--anonymize', action='store_true', help='include to anonymize redacted data')
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
     parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
-    parser.add_argument('--level', type=int, required=False, help='sets the redaction level (1-3); default is 2')
+    parser.add_argument('--level', default=2, required=False, help='sets the redaction level (1-3); default is 2')
     parser.add_argument('--noredaction', action='store_true', help='turn off redaction')
     parser.add_argument('--seed', type=int, required=False, help='a seed value for anonymization random selection; default is None i.e. truly random.',default=None)
     parser.add_argument('--rulefile', nargs="*", required=False, help='a YAML file containing definitions for entity rules; default is data/core-rules.yaml')
@@ -39,11 +40,10 @@ def df_load_files(args):
     return df, texts, ids
 
 def main():
-    #initialize entity map
+    #initialize entity map and rules base
     entity_map = em.EntityMap()
-
-    # initialize entity value dict
-    entity_values = {}
+    entity_rules = er.EntityRules()    
+    entity_values = ev.EntityValues()
 
     # initialize list of entities we want to redact
     entities = []
@@ -54,59 +54,48 @@ def main():
     # get command line params
     args = config_args()
 
-    # set default redaction level to 2
-    if bool(args.level) == False:
-        args.level = 2
+    # set redaction level (default it set to 2 in the properties reader.)
+    entity_rules.level=args.level 
 
-    # validate command line params
-    if args.modality == "text":
-        pass
-    elif args.modality == "voice":
-        pass
-    else:
-        print("--modality command line value must be either text or voice")
-        exit()
+    # set whether we want to use large or small ML models.
+    # this could be moved to the model-definition files at a later date
+    entity_rules.large=args.large
 
-    # get list of entities to redact from config.json
-    entities, redaction_order, anon_map, token_map = redact.load_config(args.level)
+    # load config.json into the entity rules base.
+    entity_rules.load_configfile_json(os.getcwd() + '/config.json')
+    entities=entity_rules.entities
+    redaction_order=entity_rules.redaction_order
+    anon_map=entity_rules.anon_map
+    token_map=entity_rules.token_map
+
+    #Load the YAML rules files into the entity rules base. Use data/core-defs.yml if no rules files are given.
+    for file in args.rulefile or [os.getcwd() + '/data/core-defs.yml']:
+        print("Loading rulefile " + file + "...")
+        entity_rules.load_rulefile_yaml(file)
 
     # load data into a Pandas Dataframe
     df, texts, ids = df_load_files(args)
 
-    #Load the rules files. Use data/core-defs.yml if no rules files are given.
-    entity_rules = er.EntityRules()
-    for file in args.rulefile or ['data/core-defs.yml']:
-        print("Loading rulefile " + file + "...")
-        entity_rules.load_rulefile_yaml(file)
+    #Now run redaction on the ordered list of redactors that are needed to meet the current redaction level.
+    if not args.noredaction:
+        print("Starting redaction at anonymization level:",entity_rules.level)
 
-    # first pass replaces text phrases that should be ignored and stored them in entity_values
-    texts, entity_map, curr_id, entity_values  = redact.ignore_phrases(texts, entity_map, curr_id, ids, entity_values)
+        #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
+        if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
+        if not "_SPACY_" in entities: entities.append("_SPACY_")
 
-    if args.noredaction:
-        pass
-    else:
-        if not "#SPACY#" in redaction_order:
-            #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
-            redaction_order.append("#SPACY#")
-        
-        for redactor in redaction_order:
-            # redact specified column with regex methods, for chat and NOT voice
-            if redactor == "SSN" and "SSN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"SSN", "ssn", "ssn") # chat-yes, voice-no
-            if redactor == "CCARD" and "CCARD" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules, "CCARD","ccard") # chat-yes, voice-no
-            if redactor == "ADDRESS" and "ADDRESS" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ADDRESS","address") # chat-yes, voice-no
-            if redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ZIP","zip-text","zip") # chat-yes, voice-no supports US zip+4 and Canadian postal codes
-            if args.modality == 'voice' and redactor == "ZIP" and "ZIP" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ZIP","zip-voice") # chat-no, voice-yes
-            if redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PHONE","phone-text") # chat-yes, voice-no
-            if args.modality == 'voice' and redactor == "PHONE" and "PHONE" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PHONE","phone-voice") # chat-no, voice-yes
-            if redactor == "EMAIL" and "EMAIL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"EMAIL","email") # chat-yes, voice-yes
-            if redactor == "ORDINAL" and "ORDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"ORDINAL","ordinal") # voice-yes, chat-yes
-            if redactor == "CARDINAL" and "CARDINAL" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"CARDINAL","cardinal") # voice-yes, chat-yes
-            if redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PIN","pin-text") # chat-yes, voice-no
-            if args.modality == 'voice' and redactor == "PIN" and "PIN" in entities: texts, entity_map, curr_id, entity_values = redact.entity_re(texts, entity_map, curr_id, ids, entity_values, entity_rules,"PIN","pin-voice") # chat-no, voice-yes
+        #Put the IGNORE step first unless it has been explicitly specified in the config file to be somewhere else.
+        if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
+        if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
             
-            #SPACY is not an entity so always run it and pass the entities to it so that it can decide what to add itself.
-            if redactor == "#SPACY#": texts, entity_map, curr_id, ids, entity_values = redact.ner_ml(texts, entity_map, curr_id, ids, entity_values, args, entities)
-
+        #Get a list of the entities in the desired level ordered by the redaction_order.
+        rule_order=[x for x in redaction_order if x in entities]
+        for redactor in rule_order:
+            redactor_model=entity_rules.get_redactor_model(redactor,args.modality)
+            if redactor_model is not None:
+                print("Redacting ",redactor,"...")
+                texts, entity_map, curr_id, ids, entity_values = redactor_model.redact(texts, entity_map, curr_id, ids, entity_values)
+ 
     #Put the text back that we do not want to allow to be redacted
     texts = redact.replace_ignore(texts,entity_values)
    
@@ -161,7 +150,9 @@ def main():
 
     # write audit log
     if args.log:
-        redact.write_audit_log(args.log, entity_values)
+        filepath=os.getcwd() + "/" + args.log
+        print("Writing log to " + filepath)
+        entity_values.write_csv(filepath)
 
     print("Done. Output file is",args.outputfile)
 
