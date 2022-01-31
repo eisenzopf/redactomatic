@@ -132,5 +132,10 @@ output.csv
 audit_log.csv
 log.csv
 custom-data/custom-defs.yml
+rules/custom-test.yml
+rules/custom.yml
 custom-data/custom-test.yml
-data/custom.yml
+rules-custom/custom-defs.yml
+rules-custom/custom-test.yml
+
+rules/custom-defs.yml

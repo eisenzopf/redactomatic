@@ -4,121 +4,139 @@ import redact
 import regex
 import sys
 
+# Exception classes for redactors
+class EntityRuleCongfigException(Exception):
+    pass
+
+class ModalityNotSupportedException(Exception):
+    pass
+
+#Helper function to merge config files as they are
+def merge(source, destination):
+    """
+    Deep merge two dictionaries
+
+    >>> a = { 'first' : { 'all_rows' : { 'pass' : 'dog', 'number' : '1' } } }
+    >>> b = { 'first' : { 'all_rows' : { 'fail' : 'cat', 'number' : '5' } } }
+    >>> merge(b, a) == { 'first' : { 'all_rows' : { 'pass' : 'dog', 'fail' : 'cat', 'number' : '5' } } }
+    True
+    """
+    for key, value in source.items():
+        if isinstance(value, dict):
+            # get node or create one
+            node = destination.setdefault(key, {})
+            merge(value, node)
+            #print("key:",key,"value",value,"node",node,file=sys.stderr)
+        else:
+            destination[key] = value
+
+    return destination
+
 class EntityRules():
-    def __init__(self):
+    def __init__(self, args):
         self._rules={}
-        self._config={}
-        self._level=2
-        self._use_large=None
-
-    @property
-    def use_large(self):
-        return self._use_large
-
-    @use_large.setter  
-    def use_large(self,value):
-        self._use_large=value
+        self._args=args
 
     @property
     def level(self):
-        return self._level
-
-    @level.setter  
-    def level(self,value):
-        self._level=value
+        '''Return the current level set in the args.'''
+        return self._args.level
 
     @property  
     def entities(self):
-        entities=self._config.get("level-"+str(self._level),[])
+        '''Return the entities list defined in the 'level-{level} section in the rules.'''
+        entities=self._rules.get("level-"+str(self.level),[])
         return entities
         
     @property  
     def redaction_order(self):
-        return self._config.get('redaction-order',[])
+        '''Return the redaction_order list set in the rules'''
+        return self._rules.get('redaction-order',[])
 
     @property  
     def anon_map(self):
-        return self._config.get('anon-map',[])
+        '''Return the anon_map list fromt the rules'''
+        return self._rules.get('anon-map',[])
 
     @property  
     def token_map(self):
-        return self._config.get('token-map',[])  
+        '''Return the token_map list from the rules'''
+        return self._rules.get('token-map',[])  
 
-    def load_configfile_json(self,filepath):
-        print("Loading config file:",filepath)
-        with open(filepath) as json_file:
-            self._config=json.load(json_file)
+    @property  
+    def args(self):
+        '''return the args object.'''
+        return self._args
+
+    def load_rulefile_json(self,filepath):
+        '''Load a JSON rulefile to define the entities'''
+        #print("Loading config file:",filepath)
+        with open(filepath) as stream:
+            try:
+                _new_rules=json.load(stream)
+                self._rules=merge(self._rules,_new_rules)
+                #print("RULES: ",str(self._rules))    
+            except Exception as e:
+                raise(e)
 
     def load_rulefile_yaml(self, filepath):
         '''Load a YAML rulefile to define the entities'''
-        print("Loading rule file:",filepath)
+        #print("Loading rule file:",filepath)
 
         with open(filepath, "r") as stream:
             try:
-                self._rules=yaml.safe_load(stream)
-                #print("RULES: ",str(self._rules))
-            except yaml.YAMLError as exc:
-                print(exc)
+                _new_rules=yaml.safe_load(stream)
+                self._rules=merge(self._rules,_new_rules)
+                #print("RULES: ",str(self._rules))    
+            except yaml.YAMLError as e:
+                raise(e)
 
-    def get_regexp(self, rulename):
-        '''Return the regular expression associated with teh rulename'''
-        regexp= self._rules["regexp"][rulename][0]
-        #print ("REGEXP:",regexp)
-        return regexp
+    def print_rulefile(self,f):
+        print(self._rules,file=f)
 
-    def get_redactor_model(self,label,modality):
-        #print("get_redactor_model",label,modality)
+    def get_regex(self, rulename):
+        '''Return the regular expression associated with the rulename'''
+        regex= self._rules["regex"][rulename][0]
+        #print ("regex:",regex)
+        return regex
+
+    def get_redactor_model(self,id):
+        #print("get_redactor_model",id,modality)
         
         _entity_rule=self._rules.get("entities",None)
         if _entity_rule is None: 
-            print("WARNING: No 'entities' section found in rules.",file=sys.stderr)
-            return None
+            raise EntityRuleCongfigException("WARNING: No 'entities' section found in rules.")
         
-        _entity_label=_entity_rule.get(label,None)
-        if _entity_label is None: 
-            print("WARNING: Label",label," not listed in 'entities' in the rules.",file=sys.stderr)
-            return None
+        _specific_entity=_entity_rule.get(id,None)
+        if _specific_entity is None: 
+            raise EntityRuleCongfigException("WARNING: Entity ",id," not listed in 'entities' in the rules.")
 
-        _redactor=_entity_label.get("redactor",None)
-        if _redactor is None: 
-            print("WARNING: Label 'redactor' is not listed for",label,"in 'entities' in the rules.",file=sys.stderr)
-            return None
+        _redactor_params=_specific_entity.get("redactor",None)
+        if _redactor_params is None: 
+            raise EntityRuleCongfigException("WARNING: No 'redactor' specified for: "+id+" the rules.")
         
-        _model_type=_redactor.get("model-type",None)
+        _model_type=_redactor_params.get("model-type",None)
         if _model_type is None: 
-            print("WARNING: Label 'model-type' is not listed in redactor section for ",label," in the rules.",file=sys.stderr)
-            return None
+            raise EntityRuleCongfigException("WARNING: Label 'model-type' is not listed in redactor section for "+id+" in the rules.")
 
+        #Instantiate a model class and configure it with any parameters in the rules section for that model.
+        #Models get a reference to this entity_rules object so they use it to configure themselves. (e.g. find rules defs in other parts of the configuration.)
         #Entities that are 'shared' are generated only by spacy and we return an empty model for them.
-        if (_model_type == "shared"):
-            return None
+        if (_model_type == "shared"): return None
+        elif (_model_type == "spacy"): _model=redact.RedactorSpacy(id,self)
+        elif (_model_type == "regex"): _model=redact.RedactorRegex(id,self)
+        elif (_model_type == "phraselist"): _model=redact.RedactorPhraseList(id,self)
+        else:
+            raise EntityRuleCongfigException("Undefined model_type: ",str(_model_type))
 
-        #Get the model parameters for voice or text if they are specified.
-        _model_params=_redactor.get(modality,None)
+        #Configure the model.  
+        try:
+            _model.configure(_redactor_params)
+        except(ModalityNotSupportedException) as e:
+            print("Skipping: "+id)
+            _model=None
 
-        if (_model_type == "spacy"):
-            _model=redact.RedactorSpacy()
-            _model.configure(use_large=self.use_large,entities=self.entities)
-            return _model
-    
-        if (_model_type == "regexp"):
-            if _model_params is None: 
-                print("ERROR: No 'voice' or 'text' section found for ",label," in the for regexp model rules.",file=sys.stderr)
-                return None
+        return _model
 
-            _regexp_filename=_model_params.get("regexp-filename",None) 
-            _regexp_id=_model_params.get("regexp-id",None)
-            _group=_model_params.get("group",None)     
-            if(_regexp_id is not None):
-                _regexp=self.get_regexp(_regexp_id)
-                _model=redact.RedactorRegexp()
-                _model.configure(label,_regexp,_group or 1,regex.IGNORECASE)
-                return _model
-            
-            if(_regexp_filename is not None):
-                _model=redact.RedactorRegexpFromFile()
-                _model.configure(label=label,filepath=_regexp_filename,group=_group or 1,flags=regex.IGNORECASE)
-                return _model
-            
-        print("ERROR. model_type",str(_model_type),file=sys.stderr)
+        
         

@@ -1,12 +1,4 @@
-entities:
-  _IGNORE_:
-    redactor:
-      model-type: regexp
-      text:
-        regexp-filename: ignore.json
-      voice:
-        regexp-filename: ignore.json
-
+entities: 
   _SPACY_:
     redactor:
       model-type: spacy
@@ -81,80 +73,80 @@ entities:
 
   SSN:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: ssn
+        regex-id: ssn
         group: ssn
-      voice:
-        regexp-id: ssn
-        group: ssn
-  
+        voice:
+          regexp-id: ssn
+          group: ssn
+    
   CCARD:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: ccard
+        regex-id: ccard
       voice:
-        regexp-id: ccard
+        regex-id: ccard
 
   ADDRESS:  
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: address
+        regex-id: address
       voice:
-        regexp-id: address
+        regex-id: address
 
   ZIP:  
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: zip-text
+        regex-id: zip-text
         group: zip
       voice:
-        regexp-id: zip-voice
+        regex-id: zip-voice
 
   PHONE:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: phone-text
+        regex-id: phone-text
       voice:
-        regexp-id: phone-voice
+        regex-id: phone-voice
 
   EMAIL:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: email
+        regex-id: email
       voice:
-        regexp-id: email
+        regex-id: email
 
   ORDINAL:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: ordinal
+        regex-id: ordinal
       voice:
-        regexp-id: ordinal
+        regex-id: ordinal
 
   CARDINAL:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: cardinal
+        regex-id: cardinal
       voice:
-        regexp-id: cardinal
+        regex-id: cardinal
 
   PIN:
     redactor:
-      model-type: regexp
+      model-type: regex
       text:
-        regexp-id: pin-text
+        regex-id: pin-text
       voice:
-        regexp-id: pin-voice
+        regex-id: pin-voice
 
-regexp:
+regex:
   pin-text:
     # chat-yes, voice-no
     - (^|\s)(?:(\d{4}))\s*?

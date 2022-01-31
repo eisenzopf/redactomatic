@@ -1,0 +1,29 @@
+{
+	"entities": {
+		"_IGNORE_": {
+			"redactor": {
+				"model-type": "phraselist",
+				"text": {
+					"phrase-list": [
+						"first name",
+						"first and",
+						"today",
+						"yesterday",
+						"CV",
+						"tomorrow"
+					]
+				},
+				"voice": {
+					"phrase-list": [
+						"first name",
+						"first and",
+						"today",
+						"yesterday",
+						"CV",
+						"tomorrow"
+					]
+				}
+			}
+		}
+	}
+}

@@ -8,6 +8,8 @@ import numpy as np
 import os
 import random
 import argparse
+import glob
+import sys
 
 def config_args(): # add --anonymize
     parser = argparse.ArgumentParser(description='Redactomatic v1.6. Redact call transcriptions or chat logs.')
@@ -40,38 +42,40 @@ def df_load_files(args):
     return df, texts, ids
 
 def main():
-    #initialize entity map and rules base
-    entity_map = em.EntityMap()
-    entity_rules = er.EntityRules()    
-    entity_values = ev.EntityValues()
-
-    # initialize list of entities we want to redact
-    entities = []
-
-    # unique entity key
-    curr_id = 0
-    
-    # get command line params
+     # get command line params and then initialize an empty rules base, passing these arguments to it.
     args = config_args()
+    entity_rules = er.EntityRules(args)
 
-    # set redaction level (default it set to 2 in the properties reader.)
-    entity_rules.level=args.level 
+    # load config.json into the entity rules base.   
+    #entity_rules.load_configfile_json(os.getcwd() + '/config.json')
 
-    # set whether we want to use large or small ML models.
-    # this could be moved to the model-definition files at a later date
-    entity_rules.large=args.large
+    #Load the config rules filess into the entity rules base. 
+    #Use all relevant files in the rules directory if no globs are given.
+    for g in args.rulefile or ['rules/*.yml','rules/*.json']:
+        #print("GLOB:",g)
+        pathlist=glob.glob(g)
+        #print("Pathlist:",pathlist)
+        for file in pathlist:
+            print("Loading rulefile " + file + "...")
+            fname, fext = os.path.splitext(file)
+            if (fext==".yml" or fext==".yaml"):
+                entity_rules.load_rulefile_yaml(file)
+            elif (fext==".json"):
+                entity_rules.load_rulefile_json(file)
 
-    # load config.json into the entity rules base.
-    entity_rules.load_configfile_json(os.getcwd() + '/config.json')
+    #entity_rules.print_rulefile(sys.stderr)
+
     entities=entity_rules.entities
     redaction_order=entity_rules.redaction_order
     anon_map=entity_rules.anon_map
     token_map=entity_rules.token_map
+    
+    #initialize entity map, entity_values.
+    entity_map = em.EntityMap()
+    entity_values = ev.EntityValues()
 
-    #Load the YAML rules files into the entity rules base. Use data/core-defs.yml if no rules files are given.
-    for file in args.rulefile or [os.getcwd() + '/data/core-defs.yml']:
-        print("Loading rulefile " + file + "...")
-        entity_rules.load_rulefile_yaml(file)
+    # initialize the unique entity key
+    curr_id = 0
 
     # load data into a Pandas Dataframe
     df, texts, ids = df_load_files(args)
@@ -80,22 +84,23 @@ def main():
     if not args.noredaction:
         print("Starting redaction at anonymization level:",entity_rules.level)
 
+        #If IGNORE isn't specified in the running order then add it first. This keeps backwards compatibility.
+        if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
+        if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
+            
         #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
         if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
         if not "_SPACY_" in entities: entities.append("_SPACY_")
 
-        #Put the IGNORE step first unless it has been explicitly specified in the config file to be somewhere else.
-        if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
-        if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
-            
         #Get a list of the entities in the desired level ordered by the redaction_order.
         rule_order=[x for x in redaction_order if x in entities]
-        for redactor in rule_order:
-            redactor_model=entity_rules.get_redactor_model(redactor,args.modality)
+        for redactor_id in rule_order:
+            #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
+            redactor_model=entity_rules.get_redactor_model(redactor_id)
             if redactor_model is not None:
-                print("Redacting ",redactor,"...")
+                print("Redacting ",redactor_id,"...")
                 texts, entity_map, curr_id, ids, entity_values = redactor_model.redact(texts, entity_map, curr_id, ids, entity_values)
- 
+                
     #Put the text back that we do not want to allow to be redacted
     texts = redact.replace_ignore(texts,entity_values)
    
