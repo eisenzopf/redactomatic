@@ -105,25 +105,32 @@ def main():
                 print("Skipping ",rule,"...")
                 
     #Put the text back that we do not want to allow to be redacted
-    texts = redact.replace_ignore(texts,entity_values)
+    #texts = redact.replace_ignore(texts,entity_values)
    
-    # anonymize if flag was passed
+    # clear the entity map.  It will be used the other way round for anonymization.
     entity_map=em.EntityMap()
+    
+    #Set up for running the anonymizers.  
     if args.anonymize:
+        #Run the anonymizers for the same targets as redaction (order doesn't matter)
+        anon_order=rule_order
         #Seed the random number generator if determinism is required
         if (args.seed is not None):
             print("Using fixed random seed: ",args.seed)
             random.seed(args.seed)
-        
-        #Now run through the rules again and execute the associated anonumizers
-        for rule in rule_order:
-            #Get the custom anonymizer model for this rule_label. 
-            try:
-                _model=entity_rules.get_anonomizer_model(rule)
-                print("Anonymizing ",rule,"...")
-                texts, entity_map=_model.anonymize(texts, entity_map, ids)
-            except(er.NotSupportedException) as e:
-                print("Skipping ",rule,"...")
+    else:
+        # If no anonymization just run the special _IGNORE_ text restorer.
+        anon_order=['_IGNORE_']
+
+    #Now re-precess all the text and execute the associated anonumizers.
+    for rule in anon_order:
+        #Get the custom anonymizer model for this rule_label. 
+        try:
+            _model=entity_rules.get_anonomizer_model(rule)
+            print("Anonymizing ",rule,"...")
+            texts, entity_map=_model.anonymize(texts, ids, entity_map, entity_values)
+        except(er.NotSupportedException) as e:
+            print("Skipping ",rule,"...")
 
     # data cleanup
     texts = redact.clean(texts) # chats-yes, voice-yes

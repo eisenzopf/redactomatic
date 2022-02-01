@@ -152,3 +152,6 @@ test/voice_output_anonymized_only.csv
 rules/custom-redactor.yml_
 rules/custom-regex.yml_
 rules/ignore.yml
+rules/custom-anon.yml_
+rules/custom-test.yml_
+test_regex_gen.py

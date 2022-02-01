@@ -18,3 +18,5 @@ entities:
           - yesterday
           - CV
           - tomorrow
+    anonymizer:
+      model-type: anonymize.AnonRestoreEntityText  

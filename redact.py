@@ -41,22 +41,6 @@ def convert_to_uppercase(texts):
         new_texts.append(new_text)
     return new_texts
 
-def replace_ignore(texts,entity_values):
-    print("Re-inserting ignored text...")
-    new_texts = []
-    pattern = regex.compile(r'(\[(_IGNORE_\-\d+)\])')
-
-    for text in texts:
-        matches = list(pattern.finditer(text))
-        newString = text
-        for e in reversed(matches):
-            name = e.group(2)
-            start = e.span()[0]
-            end = start + len(e.group())
-            newString = newString[:start] + entity_values.get_value(name) + newString[end:]
-        new_texts.append(newString)
-    return new_texts
-
 ## Redactor classes ##
 
 #Base class from which all redactors are derived.
