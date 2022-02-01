@@ -1,7 +1,7 @@
 entities:
   _IGNORE_:
     redactor:
-      model-type: phraselist
+      model-type: redact.RedactorPhraseList
       text:
         phrase-list:
           - first name

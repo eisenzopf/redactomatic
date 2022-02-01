@@ -11,174 +11,7 @@ import entity_map as em
 
 inflector = inflect.engine()
 
-def persist_entity_value(id, tag, entity_value,entity_map):
-    #Look for tags of the form '[ENTITY-dddd]' where dddd is an integer identifier for the entity.
-    #The enclosing [ ] are optional so this function also works with tags of the form 'ENTITY-dddd'.
-    #If this exists then we look whether we have seen something of type 'ENTITY' with this id and index previously.
-    #If we have then use that value otherwise use the value we were given and remember it for later calls.
-    #If the tag does not match the pattern then just return the value we were given.
-
-    this_match = re.fullmatch('\[?(.*)-(.*?)\]?', tag)
-
-    if this_match:   # handling for ENTITY-dddd tags    
-         m_ix=this_match[2]
-         m_cat=this_match[1]
-         r=entity_map.update_entities(m_ix, id, entity_value, m_cat)
-    else:
-         r=entity_value
-    return r
-
-def anon_regex(type, anon_map, token_map):
-    counter = 0
-    if type in anon_map.keys():
-        for entity in anon_map[type]:
-            if counter == 0:
-                this_regex = "\[" + entity + "-\d+\]"
-            else:
-                this_regex = this_regex + "|\[" + entity + "-\d+\]"
-            counter = counter + 1
-    if type in token_map.keys():
-        for entity in token_map[type]:
-            if counter == 0:
-                this_regex = entity
-            else:
-                this_regex = this_regex + "|" + entity
-            counter = counter + 1
-    return this_regex
-
-def generalized_callback(pattern, selector, entity_map,id):
-    #wanted to write a generalized callback, 
-    #but it interfered with entity updating
-    pass
-
-def adate(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing dates...")
-    new_texts = []
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    ordinal_days = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty first", "twenty second", "twenty third", "twenty fourth", "twenty fifth", "twenty sixth", "twenty seventh", "twenty eighth"]
-
-    def callback(match, i):
-        if modality == 'text':
-            date = str(random.randrange(1,12)) + "/" + str(random.randrange(1,28))
-        else:
-            date = random.choice(months) + " " + random.choice(ordinal_days)
-        tag = match.group()
-        return persist_entity_value(i,tag,date,entity_map)
-        
-    this_regex = anon_regex("DATE", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def address(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing addresses...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/street-names.csv')
-
-    def callback(match, i):
-        street = str(random.choice(df['Streets']))
-        if modality == 'text':
-            number = str(random.randrange(100,500))
-        else:
-            number = inflector.number_to_words(random.randrange(100,500))
-        address = number + " " + street + " "
-
-        tag = match.group()
-        return persist_entity_value(i,tag,address,entity_map)
-    
-    this_regex = anon_regex("ADDRESS", anon_map, token_map)
-
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-def atime(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing time...")
-    hours = ["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
-    minutes = ["oh one","oh two","oh three","oh four","oh five","oh six","oh seven","oh nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
-    new_texts = []
-    
-    def callback(match, i):
-        if modality == 'text':
-            time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
-        else:
-            time = str(random.choice(hours)) + " " + str(random.choice(minutes)) + " " + str(random.choice(["AM","PM"]))  
-        tag = match.group()
-        return persist_entity_value(i,tag,time,entity_map)
-        
-    this_regex = anon_regex("TIME", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def cardinal(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing cardinals...")
-    t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
-    v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-    if modality == 'text':
-        cardinal = t_cardinal
-    else:
-        cardinal = v_cardinal
-    
-    new_texts = []
-    def callback(match, i):
-        this_cardinal = random.choice(cardinal)
-        tag = match.group()
-        return persist_entity_value(i,tag,this_cardinal,entity_map)
-
-    this_regex = anon_regex("CARDINAL", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def ccard(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing credit card numbers...")
-    new_texts = []
-
-    def callback(match, i):
-        ccnumber = ""
-        length = 16
-        while len(ccnumber) <= (length - 1):
-            digit = str(random.randrange(0,9))
-            ccnumber += digit
-        if modality == 'text':
-            ccard = str(ccnumber)
-        else:
-            ccard = digits2words(ccnumber)
-        tag = match.group()
-        return persist_entity_value(i,tag,ccard,entity_map)
-
-    this_regex = anon_regex("CCARD", anon_map, token_map)
-
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def company(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing names (organizations)...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
-
-    def callback(match, i):
-        company = str(random.choice(df['Company']))
-        tag = match.group()
-        return persist_entity_value(i,tag,company,entity_map)
-
-    this_regex = anon_regex("ORG", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
+## Helper functions ###
 
 def digits2words(digits):
     num2words = {'0': 'zero', '1': 'one', '2': 'two', '3': 'three', '4': 'four', '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine'}
@@ -187,352 +20,540 @@ def digits2words(digits):
         words += " " + num2words[digits[digit]]
     return words
 
+## Redactor classes ##
 
-def email(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing email addresses...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
-    def callback(match, i):
-        name = str(random.choice(df['name']))
+#Base class from which all redactors are derived.
+class AnonymizerBase():
+    '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
+    def __init__(self,id,entity_rules):
+        self._entity_rules=entity_rules
+        self._params={}
+        self._id=id
+     
+    '''Virtual function defining what a configuration call should look like.'''
+    def configure(self, params):
+        self._params=params
 
-        email = name + "@gmail.com"
-        tag = match.group()
-        return persist_entity_value(i,tag,email,entity_map)
+    # IMPLEMENT THIS FUNCTION TO:
+    # Find match to pattern of type label; keeping entities map updated and tracking ID-TEXT connection,
+    # pattern: the regex used to match the target entity.
+    # label: contains IGNORE,ADDRESS,CCARD,EMAIL,PHONE,PIN,SSN,ZIP
+    # texts : an array of texts to be redacted
+    # entity_map : a map to keep track of indexes assoigned to redacted words to enable restoration of consitent anonymized words later.
+    # eCount : a unique entity key, ready for the next discovered entity
+    # ids: an array of conversation-ids (aligns with the texts in length and content)
+    # entity_values: a dictionary to keep the substituted entity values keyed by their substituted labels (e.g. ) entity_values["PIN-45"=1234]
+    # group:  contains the target match group for the regex. By default the whole match is used but this can be a named match (e.g. group='zip')
 
-    this_regex = anon_regex("EMAIL", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+    '''Virtual function defining what a anonymization should look like.'''
+    def anonymize(self, texts, entity_map, ids):
+        return texts, entity_map
 
+    def persist_entity_value(self, id, tag, entity_value, entity_map):
+        #Look for tags of the form '[ENTITY-dddd]' where dddd is an integer identifier for the entity.
+        #The enclosing [ ] are optional so this function also works with tags of the form 'ENTITY-dddd'.
+        #If this exists then we look whether we have seen something of type 'ENTITY' with this id and index previously.
+        #If we have then use that value otherwise use the value we were given and remember it for later calls.
+        #If the tag does not match the pattern then just return the value we were given.
 
-def event(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing events...")
-    events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
-    new_texts = []
-    def callback(match, i):
-        event = random.choice(events)
-        tag = match.group()
-        return persist_entity_value(i,tag,event,entity_map)
+        this_match = re.fullmatch('\[?(.*)-(.*?)\]?', tag)
 
-    this_regex = anon_regex("EVENT", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def fac(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing facility names...")
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        return persist_entity_value(i,tag,"",entity_map)
-
-    this_regex = anon_regex("FAC", anon_map, token_map)
-    for text, id in zip(texts, ids):
-        new_text = re.sub(this_regex,lambda x: callback(x, id),text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def gpe(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing country, city, state...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
-    def callback(match, i):
-        gpe = str(random.choice(df. iloc[:, 0]))
-        tag = match.group()
-        return persist_entity_value(i,tag,gpe,entity_map)
-
-    this_regex = anon_regex("GPE", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def language(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing language...")
-    language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
-    new_texts = []
-    def callback(match, i):
-        this_language = random.choice(language)
-        tag = match.group()
-        return persist_entity_value(i,tag,this_language,entity_map)
-
-    this_regex = anon_regex("LANGUAGE", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def laughter(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing laughter...")
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        return persist_entity_value(i,tag,"",entity_map)
-
-    this_regex = anon_regex("LAUGHTER", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) ,text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def law(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing law...")
-    new_texts = []
-    def callback(match, i):
-        tag = match.group()
-        this_match = re.search('-', tag)
-        return persist_entity_value(i,tag,"",entity_map)
-
-    this_regex = anon_regex("LAW", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id),text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def loc(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing loc...")
-    # us-area-code-cities
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/us-area-code-cities.csv')
-    def callback(match, i):
-        loc = str(random.choice(df['city']))
-        tag = match.group()
-        return persist_entity_value(i,tag,loc,entity_map)
-
-    this_regex = anon_regex("LOC", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) ,text)
-        new_texts.append(new_text)
-    return new_texts,entity_map
-
-
-def money (texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing money...")
-    new_texts = []
-    def callback(match, i):
-        if modality == 'text':
-            money = '$' + str(random.randrange(200,500))
+        if this_match:   # handling for ENTITY-dddd tags    
+            m_ix=this_match[2]
+            m_cat=this_match[1]
+            r=entity_map.update_entities(m_ix, id, entity_value, m_cat)
         else:
-            money = inflector.number_to_words(random.randrange(200,500)) + " dollars"
-        tag = match.group()
-        return persist_entity_value(i,tag,money,entity_map)
+            r=entity_value
+        return r
 
-    this_regex = anon_regex("MONEY", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+    def anon_regex(self, type):
+        anon_map=self._entity_rules.anon_map
+        token_map=self._entity_rules.token_map
 
+        counter = 0
+        if type in anon_map.keys():
+            for entity in anon_map[type]:
+                if counter == 0:
+                    this_regex = "\[" + entity + "-\d+\]"
+                else:
+                    this_regex = this_regex + "|\[" + entity + "-\d+\]"
+                counter = counter + 1
+        if type in token_map.keys():
+            for entity in token_map[type]:
+                if counter == 0:
+                    this_regex = entity
+                else:
+                    this_regex = this_regex + "|" + entity
+                counter = counter + 1
+        return this_regex
 
-def norp (texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing NORPs (nationality, religious or political organizations)...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
-    def callback(match, i):
-        norp = str(random.choice(df['Nationality']))
-        tag = match.group()
-        return persist_entity_value(i,tag,norp,entity_map)
+class AnonDate(AnonymizerBase):
+    def anonymize(self, texts, entity_map, ids):
+        new_texts = []
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        ordinal_days = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty first", "twenty second", "twenty third", "twenty fourth", "twenty fifth", "twenty sixth", "twenty seventh", "twenty eighth"]
 
-    this_regex = anon_regex("NORP", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+        def callback(match, i):
+            if self._entity_rules.args.modality == 'text':
+                date = str(random.randrange(1,12)) + "/" + str(random.randrange(1,28))
+            else:
+                date = random.choice(months) + " " + random.choice(ordinal_days)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,date,entity_map)
+            
+        this_regex = self.anon_regex("DATE")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
+class AnonAddress(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/street-names.csv')
 
-def ordinal (texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing ordinals...")
-    v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
-    t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
-    
-    if modality == 'text':
-        ordinal = t_ordinal
-    else:
-        ordinal = v_ordinal
-    
-    new_texts = []
-    def callback(match, i):
-        number = random.choice(ordinal)
-        tag = match.group()
-        return persist_entity_value(i,tag,number,entity_map)
+        def callback(match, i):
+            street = str(random.choice(df['Streets']))
+            if self._entity_rules.args.modality == 'text':
+                number = str(random.randrange(100,500))
+            else:
+                number = inflector.number_to_words(random.randrange(100,500))
+            address = number + " " + street + " "
 
-    this_regex = anon_regex("ORDINAL", anon_map, token_map)
-    for text,id in zip(texts, ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def perc (texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing cardinals...")
-    new_texts = []
-    def callback(match, i):
-        if modality == 'text':
-            perc = str(random.randrange(1,100)) + "%"
-        else:
-            perc = inflector.number_to_words(str(random.randrange(1,100))) + " PERCENT"
-        tag = match.group()
-        return persist_entity_value(i,tag,perc,entity_map)
-
-    this_regex = anon_regex("PERCENT", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-def person (texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing names (people)...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
-
-    def callback(match, i):
-        tag = match.group()
-        name = str(random.choice(df['name']))
-        return persist_entity_value(i,tag,name,entity_map)
-
-    this_regex = anon_regex("PERSON", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-def phone(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing phone numbers...")
-    new_texts = []
-
-    def callback(match, i):
-        area_code = str(random.randrange(200,999))
-        exchange = str(random.randrange(200,999))
-        number = str(random.randrange(1000,9999))
-        if modality == 'text':
-            phone = area_code + "-" + exchange + "-" + number
-        else:
-            phone = digits2words(str(area_code + exchange + number))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,address,entity_map)
         
-        tag = match.group()
-        return persist_entity_value(i,tag,phone,entity_map)
+        this_regex = self.anon_regex("ADDRESS")
 
-    this_regex = anon_regex("PHONE", anon_map, token_map)
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+class AnonTime(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        hours = ["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+        minutes = ["oh one","oh two","oh three","oh four","oh five","oh six","oh seven","oh nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
+        new_texts = []
+        
+        def callback(match, i):
+            if self._entity_rules.args.modality == 'text':
+                time = str(random.randrange(1,12)) + ":" + str(random.randrange(0,50)) + " " + str(random.choice(["AM","PM"]))
+            else:
+                time = str(random.choice(hours)) + " " + str(random.choice(minutes)) + " " + str(random.choice(["AM","PM"]))  
+            tag = match.group()
+            return self.persist_entity_value(i,tag,time,entity_map)
+            
+        this_regex = self.anon_regex("TIME")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
 
-def pin(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing PIN numbers...")
-    new_texts = []
-
-    def callback(match, i):
-        rand_4d = str(random.randrange(1000,9999))
-        if modality == 'voice':
-            pin = digits2words(str(rand_4d))
+class AnonCardinal(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
+        v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
+        if self._entity_rules.args.modality == 'text':
+            cardinal = t_cardinal
         else:
-            pin = rand_4d
-        tag = match.group()
-        return persist_entity_value(i,tag,pin,entity_map)
+            cardinal = v_cardinal
+        
+        new_texts = []
+        def callback(match, i):
+            this_cardinal = random.choice(cardinal)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,this_cardinal,entity_map)
 
-    this_regex = anon_regex("PIN", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+        this_regex = self.anon_regex("CARDINAL")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonCCard(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+
+        def callback(match, i):
+            ccnumber = ""
+            length = 16
+            while len(ccnumber) <= (length - 1):
+                digit = str(random.randrange(0,9))
+                ccnumber += digit
+            if self._entity_rules.args.modality == 'text':
+                ccard = str(ccnumber)
+            else:
+                ccard = digits2words(ccnumber)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,ccard,entity_map)
+
+        this_regex = self.anon_regex("CCARD")
+
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonCompany(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/Top-100-Retailers.csv')
+
+        def callback(match, i):
+            company = str(random.choice(df['Company']))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,company,entity_map)
+
+        this_regex = self.anon_regex("ORG")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
 
-def product(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing products...")
-    product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
-    new_texts = []
-    def callback(match, i):
-        this_product = random.choice(product)
-        tag = match.group()
-        return persist_entity_value(i,tag,this_product,entity_map)
+class AnonEmail(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
+        def callback(match, i):
+            name = str(random.choice(df['name']))
 
-    this_regex = anon_regex("PRODUCT", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id),text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+            email = name + "@gmail.com"
+            tag = match.group()
+            return self.persist_entity_value(i,tag,email,entity_map)
 
-
-def quantity(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing quantities...")
-    new_texts = []
-    def callback(match, i):
-        quantity = str(random.randrange(1000,9999))
-        tag = match.group()
-        return persist_entity_value(i,tag,quantity,entity_map)
-
-    this_regex = anon_regex("QUANTITY", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id),text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+        this_regex = self.anon_regex("EMAIL")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
 
-def ssn(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing Social Security numbers...")
-    new_texts = []
+class AnonEvent(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
+        new_texts = []
+        def callback(match, i):
+            event = random.choice(events)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,event,entity_map)
 
-    def callback(match, i):
-        first = str(random.randrange(200,999))
-        second = str(random.randrange(10,99))
-        third = str(random.randrange(1000,9999))
-        if modality == 'text':
-            ssn = first + "-" + second + "-" + third
+        this_regex = self.anon_regex("EVENT")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonFac(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            tag = match.group()
+            return self.persist_entity_value(i,tag,"",entity_map)
+
+        this_regex = self.anon_regex("FAC")
+        for text, id in zip(texts, ids):
+            new_text = re.sub(this_regex,lambda x: callback(x, id),text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonGPE(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/gpe.csv')
+        def callback(match, i):
+            gpe = str(random.choice(df. iloc[:, 0]))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,gpe,entity_map)
+
+        this_regex = self.anon_regex("GPE")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonLanguage(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
+        new_texts = []
+        def callback(match, i):
+            this_language = random.choice(language)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,this_language,entity_map)
+
+        this_regex = self.anon_regex("LANGUAGE")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonLaughter(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            tag = match.group()
+            return self.persist_entity_value(i,tag,"",entity_map)
+
+        this_regex = self.anon_regex("LAUGHTER")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) ,text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonLaw(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            tag = match.group()
+            this_match = re.search('-', tag)
+            return self.persist_entity_value(i,tag,"",entity_map)
+
+        this_regex = self.anon_regex("LAW")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id),text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonLoc(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        # us-area-code-cities
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/us-area-code-cities.csv')
+        def callback(match, i):
+            loc = str(random.choice(df['city']))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,loc,entity_map)
+
+        this_regex = self.anon_regex("LOC")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) ,text)
+            new_texts.append(new_text)
+        return new_texts,entity_map
+
+
+class AnonMoney(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            if self._entity_rules.args.modality == 'text':
+                money = '$' + str(random.randrange(200,500))
+            else:
+                money = inflector.number_to_words(random.randrange(200,500)) + " dollars"
+            tag = match.group()
+            return self.persist_entity_value(i,tag,money,entity_map)
+
+        this_regex = self.anon_regex("MONEY")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonNorp(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/nationalities.csv')
+        def callback(match, i):
+            norp = str(random.choice(df['Nationality']))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,norp,entity_map)
+
+        this_regex = self.anon_regex("NORP")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonOrdinal(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
+        t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
+        
+        if self._entity_rules.args.modality == 'text':
+            ordinal = t_ordinal
         else:
-            ssn = digits2words(str(first + second + third))
-        tag = match.group()
-        return persist_entity_value(i,tag,ssn,entity_map)
+            ordinal = v_ordinal
+        
+        new_texts = []
+        def callback(match, i):
+            number = random.choice(ordinal)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,number,entity_map)
 
-    this_regex = anon_regex("SSN", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
-
-
-def work_of_art(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing works of art...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
-
-    def callback(match, i):
-        work = str(random.choice(df['Title']))
-        tag = match.group()
-        return persist_entity_value(i,tag,work,entity_map)
-
-    this_regex = anon_regex("WORK_OF_ART", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex,lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+        this_regex = self.anon_regex("ORDINAL")
+        for text,id in zip(texts, ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
 
-def zipC(texts, entity_map, ids, modality, anon_map, token_map):
-    print("Anonymizing zip codes...")
-    new_texts = []
-    df = pd.read_csv(os.getcwd() + '/data/zip_code_database.csv')
+class AnonPercent(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            if self._entity_rules.args.modality == 'text':
+                perc = str(random.randrange(1,100)) + "%"
+            else:
+                perc = inflector.number_to_words(str(random.randrange(1,100))) + " PERCENT"
+            tag = match.group()
+            return self.persist_entity_value(i,tag,perc,entity_map)
 
-    def callback(match, i):
-        if modality == 'text':
-            zipC = str(random.choice(df['zip']))
-        else:
-            zipC = digits2words(str(random.choice(df['zip'])))
-        tag = match.group()
-        return persist_entity_value(i,tag,zipC,entity_map)
+        this_regex = self.anon_regex("PERCENT")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
 
-    this_regex = anon_regex("ZIP", anon_map, token_map)
-    for text,id in zip(texts,ids):
-        new_text = re.sub(this_regex, lambda x: callback(x,id), text)
-        new_texts.append(new_text)
-    return new_texts, entity_map
+class AnonPerson(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/baby-names.csv')
+
+        def callback(match, i):
+            tag = match.group()
+            name = str(random.choice(df['name']))
+            return self.persist_entity_value(i,tag,name,entity_map)
+
+        this_regex = self.anon_regex("PERSON")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+class AnonPhone(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+
+        def callback(match, i):
+            area_code = str(random.randrange(200,999))
+            exchange = str(random.randrange(200,999))
+            number = str(random.randrange(1000,9999))
+            if self._entity_rules.args.modality == 'text':
+                phone = area_code + "-" + exchange + "-" + number
+            else:
+                phone = digits2words(str(area_code + exchange + number))
+            
+            tag = match.group()
+            return self.persist_entity_value(i,tag,phone,entity_map)
+
+        this_regex = self.anon_regex("PHONE")
+
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonPIN(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+
+        def callback(match, i):
+            rand_4d = str(random.randrange(1000,9999))
+            if self._entity_rules.args.modality == 'voice':
+                pin = digits2words(str(rand_4d))
+            else:
+                pin = rand_4d
+            tag = match.group()
+            return self.persist_entity_value(i,tag,pin,entity_map)
+
+        this_regex = self.anon_regex("PIN")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id) , text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonProduct(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
+        new_texts = []
+        def callback(match, i):
+            this_product = random.choice(product)
+            tag = match.group()
+            return self.persist_entity_value(i,tag,this_product,entity_map)
+
+        this_regex = self.anon_regex("PRODUCT")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id),text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonQuantity(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        def callback(match, i):
+            quantity = str(random.randrange(1000,9999))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,quantity,entity_map)
+
+        this_regex = self.anon_regex("QUANTITY")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id),text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonSSN(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+
+        def callback(match, i):
+            first = str(random.randrange(200,999))
+            second = str(random.randrange(10,99))
+            third = str(random.randrange(1000,9999))
+            if self._entity_rules.args.modality == 'text':
+                ssn = first + "-" + second + "-" + third
+            else:
+                ssn = digits2words(str(first + second + third))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,ssn,entity_map)
+
+        this_regex = self.anon_regex("SSN")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonWorkOfArt(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/Artworks.csv')
+
+        def callback(match, i):
+            work = str(random.choice(df['Title']))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,work,entity_map)
+
+        this_regex = self.anon_regex("WORK_OF_ART")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex,lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map
+
+
+class AnonZipC(AnonymizerBase):
+    def anonymize(self,texts, entity_map, ids):
+        new_texts = []
+        df = pd.read_csv(os.getcwd() + '/data/zip_code_database.csv')
+
+        def callback(match, i):
+            if self._entity_rules.args.modality == 'text':
+                zipC = str(random.choice(df['zip']))
+            else:
+                zipC = digits2words(str(random.choice(df['zip'])))
+            tag = match.group()
+            return self.persist_entity_value(i,tag,zipC,entity_map)
+
+        this_regex = self.anon_regex("ZIP")
+        for text,id in zip(texts,ids):
+            new_text = re.sub(this_regex, lambda x: callback(x,id), text)
+            new_texts.append(new_text)
+        return new_texts, entity_map

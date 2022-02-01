@@ -2,7 +2,7 @@
 	"entities": {
 		"_IGNORE_": {
 			"redactor": {
-				"model-type": "phraselist",
+				"model-class": "redact.RedactorPhraseList",
 				"text": {
 					"phrase-list": [
 						"first name",

@@ -139,3 +139,16 @@ rules-custom/custom-defs.yml
 rules-custom/custom-test.yml
 
 rules/custom-defs.yml
+rules/custom-regex.yml
+rules/custom-redactor.yml
+text_log_l2.csv
+text_output_l2.csv
+voice_log_l2.csv
+voice_output_l2.csv
+test/text_output_anonymized_l2.csv
+test/text_output_anonymized_only.csv
+test/voice_output_anonymized_l2.csv
+test/voice_output_anonymized_only.csv
+rules/custom-redactor.yml_
+rules/custom-regex.yml_
+rules/ignore.yml

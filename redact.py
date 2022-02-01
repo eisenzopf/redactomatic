@@ -41,7 +41,6 @@ def convert_to_uppercase(texts):
         new_texts.append(new_text)
     return new_texts
 
-
 def replace_ignore(texts,entity_values):
     print("Re-inserting ignored text...")
     new_texts = []
@@ -105,7 +104,7 @@ class RedactorRegex(RedactorBase):
 
         #If the paramters do not contain a definition for the current modality then assume that the model is not designed for this and return None.
         if _model_params is None: 
-            raise er.ModalityNotSupportedException("Modality: "+str(self._entity_rules.args.modality)+" not supported for redactor id: "+self._id)
+            raise er.NotSupportedException("Modality: "+str(self._entity_rules.args.modality)+" not supported for redactor id: "+self._id)
         #print("_model_params:",_model_params)
 
         #Build a regular expression matcher using the parameters in the relevant 'voice' or 'text' section.
@@ -180,7 +179,7 @@ class RedactorPhraseList(RedactorRegex):
         _phrase_list=_model_params.get("phrase-list",None)   
         if (_phrase_list is not None):
             self._phrase_list=_phrase_list
-            print("Phrase list: "+str(self._phrase_list))
+            #print("Phrase list: "+str(self._phrase_list))
         elif (_phrase_filename is not None):
             with open(self._phrase_filename) as json_file:
                 #print ("Open ",self._phrase_filename)
@@ -192,7 +191,7 @@ class RedactorPhraseList(RedactorRegex):
     def redact(self, texts, entity_map, eCount, ids, entity_values):
         for phrase in self._phrase_list :
             #Delegate the task to a regexRedactor which will use the parameters in this config parameter set.
-            print("Phrase: "+str(phrase))
+            #print("Phrase: "+str(phrase))
             _my_redactor=RedactorRegex(self._id,self._entity_rules)
             _my_model_params=self._params.copy()
             _my_model_params[self._entity_rules.args.modality]["regex"]=str(phrase)

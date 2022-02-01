@@ -1,150 +1,168 @@
 entities: 
   _SPACY_:
     redactor:
-      model-type: spacy
+      model-class: redact.RedactorSpacy
 
   PERSON:
-    redactor:
-      model-type: shared
-  
+    anonymizer:
+      model-class: anonymize.AnonPerson
+
   MONEY:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonMoney
   
   LOC:
-    redactor:
-      model-type: shared 
+    anonymizer:
+      model-class: anonymize.AnonLoc
  
   DATE:
-    redactor:
-      model-type: shared  
+    anonymizer:
+      model-class: anonymize.AnonDate
 
   EVENT:
-    redactor:
-      model-type: shared  
+    anonymizer:
+      model-class: anonymize.AnonEvent
   
   FAC:
-    redactor:
-      model-type: shared  
-  
+    anonymizer:
+      model-class: anonymize.AnonFac
+
   GPE:
-    redactor:
-      model-type: shared  
+    anonymizer:
+      model-class: anonymize.AnonGPE
   
   LANGUAGE:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonLanguage
 
   LAUGHTER:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonLaughter
 
   LAW:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonLaw
 
   NORP:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonNorp
 
   ORG:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonCompany
 
   PERCENT:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonPercent
 
   PRODUCT:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonProduct
 
   QUANTITY:
-    redactor:
-      model-type: shared
-  
+    anonymizer:
+      model-class: anonymize.AnonQuantity
+
   TIME:
-    redactor:
-      model-type: shared
-  
+    anonymizer:
+      model-class: anonymize.AnonTime
+
   WORK_OF_ART:
-    redactor:
-      model-type: shared
+    anonymizer:
+      model-class: anonymize.AnonWorkOfArt
 
   SSN:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: ssn
         group: ssn
         voice:
           regexp-id: ssn
           group: ssn
-    
+    anonymizer:
+      model-class: anonymize.AnonSSN
+
   CCARD:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: ccard
       voice:
         regex-id: ccard
+    anonymizer:
+      model-class: anonymize.AnonCCard
 
   ADDRESS:  
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: address
       voice:
         regex-id: address
+    anonymizer:
+      model-class: anonymize.AnonAddress
 
   ZIP:  
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: zip-text
         group: zip
       voice:
         regex-id: zip-voice
+    anonymizer:
+      model-class: anonymize.AnonZipC
 
   PHONE:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: phone-text
       voice:
         regex-id: phone-voice
+    anonymizer:
+      model-class: anonymize.AnonPhone
 
   EMAIL:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: email
       voice:
         regex-id: email
+    anonymizer:
+      model-class: anonymize.AnonEmail
 
   ORDINAL:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: ordinal
       voice:
         regex-id: ordinal
+    anonymizer:
+      model-class: anonymize.AnonOrdinal
 
   CARDINAL:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: cardinal
       voice:
         regex-id: cardinal
+    anonymizer:
+      model-class: anonymize.AnonCardinal
 
   PIN:
     redactor:
-      model-type: regex
+      model-class: redact.RedactorRegex
       text:
         regex-id: pin-text
       voice:
         regex-id: pin-voice
+    anonymizer:
+      model-class: anonymize.AnonPIN
 
 regex:
   pin-text:

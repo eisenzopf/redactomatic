@@ -1,6 +1,7 @@
 import yaml
 import json
 import redact
+import anonymize
 import regex
 import sys
 
@@ -8,8 +9,19 @@ import sys
 class EntityRuleCongfigException(Exception):
     pass
 
-class ModalityNotSupportedException(Exception):
+class NotSupportedException(Exception):
     pass
+
+
+def get_class(classpath):
+    '''Take a string of the form module.class and return the actual class object.'''
+    try:
+        modulename,classname=classpath.split('.')
+        module = __import__(modulename)
+        class_ = getattr(module, classname)
+        return class_
+    except Exception as err:
+        raise Exception("ERROR: Unable to find classname:"+classname+"in module:"+modulename) from err
 
 #Helper function to merge config files as they are
 def merge(source, destination):
@@ -101,42 +113,41 @@ class EntityRules():
         return regex
 
     def get_redactor_model(self,id):
-        #print("get_redactor_model",id,modality)
+        return self.get_model(id,"redactor")
+
+    def get_anonomizer_model(self,id):
+        return self.get_model(id,"anonymizer")
+
+    def get_model(self,id,model_type):
+        #model_type="redactor","anoymizer"
+        #print("get_model",id,model_type)
         
         _entity_rule=self._rules.get("entities",None)
         if _entity_rule is None: 
             raise EntityRuleCongfigException("WARNING: No 'entities' section found in rules.")
         
         _specific_entity=_entity_rule.get(id,None)
-        if _specific_entity is None: 
-            raise EntityRuleCongfigException("WARNING: Entity ",id," not listed in 'entities' in the rules.")
+        if _specific_entity is None: raise EntityRuleCongfigException("WARNING: Entity ",id," not listed in 'entities' in the rules.")
 
-        _redactor_params=_specific_entity.get("redactor",None)
-        if _redactor_params is None: 
-            raise EntityRuleCongfigException("WARNING: No 'redactor' specified for: "+id+" the rules.")
+        _model_params=_specific_entity.get(model_type,None)
+        if _model_params is None: 
+            raise NotSupportedException("WARNING: No '"+model_type+"' specified for: "+id+" the rules.")
         
-        _model_type=_redactor_params.get("model-type",None)
-        if _model_type is None: 
-            raise EntityRuleCongfigException("WARNING: Label 'model-type' is not listed in redactor section for "+id+" in the rules.")
-
         #Instantiate a model class and configure it with any parameters in the rules section for that model.
         #Models get a reference to this entity_rules object so they use it to configure themselves. (e.g. find rules defs in other parts of the configuration.)
-        #Entities that are 'shared' are generated only by spacy and we return an empty model for them.
-        if (_model_type == "shared"): return None
-        elif (_model_type == "spacy"): _model=redact.RedactorSpacy(id,self)
-        elif (_model_type == "regex"): _model=redact.RedactorRegex(id,self)
-        elif (_model_type == "phraselist"): _model=redact.RedactorPhraseList(id,self)
-        else:
-            raise EntityRuleCongfigException("Undefined model_type: ",str(_model_type))
+        _model_class=_model_params.get("model-class",None)
+        if _model_class is None: raise EntityRuleCongfigException("WARNING: Label 'model-class' is not listed in '"+model_type+"' section for "+id+" in the rules.")
+        
+        #Dynamically create a model
+        #print("Creating dynamic class: ",_model_class)
+        _model=get_class(_model_class)(id,self)
 
         #Configure the model.  
         try:
-            _model.configure(_redactor_params)
-        except(ModalityNotSupportedException) as e:
-            print("Skipping: "+id)
-            _model=None
+            _model.configure(_model_params)
+        except(NotSupportedException) as e:
+            raise NotSupportedException("WARNING: configuration failed for '"+model_type+"' specified for: "+id+" the rules.")
 
         return _model
 
-        
         

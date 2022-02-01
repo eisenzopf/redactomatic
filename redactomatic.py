@@ -80,26 +80,29 @@ def main():
     # load data into a Pandas Dataframe
     df, texts, ids = df_load_files(args)
 
+    #If IGNORE isn't specified in the running order then add it first. This keeps backwards compatibility.
+    if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
+    if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
+        
+    #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
+    if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
+    if not "_SPACY_" in entities: entities.append("_SPACY_")
+    
+    #Get a list of the entities in the level specified on the command line ordered by the redaction_order.
+    rule_order=[x for x in redaction_order if x in entities]
+
     #Now run redaction on the ordered list of redactors that are needed to meet the current redaction level.
     if not args.noredaction:
         print("Starting redaction at anonymization level:",entity_rules.level)
 
-        #If IGNORE isn't specified in the running order then add it first. This keeps backwards compatibility.
-        if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
-        if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
-            
-        #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
-        if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
-        if not "_SPACY_" in entities: entities.append("_SPACY_")
-
-        #Get a list of the entities in the desired level ordered by the redaction_order.
-        rule_order=[x for x in redaction_order if x in entities]
-        for redactor_id in rule_order:
+        for rule in rule_order:
             #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
-            redactor_model=entity_rules.get_redactor_model(redactor_id)
-            if redactor_model is not None:
-                print("Redacting ",redactor_id,"...")
-                texts, entity_map, curr_id, ids, entity_values = redactor_model.redact(texts, entity_map, curr_id, ids, entity_values)
+            try:
+                _model=entity_rules.get_redactor_model(rule)
+                print("Redacting ",rule,"...")
+                texts, entity_map, curr_id, ids, entity_values = _model.redact(texts, entity_map, curr_id, ids, entity_values)
+            except(er.NotSupportedException) as e:
+                print("Skipping ",rule,"...")
                 
     #Put the text back that we do not want to allow to be redacted
     texts = redact.replace_ignore(texts,entity_values)
@@ -111,35 +114,16 @@ def main():
         if (args.seed is not None):
             print("Using fixed random seed: ",args.seed)
             random.seed(args.seed)
-
-        if "ADDRESS" in entities: texts, entity_map =   anonymize.address(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "CCARD" in entities: texts, entity_map =     anonymize.ccard(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "PHONE" in entities: texts, entity_map =     anonymize.phone(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "CARDINAL" in entities: texts, entity_map = anonymize.cardinal(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-no, voice=no   
-        if "ORDINAL" in entities: texts, entity_map =   anonymize.ordinal(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "ZIP" in entities: texts, entity_map =       anonymize.zipC(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "ORG" in entities: texts, entity_map =       anonymize.company(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "PERSON" in entities: texts, entity_map =    anonymize.person(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "TIME" in entities: texts, entity_map =      anonymize.atime(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "DATE" in entities: texts, entity_map =      anonymize.adate(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "GPE" in entities: texts, entity_map =       anonymize.gpe(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "WORK_OF_ART" in entities: texts, entity_map = anonymize.work_of_art(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "LANGUAGE" in entities: texts, entity_map =  anonymize.language(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "EVENT" in entities: texts, entity_map =     anonymize.event(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "NORP" in entities: texts, entity_map =      anonymize.norp(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "MONEY" in entities: texts, entity_map =     anonymize.money(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "PERCENT" in entities: texts, entity_map =   anonymize.perc(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "SSN" in entities: texts, entity_map =       anonymize.ssn(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "EMAIL" in entities: texts, entity_map =     anonymize.email(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "PIN" in entities: texts, entity_map =       anonymize.pin(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-
-        # These anonymizers are for spacy labels that we have anonymized to "[]" unless its a mislabeled match to another label
-        if "LAUGHTER" in entities: texts, entity_map = anonymize.laughter(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "PRODUCT" in entities: texts, entity_map = anonymize.product(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "QUANTITY" in entities: texts, entity_map = anonymize.quantity(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "LAW" in entities: texts, entity_map = anonymize.law(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "FAC" in entities: texts, entity_map = anonymize.fac(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
-        if "LOC" in entities: texts, entity_map = anonymize.loc(texts, entity_map, ids, args.modality, anon_map, token_map) # chats-yes, voice=yes
+        
+        #Now run through the rules again and execute the associated anonumizers
+        for rule in rule_order:
+            #Get the custom anonymizer model for this rule_label. 
+            try:
+                _model=entity_rules.get_anonomizer_model(rule)
+                print("Anonymizing ",rule,"...")
+                texts, entity_map=_model.anonymize(texts, entity_map, ids)
+            except(er.NotSupportedException) as e:
+                print("Skipping ",rule,"...")
 
     # data cleanup
     texts = redact.clean(texts) # chats-yes, voice-yes
