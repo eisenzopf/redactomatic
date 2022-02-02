@@ -33,7 +33,11 @@ entities:
   
   LANGUAGE:
     anonymizer:
-      model-class: anonymize.AnonLanguage
+      model-class: anonymize.AnonRegex
+      text:
+        regex-id: language-gen
+      voice:
+        regex-id: language-gen
 
   LAUGHTER:
     anonymizer:
@@ -77,9 +81,9 @@ entities:
       text:
         regex-id: ssn
         group: ssn
-        voice:
-          regexp-id: ssn
-          group: ssn
+      voice:
+        regex-id: ssn
+        group: ssn
     anonymizer:
       model-class: anonymize.AnonSSN
 
@@ -165,6 +169,9 @@ entities:
       model-class: anonymize.AnonPIN
 
 regex:
+  language-gen:
+    - 'Chinese|Spanish|English|Hindi|Arabic|Portuguese|Russian|German|Korean|French|Turkish'
+
   pin-text:
     # chat-yes, voice-no
     - (^|\s)(?:(\d{4}))\s*?

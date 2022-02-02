@@ -4,14 +4,14 @@ import redact
 import anonymize
 import regex
 import sys
+from random import Random
 
 # Exception classes for redactors
-class EntityRuleCongfigException(Exception):
+class EntityRuleConfigException(Exception):
     pass
 
 class NotSupportedException(Exception):
     pass
-
 
 def get_class(classpath):
     '''Take a string of the form module.class and return the actual class object.'''
@@ -48,6 +48,16 @@ class EntityRules():
     def __init__(self, args):
         self._rules={}
         self._args=args
+        
+        #Set up a shared randomizer for shared seeding.
+        self._random = Random()
+        if (self._args.seed is not None):
+            print("Using fixed random seed: ",self._args.seed)
+            self._random.seed(args.seed)
+
+    @property
+    def random(self):
+        return self._random
 
     @property
     def level(self):
@@ -108,8 +118,7 @@ class EntityRules():
 
     def get_regex(self, rulename):
         '''Return the regular expression associated with the rulename'''
-        regex= self._rules["regex"][rulename][0]
-        #print ("regex:",regex)
+        regex= self._rules["regex"][rulename]
         return regex
 
     def get_redactor_model(self,id):
@@ -117,37 +126,44 @@ class EntityRules():
 
     def get_anonomizer_model(self,id):
         return self.get_model(id,"anonymizer")
-
+    
     def get_model(self,id,model_type):
-        #model_type="redactor","anoymizer"
-        #print("get_model",id,model_type)
-        
-        _entity_rule=self._rules.get("entities",None)
-        if _entity_rule is None: 
-            raise EntityRuleCongfigException("WARNING: No 'entities' section found in rules.")
-        
-        _specific_entity=_entity_rule.get(id,None)
-        if _specific_entity is None: raise EntityRuleCongfigException("WARNING: Entity ",id," not listed in 'entities' in the rules.")
-
-        _model_params=_specific_entity.get(model_type,None)
-        if _model_params is None: 
-            raise NotSupportedException("WARNING: No '"+model_type+"' specified for: "+id+" the rules.")
-        
         #Instantiate a model class and configure it with any parameters in the rules section for that model.
-        #Models get a reference to this entity_rules object so they use it to configure themselves. (e.g. find rules defs in other parts of the configuration.)
-        _model_class=_model_params.get("model-class",None)
-        if _model_class is None: raise EntityRuleCongfigException("WARNING: Label 'model-class' is not listed in '"+model_type+"' section for "+id+" in the rules.")
-        
-        #Dynamically create a model
-        #print("Creating dynamic class: ",_model_class)
+        #We find the type of class to create from the entity_rules then that object configures itself from the rules.
+        _model_class=self.get_entityid_model_class(id,model_type)
+            
+        #Dynamically create and configure the model.
+        #print("Creating dynamic class: ",str(_model_class))
         _model=get_class(_model_class)(id,self)
-
-        #Configure the model.  
-        try:
-            _model.configure(_model_params)
-        except(NotSupportedException) as e:
-            raise NotSupportedException("WARNING: configuration failed for '"+model_type+"' specified for: "+id+" the rules.")
-
+        _model_params=self.get_entityid_model_rule(id,model_type)
+        #print("type:",type(_model).__name__)
+        _model.configure(params=_model_params)
         return _model
+
+    ### Fetch rule properties with specific exception support ###
+    def get_entities_rule(self):
+        '''return entity_rules(entites).'''         
+        _rule=self._rules.get("entities",None)
+        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities) not found in rules.")   
+        return _rule  
+
+    def get_entityid_rule(self,id):
+        '''return entity_rules('entites.{id}).'''         
+        _rule=self.get_entities_rule().get(id,None)
+        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities."+id+") not found in rules.")
+        return _rule
+
+    def get_entityid_model_rule(self,id,model_type):
+        '''return entity_rules('entites.{id}.{model_type}). Where {model_type}='redactor' or 'anonymizer'.'''            
+        _rule=self.get_entityid_rule(id).get(model_type,None)
+        if _rule is None: raise NotSupportedException("WARNING: entity_rules(entities."+id+"."+model_type+") not defined.")
+        return _rule
+
+    def get_entityid_model_class(self,id,model_type):
+        '''return entity_rules('entites.{id}.{model_type}).model_class:'''
+        _rule=self.get_entityid_model_rule(id,model_type).get("model-class",None)
+        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities."+id+"."+model_type+".model-class) not defined.")
+        return _rule
+
 
         

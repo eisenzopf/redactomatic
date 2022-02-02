@@ -103,7 +103,7 @@ def main():
                 texts, entity_map, curr_id, ids, entity_values = _model.redact(texts, entity_map, curr_id, ids, entity_values)
             except(er.NotSupportedException) as e:
                 print("Skipping ",rule,"...")
-                
+
     #Put the text back that we do not want to allow to be redacted
     #texts = redact.replace_ignore(texts,entity_values)
    
@@ -114,10 +114,6 @@ def main():
     if args.anonymize:
         #Run the anonymizers for the same targets as redaction (order doesn't matter)
         anon_order=rule_order
-        #Seed the random number generator if determinism is required
-        if (args.seed is not None):
-            print("Using fixed random seed: ",args.seed)
-            random.seed(args.seed)
     else:
         # If no anonymization just run the special _IGNORE_ text restorer.
         anon_order=['_IGNORE_']

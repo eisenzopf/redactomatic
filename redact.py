@@ -74,7 +74,7 @@ class RedactorRegex(RedactorBase):
     def __init__(self,id, entity_rules):
         #to ignore case set flags= regex.IGNORECASE
         self._group =None      
-        self._pattern =None
+        self._pattern_set =[]
         self._flags=0
         super().__init__(id, entity_rules)
 
@@ -95,49 +95,53 @@ class RedactorRegex(RedactorBase):
         _regex_filename=_model_params.get("regex-filename",None)   
         _regex_id=_model_params.get("regex-id",None)
         _regex=_model_params.get("regex",None)
-        
+                
         #Get the regex from an inline definition, a ruleref, or an external file (NOT YET SUPPORTED)
         if (_regex_id is not None): 
-            _regex_string=str(self._entity_rules.get_regex(_regex_id))
+            _regex_set=self._entity_rules.get_regex(_regex_id)
         elif (_regex_filename is not None):
             #IMPLEMENT THIS!
-            raise er.EntityRuleCongfigError("ERROR: regex-filename is not yet supported.")
+            raise er.EntityRuleConfigException("ERROR: regex-filename is not yet supported.")
         elif (_regex is not None):
-            _regex_string=str(_regex)
+            _regex_set=_regex
         else:
-            raise er.EntityRuleCongfigError("ERROR: No valid regex defined in rule: "+str(self._id))
+            raise er.EntityRuleConfigException("ERROR: No valid regex defined in rule: "+str(self._id))
+        
+        #ensure we have a list of regexp expressions (even if there is just one in the list.)  
+        if isinstance(_regex_set,str): _regex_set=[_regex_set]
+        if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")   
 
         self._group=_model_params.get("group",1)     
         self._flags=_model_params.get("flags",regex.IGNORECASE)
         
-        #The regex is defined in another rule in the rulesbase object then use this definition. Will overwrite any local regex definition.
         try:
-            #print("compiling:",_regex_string)
-            self._pattern = regex.compile(_regex_string, self._flags)              
+            self._pattern_set = [regex.compile(r, self._flags) for r in _regex_set]
         except Exception as exc:
-            print("WARNING: Failed to compile regex ':"+self._id+"' with error: "+str(exc))
+            print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc))
 
     #previously: the_redactor()
+    #Supports more than one regular expressions and runs each one, even if a prevoius one found a match.
     def redact(self, texts, entity_map, eCount, ids, entity_values):
         new_texts = []
         for text, d_id in zip(texts,ids):
-            matches = list(self._pattern.finditer(text))
-            newString = text
-            for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
-                #name=entity-text found by pattern
-                if self._group != 1 and e.captures(self._group):
-                        name = e.captures(self._group)[0]
-                        start = e.span(self._group)[0]
-                else:
-                    name = e.group()
-                    start = e.span()[0]
+            for pattern in self._pattern_set:
+                matches = list(pattern.finditer(text))
+                newString = text
+                for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
+                    #name=entity-text found by pattern
+                    if self._group != 1 and e.captures(self._group):
+                            name = e.captures(self._group)[0]
+                            start = e.span(self._group)[0]
+                    else:
+                        name = e.group()
+                        start = e.span()[0]
 
-                if not (self._id == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
-                    ix = entity_map.update_entities(name,d_id,eCount,self._id)
-                    end = start + len(name)
-                    newLabel=entity_values.set_label_value(self._id,ix,name)
-                    newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
-                    eCount += 1
+                    if not (self._id == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
+                        ix = entity_map.update_entities(name,d_id,eCount,self._id)
+                        end = start + len(name)
+                        newLabel=entity_values.set_label_value(self._id,ix,name)
+                        newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
+                        eCount += 1
             new_texts.append(newString)
         return new_texts, entity_map, eCount, ids, entity_values
 
