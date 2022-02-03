@@ -173,7 +173,7 @@ class RedactorPhraseList(RedactorRegex):
                 #print ("Open ",self._phrase_filename)
                 self._phrase_list = json.load(json_file)
         else:
-            raise er.EntityRuleCongfigException("ERROR: No phrase list defined for phrase-list entity definition.")
+            raise er.EntityRuleConfigException("ERROR: No phrase list defined for phrase-list entity definition.")
 
     #was ignore_phrases()
     def redact(self, texts, entity_map, eCount, ids, entity_values):

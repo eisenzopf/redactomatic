@@ -25,7 +25,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--level', default=2, required=False, help='sets the redaction level (1-3); default is 2')
     parser.add_argument('--noredaction', action='store_true', help='turn off redaction')
     parser.add_argument('--seed', type=int, required=False, help='a seed value for anonymization random selection; default is None i.e. truly random.',default=None)
-    parser.add_argument('--rulefile', nargs="*", required=False, help='a YAML file containing definitions for entity rules; default is data/core-rules.yaml')
+    parser.add_argument('--rulefile', nargs="*", required=False, help='a list of YAML or JSON files containing definitions for entity rules; default is \'rules/*.yml\',\'rules/*.json\'')
 
     return parser.parse_args()
 

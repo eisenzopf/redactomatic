@@ -84,6 +84,7 @@ class AnonymizerBase():
         return self._entity_rules.random
 
 class AnonRegex(AnonymizerBase):
+    '''Class to anonymize a token by generating a random string from a regular expression.'''
     def __init__(self,id,entity_rules):
         self._pattern_set =[]
         self._flags=0
@@ -142,6 +143,7 @@ class AnonRegex(AnonymizerBase):
             #If there are multiple regexps in a list, then pick one at random.
             pattern=self.random.choice(self._pattern_set)
             anon_string= self._xeger.xeger(pattern)
+            #print ("pattern:",pattern,"string:",anon_string)
             tag = match.group()
             return self.persist_entity_value(i,tag,anon_string,entity_map)
             
@@ -152,6 +154,7 @@ class AnonRegex(AnonymizerBase):
         return new_texts, entity_map
 
 class AnonRestoreEntityText(AnonymizerBase):
+    '''Class to replace an anonymization token with the original text that was redacted in order to restore the original text.'''
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
         print("Re-inserting ignored text...")
         new_texts = []
@@ -168,25 +171,21 @@ class AnonRestoreEntityText(AnonymizerBase):
             new_texts.append(newString)
         return new_texts, entity_map
 
-class AnonDate(AnonymizerBase):
+class AnonNullString(AnonymizerBase):
+    '''Class to replace the anonymization token with a null string.'''
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
         new_texts = []
-        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        ordinal_days = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty first", "twenty second", "twenty third", "twenty fourth", "twenty fifth", "twenty sixth", "twenty seventh", "twenty eighth"]
-
         def callback(match, i):
-            if self._entity_rules.args.modality == 'text':
-                date = str(self.random.randrange(1,12)) + "/" + str(self.random.randrange(1,28))
-            else:
-                date = self.random.choice(months) + " " + self.random.choice(ordinal_days)
             tag = match.group()
-            return self.persist_entity_value(i,tag,date,entity_map)
-            
-        this_regex = self.anon_regex("DATE")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
+            return self.persist_entity_value(i,tag,"",entity_map)
+
+        this_regex = self.anon_regex(self._id)
+        for text, id in zip(texts, conversation_ids):
+            new_text = regex.sub(this_regex,lambda x: callback(x, id),text)
             new_texts.append(new_text)
         return new_texts, entity_map
+
+### Custom anonymization classes for specific entity types ###
 
 class AnonAddress(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
@@ -211,72 +210,6 @@ class AnonAddress(AnonymizerBase):
             new_texts.append(new_text)
         return new_texts, entity_map
 
-class AnonTime(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        hours = ["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
-        minutes = ["oh one","oh two","oh three","oh four","oh five","oh six","oh seven","oh nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
-        new_texts = []
-        
-        def callback(match, i):
-            if self._entity_rules.args.modality == 'text':
-                time = str(self.random.randrange(1,12)) + ":" + str(self.random.randrange(0,50)) + " " + str(self.random.choice(["AM","PM"]))
-            else:
-                time = str(self.random.choice(hours)) + " " + str(self.random.choice(minutes)) + " " + str(self.random.choice(["AM","PM"]))  
-            tag = match.group()
-            return self.persist_entity_value(i,tag,time,entity_map)
-            
-        this_regex = self.anon_regex("TIME")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonCardinal(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        t_cardinal = ["0","1","2","3","4","5","6","7","8","9"]
-        v_cardinal = ["zero","one","two","three","four","five","six","seven","eight","nine"]
-        if self._entity_rules.args.modality == 'text':
-            cardinal = t_cardinal
-        else:
-            cardinal = v_cardinal
-        
-        new_texts = []
-        def callback(match, i):
-            this_cardinal = self.random.choice(cardinal)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,this_cardinal,entity_map)
-
-        this_regex = self.anon_regex("CARDINAL")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-class AnonCCard(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-
-        def callback(match, i):
-            ccnumber = ""
-            length = 16
-            while len(ccnumber) <= (length - 1):
-                digit = str(self.random.randrange(0,9))
-                ccnumber += digit
-            if self._entity_rules.args.modality == 'text':
-                ccard = str(ccnumber)
-            else:
-                ccard = digits2words(ccnumber)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,ccard,entity_map)
-
-        this_regex = self.anon_regex("CCARD")
-
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id) , text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
 class AnonCompany(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
         new_texts = []
@@ -292,7 +225,6 @@ class AnonCompany(AnonymizerBase):
             new_text = regex.sub(this_regex, lambda x: callback(x,id) , text)
             new_texts.append(new_text)
         return new_texts, entity_map
-
 
 class AnonEmail(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
@@ -311,36 +243,6 @@ class AnonEmail(AnonymizerBase):
             new_texts.append(new_text)
         return new_texts, entity_map
 
-
-class AnonEvent(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        events = ["seminar","conference","trade show","workshop","reunion","party","gala","picnic","meeting","lunch"]
-        new_texts = []
-        def callback(match, i):
-            event = self.random.choice(events)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,event,entity_map)
-
-        this_regex = self.anon_regex("EVENT")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonFac(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            tag = match.group()
-            return self.persist_entity_value(i,tag,"",entity_map)
-
-        this_regex = self.anon_regex("FAC")
-        for text, id in zip(texts, conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x, id),text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
 class AnonGPE(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
         new_texts = []
@@ -355,50 +257,6 @@ class AnonGPE(AnonymizerBase):
             new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
             new_texts.append(new_text)
         return new_texts, entity_map
-
-class AnonLanguage(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        language = ["Chinese", "Spanish", "English", "Hindi", "Arabic", "Portuguese", "Russian", "German", "Korean", "French", "Turkish"]
-        new_texts = []
-        def callback(match, i):
-            this_language = self.random.choice(language)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,this_language,entity_map)
-
-        this_regex = self.anon_regex("LANGUAGE")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-class AnonLaughter(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            tag = match.group()
-            return self.persist_entity_value(i,tag,"",entity_map)
-
-        this_regex = self.anon_regex("LAUGHTER")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id) ,text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonLaw(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            tag = match.group()
-            this_match = regex.search('-', tag)
-            return self.persist_entity_value(i,tag,"",entity_map)
-
-        this_regex = self.anon_regex("LAW")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id),text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
 
 class AnonLoc(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
@@ -416,24 +274,6 @@ class AnonLoc(AnonymizerBase):
             new_texts.append(new_text)
         return new_texts,entity_map
 
-
-class AnonMoney(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            if self._entity_rules.args.modality == 'text':
-                money = '$' + str(self.random.randrange(200,500))
-            else:
-                money = inflector.number_to_words(self.random.randrange(200,500)) + " dollars"
-            tag = match.group()
-            return self.persist_entity_value(i,tag,money,entity_map)
-
-        this_regex = self.anon_regex("MONEY")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
 class AnonNorp(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):
         new_texts = []
@@ -444,47 +284,6 @@ class AnonNorp(AnonymizerBase):
             return self.persist_entity_value(i,tag,norp,entity_map)
 
         this_regex = self.anon_regex("NORP")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonOrdinal(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        v_ordinal = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
-        t_ordinal = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"]
-        
-        if self._entity_rules.args.modality == 'text':
-            ordinal = t_ordinal
-        else:
-            ordinal = v_ordinal
-        
-        new_texts = []
-        def callback(match, i):
-            number = self.random.choice(ordinal)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,number,entity_map)
-
-        this_regex = self.anon_regex("ORDINAL")
-        for text,id in zip(texts, conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonPercent(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            if self._entity_rules.args.modality == 'text':
-                perc = str(self.random.randrange(1,100)) + "%"
-            else:
-                perc = inflector.number_to_words(str(self.random.randrange(1,100))) + " PERCENT"
-            tag = match.group()
-            return self.persist_entity_value(i,tag,perc,entity_map)
-
-        this_regex = self.anon_regex("PERCENT")
         for text,id in zip(texts,conversation_ids):
             new_text = regex.sub(this_regex,lambda x: callback(x,id), text)
             new_texts.append(new_text)
@@ -528,58 +327,6 @@ class AnonPhone(AnonymizerBase):
             new_text = regex.sub(this_regex, lambda x: callback(x,id) , text)
             new_texts.append(new_text)
         return new_texts, entity_map
-
-
-class AnonPIN(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-
-        def callback(match, i):
-            rand_4d = str(self.random.randrange(1000,9999))
-            if self._entity_rules.args.modality == 'voice':
-                pin = digits2words(str(rand_4d))
-            else:
-                pin = rand_4d
-            tag = match.group()
-            return self.persist_entity_value(i,tag,pin,entity_map)
-
-        this_regex = self.anon_regex("PIN")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id) , text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonProduct(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        product = ["cheese","beef","milk","corn","couch","chair","table","window","stove","desk"]
-        new_texts = []
-        def callback(match, i):
-            this_product = self.random.choice(product)
-            tag = match.group()
-            return self.persist_entity_value(i,tag,this_product,entity_map)
-
-        this_regex = self.anon_regex("PRODUCT")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id),text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
-
-class AnonQuantity(AnonymizerBase):
-    def anonymize(self, texts, conversation_ids, entity_map, entity_values):
-        new_texts = []
-        def callback(match, i):
-            quantity = str(self.random.randrange(1000,9999))
-            tag = match.group()
-            return self.persist_entity_value(i,tag,quantity,entity_map)
-
-        this_regex = self.anon_regex("QUANTITY")
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex, lambda x: callback(x,id),text)
-            new_texts.append(new_text)
-        return new_texts, entity_map
-
 
 class AnonSSN(AnonymizerBase):
     def anonymize(self, texts, conversation_ids, entity_map, entity_values):

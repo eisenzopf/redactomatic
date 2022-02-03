@@ -1,7 +1,7 @@
 entities:
   _IGNORE_:
     redactor:
-      model-type: redact.RedactorPhraseList
+      model-class: redact.RedactorPhraseList
       text:
         phrase-list:
           - first name
@@ -19,4 +19,4 @@ entities:
           - CV
           - tomorrow
     anonymizer:
-      model-type: anonymize.AnonRestoreEntityText  
+      model-class: anonymize.AnonRestoreEntityText  

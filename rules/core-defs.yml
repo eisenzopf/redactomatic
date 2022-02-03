@@ -9,23 +9,35 @@ entities:
 
   MONEY:
     anonymizer:
-      model-class: anonymize.AnonMoney
-  
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: money-voice-gen
+      text:
+        regex-id: money-text-gen
+
   LOC:
     anonymizer:
       model-class: anonymize.AnonLoc
  
   DATE:
     anonymizer:
-      model-class: anonymize.AnonDate
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: date-voice-gen
+      text:
+        regex-id: date-text-gen
 
   EVENT:
     anonymizer:
-      model-class: anonymize.AnonEvent
-  
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: event-gen
+      text:
+        regex-id: event-gen
+
   FAC:
     anonymizer:
-      model-class: anonymize.AnonFac
+      model-class: anonymize.AnonNullString
 
   GPE:
     anonymizer:
@@ -41,11 +53,11 @@ entities:
 
   LAUGHTER:
     anonymizer:
-      model-class: anonymize.AnonLaughter
+      model-class: anonymize.AnonNullString
 
   LAW:
     anonymizer:
-      model-class: anonymize.AnonLaw
+      model-class: anonymize.AnonNullString
 
   NORP:
     anonymizer:
@@ -57,19 +69,35 @@ entities:
 
   PERCENT:
     anonymizer:
-      model-class: anonymize.AnonPercent
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: percent-voice-gen
+      text:
+        regex-id: percent-text-gen
 
   PRODUCT:
     anonymizer:
-      model-class: anonymize.AnonProduct
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: product-gen
+      text:
+        regex-id: product-gen
 
   QUANTITY:
     anonymizer:
-      model-class: anonymize.AnonQuantity
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: 1-9999-voice-gen
+      text:
+        regex-id: 1-9999-text-gen
 
   TIME:
     anonymizer:
-      model-class: anonymize.AnonTime
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: time-voice-gen
+      text:
+        regex-id: time-text-gen
 
   WORK_OF_ART:
     anonymizer:
@@ -95,7 +123,11 @@ entities:
       voice:
         regex-id: ccard
     anonymizer:
-      model-class: anonymize.AnonCCard
+      model-class: anonymize.AnonRegex
+      voice:
+        regex-id: ccard-voice-gen
+      text:
+        regex-id: ccard-text-gen
 
   ADDRESS:  
     redactor:
@@ -146,7 +178,11 @@ entities:
       voice:
         regex-id: ordinal
     anonymizer:
-      model-class: anonymize.AnonOrdinal
+      model-class: anonymize.AnonRegex
+      text:
+        regex-id: ordinal-text-gen
+      voice:
+        regex-id: ordinal-voice-gen
 
   CARDINAL:
     redactor:
@@ -156,7 +192,11 @@ entities:
       voice:
         regex-id: cardinal
     anonymizer:
-      model-class: anonymize.AnonCardinal
+      model-class: anonymize.AnonRegex
+      text:
+        regex-id: cardinal-text-gen
+      voice:
+        regex-id: cardinal-voice-gen
 
   PIN:
     redactor:
@@ -166,9 +206,99 @@ entities:
       voice:
         regex-id: pin-voice
     anonymizer:
-      model-class: anonymize.AnonPIN
+      model-class: anonymize.AnonRegex
+      text:
+        regex-id: 4-digit-text-gen
+      voice:
+        regex-id: 4-digit-voice-gen
+
+#### REGULAR EXPRESSIONS ###
 
 regex:
+  4-digit-text-gen:
+    - '[0-9]{4}'
+
+  4-digit-voice-gen:
+    - '( (zero|one|two|three|four|five|six|seven|eight|nine)){4}'
+
+  1-9999-text-gen:
+    #1-9999  
+    - '([1-9][0-9]{0,1}[0-9]{0,1}[0-9]{0,1})'  
+
+  1-9999-voice-gen: 
+    #one - niney nine hundred and ninety nine
+    - >
+      ( 
+        (
+          (
+            (one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen) |
+            (twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine)
+          ) 
+          ( hundred and)
+        ){0,1}
+        (
+          (one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen) |
+          (twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine)
+        )
+      ) 
+  
+  product-gen:
+    - 'cheese|beef|milk|corn|couch|chair|table|window|stove|desk'
+
+  percent-text-gen:
+    - '([1-9][0-9]{0,1})\%' #1-99%
+
+  percent-voice-gen:
+    - >
+      (
+        (one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen) |
+        (twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine)
+      ) percent
+
+  ordinal-text-gen:
+    - '1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th'
+
+  ordinal-voice-gen:
+    - 'first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth'
+
+  money-text-gen:
+    - '\$(\d{0,3})(\.\d{2}){0,1}'
+
+  money-voice-gen:
+    - '(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine|) dollars ((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|) (one|two|three|four|five|six|seven|eight|nine) cents){0,1}'
+    - '(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|) dollars ((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|) (one|two|three|four|five|six|seven|eight|nine) cents){0,1}'
+
+  event-gen:
+    - 'seminar|conference|trade show|workshop|reunion|party|gala|picnic|meeting|lunch'
+
+  ccard-text-gen:
+    - '4\d{3}-\d{4}-\d{4}-\d{4}' # visa
+    - '3[4,7]\d{2}-\d{6}-\d{5}' # amex
+  
+  ccard-voice-gen:
+    - 'four ( (zero|oh|one|two|three|four|five|six|seven|eight|nine)){15}' # visa
+    - 'three ( (zero|oh|one|two|three|four|five|six|seven|eight|nine)){14}' # amex
+
+  cardinal-text-gen:
+    - '0|1|2|3|4|5|6|7|8|9'
+
+  cardinal-voice-gen:
+    - 'zero|one|two|three|four|five|six|seven|eight|nine'
+
+  date-voice-gen:
+    - '(January|February|March|April|May|June|July|August|September|October|November|December) (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty first|twenty second|twenty third|twenty fourth|twenty fifth|twenty sixth|twenty seventh|twenty eighth)'
+
+  date-text-gen:
+    - '(01|02|03|04|05|06|07|08|09|10|11|12)\/(0|1|2)[0-9]\/20(20|21|22|23|24|25|26)'
+
+  time-text-gen:
+    - '(01|02|03|04|05|06|07|08|09|10|11|12):(0|1|2|3|4|5)[0-9] (AM|PM)'
+
+  time-voice-gen:
+    - '(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve) (oh|twenty|thirty|forty|fifty) (one|two|three|four|five|six|seven|eight|nine) (AM|PM)'
+    - '(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve) (|ten|twenty|thirty|forty|fifty) (AM|PM)'
+    - '(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve) (eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen) (AM|PM)'
+
   language-gen:
     - 'Chinese|Spanish|English|Hindi|Arabic|Portuguese|Russian|German|Korean|French|Turkish'
 

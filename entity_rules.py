@@ -21,7 +21,7 @@ def get_class(classpath):
         class_ = getattr(module, classname)
         return class_
     except Exception as err:
-        raise Exception("ERROR: Unable to find classname:"+classname+"in module:"+modulename) from err
+        raise Exception("ERROR: Unable to find classname:"+classname+" in module:"+modulename) from err
 
 #Helper function to merge config files as they are
 def merge(source, destination):
@@ -67,8 +67,14 @@ class EntityRules():
     @property  
     def entities(self):
         '''Return the entities list defined in the 'level-{level} section in the rules.'''
-        entities=self._rules.get("level-"+str(self.level),[])
-        return entities
+        _rules=self._rules.get("level",None)
+        if _rules is None: raise EntityRuleConfigException("WARNING: entity_rules(level) not found in rules.")
+        
+        _entities=_rules.get(str(self.level),[])
+        _rules=self._rules.get("level",None)
+        if _rules == []: raise EntityRuleConfigException("WARNING: entity_rules(level."+self.level+") not found in rules.")
+        
+        return _entities
         
     @property  
     def redaction_order(self):
@@ -144,13 +150,13 @@ class EntityRules():
     def get_entities_rule(self):
         '''return entity_rules(entites).'''         
         _rule=self._rules.get("entities",None)
-        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities) not found in rules.")   
+        if _rule is None: raise EntityRuleConfigException("WARNING: entity_rules(entities) not found in rules.")   
         return _rule  
 
     def get_entityid_rule(self,id):
         '''return entity_rules('entites.{id}).'''         
         _rule=self.get_entities_rule().get(id,None)
-        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities."+id+") not found in rules.")
+        if _rule is None: raise EntityRuleConfigException("WARNING: entity_rules(entities."+id+") not found in rules.")
         return _rule
 
     def get_entityid_model_rule(self,id,model_type):
@@ -162,7 +168,7 @@ class EntityRules():
     def get_entityid_model_class(self,id,model_type):
         '''return entity_rules('entites.{id}.{model_type}).model_class:'''
         _rule=self.get_entityid_model_rule(id,model_type).get("model-class",None)
-        if _rule is None: raise EntityRuleCongfigException("WARNING: entity_rules(entities."+id+"."+model_type+".model-class) not defined.")
+        if _rule is None: raise EntityRuleConfigException("WARNING: entity_rules(entities."+id+"."+model_type+".model-class) not defined.")
         return _rule
 
 
