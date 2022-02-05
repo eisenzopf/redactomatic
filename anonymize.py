@@ -9,6 +9,7 @@ import inflect
 import sys
 import entity_map as em
 import entity_rules as er
+import regex_utils as ru
 from xeger import Xeger
 
 inflector = inflect.engine()
@@ -129,7 +130,8 @@ class AnonRegex(AnonymizerBase):
         if isinstance(_regex_set,str): _regex_set=[_regex_set]
         if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")    
 
-        self._flags=_model_params.get("flags",0)
+        #self._flags=_model_params.get("flags",0)
+        self._flags=ru.flags_from_array(_model_params.get("flags",[]),ru.EngineType.RE)
         
         try:
             self._pattern_set = [regex.compile(r, self._flags) for r in _regex_set]

@@ -70,26 +70,37 @@ class EntityRules():
         _rules=self._rules.get("level",None)
         if _rules is None: raise EntityRuleConfigException("WARNING: entity_rules(level) not found in rules.")
         
-        _entities=_rules.get(str(self.level),[])
-        _rules=self._rules.get("level",None)
-        if _rules == []: raise EntityRuleConfigException("WARNING: entity_rules(level."+self.level+") not found in rules.")
-        
+        _entities=_rules.get(str(self.level),None)
+        if _entities is None: raise EntityRuleConfigException("WARNING: entity_rules(level."+self.level+") not found in rules.")
         return _entities
         
     @property  
     def redaction_order(self):
         '''Return the redaction_order list set in the rules'''
-        return self._rules.get('redaction-order',[])
+        _item=self._rules.get('redaction-order',None)
+        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(redaction_order) not found in rules.")
+        return _item
+    
+    @property  
+    def regex_test_set(self):
+        '''Return a list of entities in the regex-test section of the rules.'''
+        _item=self._rules.get('regex-test',None)
+        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(regex-test) not found in rules.")
+        return _item
 
     @property  
     def anon_map(self):
         '''Return the anon_map list fromt the rules'''
-        return self._rules.get('anon-map',[])
+        _item= self._rules.get('anon-map',None)
+        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(anon-map) not found in rules.")
+        return _item
 
     @property  
     def token_map(self):
-        '''Return the token_map list from the rules'''
-        return self._rules.get('token-map',[])  
+        '''Return the token_map list from the rules.  If not defined return an empty array. '''
+        _item=self._rules.get('token-map',None)  
+        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(token-map) not found in rules. Please add an empty token-map rule if you don't need any token mapping.")
+        return _item
 
     @property  
     def args(self):

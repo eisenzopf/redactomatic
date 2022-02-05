@@ -86,26 +86,28 @@ By default, Redactomatic will use the Spacy small ML model. However, if you plan
 Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (`--modality` which must be voice or text), and 3. the column in the CSV containing the text to redact (`--column`), the column containing the conversation ID (`--idcolumn`).
 
 ```
-usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED] [--rulefile RULEFILE [RULEFILE ...]]
+usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED] [--rulefile RULEFILE [RULEFILE ...]] [--regextest] [--testoutputfile TESTOUTPUTFILE]
 ```
 
 ### Command Line Parameters
 
-| Paramter    | Description                                                                                                                                  | Required? |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| column      | The column number containing the text to redact                                                                                              | yes       |
-| idcolumn    | the column number containing the unique conversation id                                                                                      | yes       |
-| inputfile   | The filename containing the conversations to process                                                                                         | yes       |
-| outputfile  | The filename that will contain the redacted output                                                                                           | yes       |
-| modality    | Can be voice or text depending on the type of conversations contained in the inputfile                                                       | yes       |
-| anonymize   | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                           | no        |
-| large       | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                | no        |
-| log         | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.     | no        |
-| uppercase   | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no        |
-| level       | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                           | no        |
-| noredaction | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                    | no        |
-| seed        | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                             | no        |
-| rulefile    | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                      | no        |
+| Paramter       | Description                                                                                                                                  | Required? |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| column         | The column number containing the text to redact                                                                                              | yes       |
+| idcolumn       | the column number containing the unique conversation id                                                                                      | yes       |
+| inputfile      | The filename containing the conversations to process                                                                                         | yes       |
+| outputfile     | The filename that will contain the redacted output                                                                                           | yes       |
+| modality       | Can be voice or text depending on the type of conversations contained in the inputfile                                                       | yes       |
+| anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                           | no        |
+| large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                | no        |
+| log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.     | no        |
+| uppercase      | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no        |
+| level          | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                           | no        |
+| noredaction    | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                    | no        |
+| seed           | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                             | no        |
+| rulefile       | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                      | no        |
+| regextest      | Test the regular rexpressions defeind in the regex-test rules prior to any other processing                                                  | no        |
+| testoutputfile | The file to save test results in.                                                                                                            | no        |
 
 ### Example 1: Redact a text file
 
@@ -215,16 +217,12 @@ The configuration can be spread arbitrarily across multiple files which are simp
 The top-level dictionary keys are as follows:
 
 - level
-
 - redaction-order
-
 - anon-map
-
 - token-map
-
 - entities
-
 - regex
+- regex-test
 
 Each configuration dictionary must have one of these keys as its head.  Multiple keys can be mixed into one file or spread across multiple files.  In the default configuration in the release the top-four keys are present in the file *config.json* and the remaining two keys are defined in the file core-defs.yml. 
 
@@ -379,6 +377,46 @@ The definitions in the `regex `section are just that - they are definitions.  By
 
 The values of the named id keys in the `regex `section can be a **single pattern** or a **list of patterns**.  The interpretation of what to do with a list of regular expressions is left up to the redactor or anonymizer that uses the regex definition.
 
+### regex-test
+
+```
+regex-test:
+  ordinal:
+    - engine: regex
+      flags: [IGNORECASE,DOTALL] 
+      match-type: ONE_OR_MORE_MATCH
+      phrases:
+      - 'first and foremost'
+      - 'the 10th person to see him'  
+    - module: regex
+      match-type: NO_MATCHES
+      phrases:
+      - 'the person who was seconded to the team.'
+```
+
+**Example regex-test ruleset for the rule with regex-id 'ordinal' (YAML)**
+
+An optional regex-test section can be included which will test individual regular expressions with groups of test phrases.  you can test for exact phrase matches, partial matches, of parts of the phrase, or test that phrases do NOT match.  This is controlled by the `match-type` parameter which can have one of the following values:
+
+- ONE_OR_MORE_MATCH  (Default)
+- ONE_OR_MORE_EXACT_MATCH
+- ONE_OR_MORE_PARTIAL_MATCH
+- ALL_EXACT_MATCH
+- ALL_PARTIAL_MATCH
+- NO_MATCHES
+- NO_EXACT_MATCHES
+- NO_PARTIAL_MATCHES
+
+By default the ONE_OR_MORE_MATCH options is used.   This will pass the test if the regular expression finds one or match within the phrase.
+
+ Recall that regular expression rules can comprise multiple patterns.
+
+The `flags` parameter behaves as described for `redact.RedactorRegex`.
+
+The` module` paramter is intended to select for either the 're' or 'regex' module. It is currently ignored and the PCRE compliant regex is always used.  
+
+A particularly useful feature of the regex-test is that it stores detailed information about the test results in the file specified by the `--testoutputfile`command line option.  
+
 ### entities
 
 ```
@@ -417,15 +455,29 @@ Redactomatic has three built-in Redactor classes.  New redactors can be added by
     redactor:
       model-class: redact.RedactorRegex
       text:
-        regex: {regex inline}
-        regex-id: {regex rule-id}
-        group: {regex pattern match group}
-        flags: {regex pattern match flags (raw integer mask}}
+        regex: '\d{1-3}\.com'
+        regex-id: my-rule-id
+        group: my-named-group
+        flags: [ ASCII, IGNORECASE, ... ]
       voice:
         {as per text}
 ```
 
-The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `rule-id` key in the `regex `section.    By default the whole rule has to match, but the matching `group `can be specified which can be a numbered group or a named group (using PCRE naming).  Flags for the regular expression match can be specified via the flag value.  This needs to be the integer mask for the required combination of flags currently. By default the mask value for `regex.IGNORECASE` is used.
+The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `rule-id` key in the `regex `section.    By default the whole rule has to match, but the matching `group `can be specified which can be a numbered group or a named group (using PCRE naming).  
+
+Flags for the regular expression match can be specified via the `flags`value.  This is a list of items as given below . By default  [ IGNORECASE ] is used.
+
+- ASCII, A, 
+
+- IGNORECASE, I, 
+
+- MULTILINE, M, 
+
+- DOTALL, S, 
+
+- VERBOSE, X, 
+
+- LOCALE, L
 
 If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
 
@@ -445,7 +497,7 @@ If a list of regular expressions is specified then the redactor will attempt to 
 
 The `redact.RedactorPhraseList` class is very similar to redact.RedactorRegex but instead of matching regular expressions it matches lists of phrases.  The phrases can be defined inline by attaching a list to the `phrase-list` key or defined in an external text file using the value of `phrase-filename`.
 
-Flags for the regular expression match can be specified via the flag value. This needs to be the integer mask for the required combination of flags currently. By default the mask value for `regex.IGNORECASE` is used.
+The `flags` parameter behaves as described for `redact.RedactorRegex`.
 
 This class is used by in the default definition of the `_IGNORE_` entity redactor that can be found in the release file ***ignore.yml***.   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
 
@@ -492,15 +544,15 @@ The `redact.RedactorSpacy` class implements the redaction of text using the Spac
     anonymizer:
       model-class: anonymize.AnonRegex
       text:
-        regex: {regex inline}
-        regex-id: {regex rule-id}
-        limit: {regex pattern match group}
-        flags: {regex pattern match flags (raw integer mask}}
+        regex: '[a-z]{0-16}\.com'
+        regex-id: my-rule-id
+        limit: 10
+        flags: [ IGNORECASE ]
       voice:
         {as per text}
 ```
 
-The `anonomizer.AnonRegex` class is used to generate random text strings using a regular expression as a generative grammar.  The regular expressions can be expressed inline via the `regex` parameter or by reference using the `regex-id` parameter.  The `limit `parameter defines the maximum number of repeats that a  repeating pattern will be permitted to follow before terminating.  This prevents infinite loops and can be used to limit computationally costly patterns.   This is set to 10 by default.  For more details see [xeger PyPI](https://pypi.org/project/xeger/).  This class does not support PCRE.
+The `anonomizer.AnonRegex` class is used to generate random text strings using a regular expression as a generative grammar.  The regular expressions can be expressed inline via the `regex` parameter or by reference using the `regex-id` parameter.  The `limit `parameter defines the maximum number of repeats that a  repeating pattern will be permitted to follow before terminating.  This prevents infinite loops and can be used to limit computationally costly patterns.   This is set to 10 by default.  For more details see [xeger PyPI](https://pypi.org/project/xeger/).  The `flags `parameter behaves as described for `redact.RedactorRegex`.   This class does not support PCRE.
 
 ```
 entities:
@@ -580,7 +632,7 @@ Implementations for these will be welcomed from contributors.
 
 ## Authors
 
-Jonathan Eisenzopf
+Jonathan Eisenzopf, David Attwater
 
 ## Copyright
 

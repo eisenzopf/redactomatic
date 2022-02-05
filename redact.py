@@ -1,6 +1,6 @@
 import json
 import os
-from pyrsistent import v
+#from pyrsistent import v
 import spacy
 import regex
 import pandas as pd
@@ -8,6 +8,7 @@ import numpy as np
 import entity_map as em
 import entity_rules as er
 import sys
+import regex_utils as ru
 
 # Exception classes for redactors
 
