@@ -49,27 +49,30 @@ class RedactorBase():
     '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
     def __init__(self,id,entity_rules):
         self._entity_rules=entity_rules
+        self._entity_map=None
+        self._entity_values=None
         self._params={}
         self._id=id
      
     '''Virtual function defining what a configuration call should look like.'''
-    def configure(self, params):
+    # entity_map : a map to keep track of indexes assoigned to redacted words to enable restoration of consitent anonymized words later.
+    # entity_values: a dictionary to keep the substituted entity values keyed by their substituted labels (e.g. ) entity_values["PIN-45"=1234]
+    def configure(self, params, entity_map, entity_values):
         self._params=params
+        self._entity_map=entity_map
+        self._entity_values=entity_values
 
     # IMPLEMENT THIS FUNCTION TO:
     # Find match to pattern of type label; keeping entities map updated and tracking ID-TEXT connection,
     # pattern: the regex used to match the target entity.
     # label: contains IGNORE,ADDRESS,CCARD,EMAIL,PHONE,PIN,SSN,ZIP
     # texts : an array of texts to be redacted
-    # entity_map : a map to keep track of indexes assoigned to redacted words to enable restoration of consitent anonymized words later.
     # eCount : a unique entity key, ready for the next discovered entity
     # ids: an array of conversation-ids (aligns with the texts in length and content)
-    # entity_values: a dictionary to keep the substituted entity values keyed by their substituted labels (e.g. ) entity_values["PIN-45"=1234]
-    # group:  contains the target match group for the regex. By default the whole match is used but this can be a named match (e.g. group='zip')
 
     '''Virtual function defining what a redaction should look like.'''
-    def redact(self, texts, entity_map, eCount, ids, entity_values):
-        return texts, entity_map, eCount, ids, entity_values
+    def redact(self, texts, eCount, ids):
+        return texts, eCount, ids
 
 class RedactorRegex(RedactorBase):
     def __init__(self,id, entity_rules):
@@ -79,9 +82,9 @@ class RedactorRegex(RedactorBase):
         self._flags=0
         super().__init__(id, entity_rules)
 
-    def configure(self, params):
+    def configure(self, params, entity_map, entity_values):
         #Call the base class configurator.
-        super().configure(params)
+        super().configure(params,entity_map, entity_values)
 
         #Now use the parameters passed, plus the modality in the entity_rules to congifure up this class.
         #Get params.voice or params.text if they are specified.
@@ -113,7 +116,7 @@ class RedactorRegex(RedactorBase):
         if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")   
 
         self._group=_model_params.get("group",1)     
-        self._flags=_model_params.get("flags",regex.IGNORECASE)
+        self._flags=ru.flags_from_array(_model_params.get("flags",["IGNORECASE"]),ru.EngineType.REGEX)
         
         try:
             self._pattern_set = [regex.compile(r, self._flags) for r in _regex_set]
@@ -122,7 +125,7 @@ class RedactorRegex(RedactorBase):
 
     #previously: the_redactor()
     #Supports more than one regular expressions and runs each one, even if a prevoius one found a match.
-    def redact(self, texts, entity_map, eCount, ids, entity_values):
+    def redact(self, texts, eCount, ids):
         new_texts = []
         for text, d_id in zip(texts,ids):
             for pattern in self._pattern_set:
@@ -138,13 +141,13 @@ class RedactorRegex(RedactorBase):
                         start = e.span()[0]
 
                     if not (self._id == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
-                        ix = entity_map.update_entities(name,d_id,eCount,self._id)
+                        ix = self._entity_map.update_entities(name,d_id,eCount,self._id)
                         end = start + len(name)
-                        newLabel=entity_values.set_label_value(self._id,ix,name)
+                        newLabel=self._entity_values.set_label_value(self._id,ix,name)
                         newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
                         eCount += 1
             new_texts.append(newString)
-        return new_texts, entity_map, eCount, ids, entity_values
+        return new_texts, eCount, ids
 
 class RedactorPhraseList(RedactorRegex):
     def __init__(self, id, entity_rules):
@@ -152,9 +155,11 @@ class RedactorPhraseList(RedactorRegex):
         self._params={}
         super().__init__(id, entity_rules)
 
-    def configure(self, params):
-        #Remember the params. We'll use them when we delegate this match to RedactorRegex
+    def configure(self, params, entity_map, entity_values):
+        #Fully override the base class configure function.
         self._params=params
+        self._entity_map=entity_map
+        self._entity_values=entity_values
 
         #Now use the parameters passed, plus the modality in the entity_rules to congifure up this class.
         #Get params.voice or params.text if they are specified.
@@ -177,7 +182,7 @@ class RedactorPhraseList(RedactorRegex):
             raise er.EntityRuleConfigException("ERROR: No phrase list defined for phrase-list entity definition.")
 
     #was ignore_phrases()
-    def redact(self, texts, entity_map, eCount, ids, entity_values):
+    def redact(self, texts, eCount, ids):
         for phrase in self._phrase_list :
             #Delegate the task to a regexRedactor which will use the parameters in this config parameter set.
             #print("Phrase: "+str(phrase))
@@ -186,20 +191,16 @@ class RedactorPhraseList(RedactorRegex):
             _my_model_params[self._entity_rules.args.modality]["regex"]=str(phrase)
             #print("my_model_params:",_my_model_params)
 
-            _my_redactor.configure(_my_model_params)
-            texts, entity_map, eCount, ids, entity_values = _my_redactor.redact(texts, entity_map, eCount, ids, entity_values)
-        return texts, entity_map, eCount, ids, entity_values
+            _my_redactor.configure(_my_model_params, self._entity_map, self._entity_values)
+            texts, eCount, ids = _my_redactor.redact(texts, eCount, ids)
+        return texts, eCount, ids
 
 class RedactorSpacy(RedactorBase):
     def __init__(self,id, entity_rules):
         super().__init__(id, entity_rules)
     
-    def configure(self,params):
-        '''Configure the spacy redactor.'''
-        super().configure(params)
-
     #was ner_ml()
-    def redact(self, texts, entity_map, eCount, ids, entity_values):
+    def redact(self, texts, eCount, ids):
         from spacy.lang.en import English
         spacy_multiword_labels = ["PERSON"]
         if self._entity_rules.args.large:
@@ -223,17 +224,17 @@ class RedactorSpacy(RedactorBase):
                             name = n
                             start = e.start_char + sum([len(w)+1 for w in broken[:i]])
                             end = start + len(name)
-                            c = entity_map.update_entities(name,d_id,eCount,e.label_)
+                            c = self._entity_map.update_entities(name,d_id,eCount,e.label_)
                             newString = newString[:start] + " [" + e.label_ +"-"+ str(c) + "]" + newString[end:]
                             eCount += 1
                     else:
-                        ix = entity_map.update_entities(name,d_id,eCount,e.label_)
+                        ix = self._entity_map.update_entities(name,d_id,eCount,e.label_)
                         start = e.start_char
                         end = start + len(name)
-                        newLabel=entity_values.set_label_value(e.label_,ix,name)
+                        newLabel=self._entity_values.set_label_value(e.label_,ix,name)
                         newString = newString[:start] + "[" + newLabel + "]" + newString[end:]
                         eCount += 1
             newString = newString.replace('$','')
             new_texts.append(newString)
-        return new_texts, entity_map, eCount, ids, entity_values
+        return new_texts, eCount, ids
 

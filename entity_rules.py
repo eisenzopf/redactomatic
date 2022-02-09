@@ -138,23 +138,23 @@ class EntityRules():
         regex= self._rules["regex"][rulename]
         return regex
 
-    def get_redactor_model(self,id):
-        return self.get_model(id,"redactor")
+    def get_redactor_model(self,id,entity_map, entity_values):
+        return self.get_model(id,"redactor",entity_map, entity_values)
 
-    def get_anonomizer_model(self,id):
-        return self.get_model(id,"anonymizer")
+    def get_anonomizer_model(self,id,entity_map, entity_values):
+        return self.get_model(id,"anonymizer",entity_map, entity_values)
     
-    def get_model(self,id,model_type):
+    def get_model(self,id,model_type, entity_map, entity_values):
         #Instantiate a model class and configure it with any parameters in the rules section for that model.
         #We find the type of class to create from the entity_rules then that object configures itself from the rules.
         _model_class=self.get_entityid_model_class(id,model_type)
             
-        #Dynamically create and configure the model.
+        #Dynamically create the model and return it,
         #print("Creating dynamic class: ",str(_model_class))
         _model=get_class(_model_class)(id,self)
         _model_params=self.get_entityid_model_rule(id,model_type)
         #print("type:",type(_model).__name__)
-        _model.configure(params=_model_params)
+        _model.configure(_model_params, entity_map, entity_values)
         return _model
 
     ### Fetch rule properties with specific exception support ###

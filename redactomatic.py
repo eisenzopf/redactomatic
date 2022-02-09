@@ -29,7 +29,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--rulefile', nargs="*", required=False, help='a list of YAML or JSON files containing definitions for entity rules; default is \'rules/*.yml\',\'rules/*.json\'')
     parser.add_argument('--regextest', required=False, default=False, action='store_true', help='Test the regular rexpressions defeind in the regex-test rules prior to any other processing.')
     parser.add_argument('--testoutputfile', required=False, help='The file to save test results in.')
-
+ 
     #Check conditional required options.  
     _err_str=""
     _args=parser.parse_args()
@@ -118,9 +118,9 @@ def main():
             for rule in rule_order:
                 #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
                 try:
-                    _model=entity_rules.get_redactor_model(rule)
+                    _model=entity_rules.get_redactor_model(rule, entity_map, entity_values)
                     print("Redacting ",rule,"...")
-                    texts, entity_map, curr_id, ids, entity_values = _model.redact(texts, entity_map, curr_id, ids, entity_values)
+                    texts, curr_id, ids = _model.redact(texts, curr_id, ids)
                 except(er.NotSupportedException) as e:
                     print("Skipping ",rule,"...")
 
@@ -139,9 +139,9 @@ def main():
         for rule in anon_order:
             #Get the custom anonymizer model for this rule_label. 
             try:
-                _model=entity_rules.get_anonomizer_model(rule)
+                _model=entity_rules.get_anonomizer_model(rule, entity_map, entity_values)
                 print("Anonymizing ",rule,"...")
-                texts, entity_map=_model.anonymize(texts, ids, entity_map, entity_values)
+                texts=_model.anonymize(texts, ids)
             except(er.NotSupportedException) as e:
                 print("Skipping ",rule,"...")
 

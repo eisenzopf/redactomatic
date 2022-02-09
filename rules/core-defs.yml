@@ -3,10 +3,6 @@ entities:
     redactor:
       model-class: redact.RedactorSpacy
 
-  PERSON:
-    anonymizer:
-      model-class: anonymize.AnonPerson
-
   MONEY:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -15,10 +11,6 @@ entities:
       text:
         regex-id: money-text-gen
 
-  LOC:
-    anonymizer:
-      model-class: anonymize.AnonLoc
- 
   DATE:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -39,10 +31,6 @@ entities:
     anonymizer:
       model-class: anonymize.AnonNullString
 
-  GPE:
-    anonymizer:
-      model-class: anonymize.AnonGPE
-  
   LANGUAGE:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -58,14 +46,6 @@ entities:
   LAW:
     anonymizer:
       model-class: anonymize.AnonNullString
-
-  NORP:
-    anonymizer:
-      model-class: anonymize.AnonNorp
-
-  ORG:
-    anonymizer:
-      model-class: anonymize.AnonCompany
 
   PERCENT:
     anonymizer:
@@ -99,9 +79,84 @@ entities:
       text:
         regex-id: time-text-gen
 
+  LOC:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-field: city
+      voice:
+        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-field: city
+  
+  GPE:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/gpe.csv
+        phrase-header: False
+        phrase-column: 0
+      voice:
+        phrase-filename: ./data/gpe.csv
+        phrase-header: False
+        phrase-column: 0
+
+  ORG:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-field: Company
+      voice:
+        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-field: Company
+
+  NORP:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/nationalities.csv
+        phrase-field: Nationality
+      voice:
+        phrase-filename: ./data/nationalities.csv
+        phrase-field: Nationality
+
+  PERSON:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+      voice:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+
   WORK_OF_ART:
     anonymizer:
-      model-class: anonymize.AnonWorkOfArt
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/Artworks.csv
+        phrase-field: Title
+      voice:
+        phrase-filename: ./data/Artworks.csv
+        phrase-field: Title
+
+  ZIP:  
+    redactor:
+      model-class: redact.RedactorRegex
+      text:
+        regex-id: zip-text
+        group: zip
+      voice:
+        regex-id: zip-voice
+    anonymizer:  
+      model-class: anonymize.AnonZipC
+      text:
+        phrase-filename: ./data/zip_code_database.csv
+        phrase-field: zip
+      voice:
+        phrase-filename: ./data/zip_code_database.csv
+        phrase-field: zip
 
   SSN:
     redactor:
@@ -138,27 +193,12 @@ entities:
         regex-id: address
     anonymizer:
       model-class: anonymize.AnonAddress
-
-  ZIP:  
-    redactor:
-      model-class: redact.RedactorRegex
       text:
-        regex-id: zip-text
-        group: zip
+        phrase-filename: ./data/street-names.csv
+        phrase-field: Streets
       voice:
-        regex-id: zip-voice
-    anonymizer:
-      model-class: anonymize.AnonZipC
-
-  PHONE:
-    redactor:
-      model-class: redact.RedactorRegex
-      text:
-        regex-id: phone-text
-      voice:
-        regex-id: phone-voice
-    anonymizer:
-      model-class: anonymize.AnonPhone
+        phrase-filename: ./data/street-names.csv
+        phrase-field: Streets
 
   EMAIL:
     redactor:
@@ -169,6 +209,22 @@ entities:
         regex-id: email
     anonymizer:
       model-class: anonymize.AnonEmail
+      text:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+      voice:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+
+  PHONE:
+    redactor:
+      model-class: redact.RedactorRegex
+      text:
+        regex-id: phone-text
+      voice:
+        regex-id: phone-voice
+    anonymizer:
+      model-class: anonymize.AnonPhone
 
   ORDINAL:
     redactor:
