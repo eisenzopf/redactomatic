@@ -187,7 +187,7 @@ class AnonNullString(AnonymizerBase):
 class AnonPhraseList(AnonymizerBase):
     '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
     def __init__(self,id,entity_rules):
-        self._phrase_list=None
+        self._phrase_list_set=[]
         super().__init__(id, entity_rules)
      
     '''Virtual prototype for configuring an anonymizer with a specific set of parameters.'''
@@ -201,32 +201,46 @@ class AnonPhraseList(AnonymizerBase):
         if _model_params is None: 
             raise er.NotSupportedException("Modality: "+str(self._entity_rules.args.modality)+" not supported for anonymizer id: "+self._id)
 
-        #Get the possible parameters
-        _phrase_filename=_model_params.get("phrase-filename",None)   
-        _phrase_field=_model_params.get("phrase-field",None)
-        _phrase_column=_model_params.get("phrase-column",0)
-        _phrase_header=_model_params.get("phrase-header",True)
-        _phrase_list=_model_params.get("phrase-list",None)   
+        #Create a list of rules. If there is only one dictionary in there then treat it as a list of one.
+        #This is a syntactic convenience that allows users to not bother creating lists of one dictionary.
+        if isinstance(_model_params,dict):
+            _phrase_rules=[ _model_params.copy() ]
+        else:
+            _phrase_rules= _model_params
 
-        if (_phrase_list is not None):
-            self._phrase_list=_phrase_list
-            #print("Phrase list: "+str(self._phrase_list))
-        elif (_phrase_filename is not None):
-            if _phrase_header is None:  _df = pd.read_csv(_phrase_filename, Header=None)
-            else: _df = pd.read_csv(_phrase_filename)
-            if _phrase_field is None:
-                self._phrase_list=(_df.iloc[:,_phrase_column]).to_list()
-            else:
-                self._phrase_list=_df[_phrase_field].to_list()
+        for _phrase_rule in _phrase_rules:
+            #Get the possible parameters
+            _phrase_filename=_phrase_rule.get("phrase-filename",None)   
+            _phrase_field=_phrase_rule.get("phrase-field",None)
+            _phrase_column=_phrase_rule.get("phrase-column",0)
+            _phrase_header=_phrase_rule.get("phrase-header",True)
+            _phrase_list=_phrase_rule.get("phrase-list",None)   
 
+            #Load the phrase list depending on how it is specified.
+            if (_phrase_list is None) and  (_phrase_filename is not None):
+                if _phrase_header is None:  _df = pd.read_csv(_phrase_filename, Header=None)
+                else: _df = pd.read_csv(_phrase_filename)
+                if _phrase_field is None:
+                    _phrase_list=(_df.iloc[:,_phrase_column]).to_list()
+                else:
+                    _phrase_list=_df[_phrase_field].to_list()
+            
+            #If the list is ok then add it to the phrase list set.
+            if (not isinstance(_phrase_list,list)) or len(_phrase_list)==0:
+                raise er.EntityRuleConfigException("ERROR: Invalid or empty phrase list rule for entity: "+str(self._id))
+            self._phrase_list_set.append(_phrase_list)
+
+    #Choose a random item from each phrase list and concatenate them in order.
     def callback(self, match, i):
-        phrase = str(self.random.choice(self._phrase_list))
+        phrase=""
+        for phrase_list in self._phrase_list_set:
+            phrase = phrase + str(self.random.choice(phrase_list))
         tag = match.group()
         return self.persist_entity_value(i,tag,phrase)
 
 class AnonAddress(AnonPhraseList):
     def callback(self,match, i):
-        street = str(self.random.choice(self._phrase_list))
+        street = str(self.random.choice(self._phrase_list_set[0]))
         if self._entity_rules.args.modality == 'text':
             number = str(self.random.randrange(100,500))
         else:
@@ -236,19 +250,12 @@ class AnonAddress(AnonPhraseList):
         tag = match.group()
         return self.persist_entity_value(i,tag,address)
 
-class AnonEmail(AnonPhraseList):
-    def callback(self, match, i):
-        name = str(self.random.choice(self._phrase_list))
-        email = name + "@gmail.com"
-        tag = match.group()
-        return self.persist_entity_value(i,tag,email)
-
 class AnonZipC(AnonPhraseList):
     def callback(self, match, i):
         if self._entity_rules.args.modality == 'text':
-            zipC = str(self.random.choice(self._phrase_list))
+            zipC = str(self.random.choice(self._phrase_list_set[0]))
         else:
-            zipC = digits2words(str(self.random.choice(self._phrase_list)))
+            zipC = digits2words(str(self.random.choice(self._phrase_list_set[0])))
         tag = match.group()
         return self.persist_entity_value(i,tag,zipC)
 

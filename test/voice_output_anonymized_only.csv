@@ -12,12 +12,12 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Client,11/08/2019 00:00,the credentials is [CREDENTIALS-1],CREDENTIALS,1,
 1011432,Client,11/08/2019 00:00,the same credentials is [CREDENTIALS-1],CREDENTIALS,1,
 1011432,Client,11/08/2019 00:00,a new credentials is [CREDENTIALS-2],CREDENTIALS,2,
-1011432,Agent,11/08/2019 00:00,the date is February first,DATE,1,
-1011432,Agent,11/08/2019 00:00,the same date is February first,DATE,1,
+1011432,Agent,11/08/2019 00:00,the date is August twenty sixth,DATE,1,
+1011432,Agent,11/08/2019 00:00,the same date is August twenty sixth,DATE,1,
 1011432,Agent,11/08/2019 00:00,a new date is August seventeenth,DATE,2,
 1011432,Client,11/08/2019 00:00,the email is Jaren@gmail.com,EMAIL,1,
 1011432,Client,11/08/2019 00:00,the same email is Jaren@gmail.com,EMAIL,1,
-1011432,Client,11/08/2019 00:00,a new email is Alfred@gmail.com,EMAIL,2,
+1011432,Client,11/08/2019 00:00,a new email is Yvette@gmail.com,EMAIL,2,
 1011432,Agent,11/08/2019 00:00,the event is reunion,EVENT,1,
 1011432,Agent,11/08/2019 00:00,the same event is reunion,EVENT,1,
 1011432,Agent,11/08/2019 00:00,a new event is seminar,EVENT,2,
@@ -39,12 +39,12 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Agent,11/08/2019 00:00,the law is,LAW,1,
 1011432,Agent,11/08/2019 00:00,the same law is,LAW,1,
 1011432,Agent,11/08/2019 00:00,a new law is,LAW,2,
-1011432,Client,11/08/2019 00:00,the loc is Rome,LOC,1,
-1011432,Client,11/08/2019 00:00,the same loc is Rome,LOC,1,
-1011432,Client,11/08/2019 00:00,a new loc is Southglenn,LOC,2,
-1011432,Agent,11/08/2019 00:00,the money is sixty six dollars twenty five cents,MONEY,1,
-1011432,Agent,11/08/2019 00:00,the same money is sixty six dollars twenty five cents,MONEY,1,
-1011432,Agent,11/08/2019 00:00,a new money is sixteen dollars,MONEY,2,
+1011432,Client,11/08/2019 00:00,the loc is Maplewood,LOC,1,
+1011432,Client,11/08/2019 00:00,the same loc is Maplewood,LOC,1,
+1011432,Client,11/08/2019 00:00,a new loc is West Little River,LOC,2,
+1011432,Agent,11/08/2019 00:00,the money is seventeen dollars,MONEY,1,
+1011432,Agent,11/08/2019 00:00,the same money is seventeen dollars,MONEY,1,
+1011432,Agent,11/08/2019 00:00,a new money is thirteen dollars,MONEY,2,
 1011432,Client,11/08/2019 00:00,the norp is Bosnian,NORP,1,
 1011432,Client,11/08/2019 00:00,the same norp is Bosnian,NORP,1,
 1011432,Client,11/08/2019 00:00,a new norp is Solomon Islander,NORP,2,
@@ -100,8 +100,8 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Agent,11/08/2019 00:00,an alias for cardinal is one,digits,1,CARDINAL
 1011432,Agent,11/08/2019 00:00,an alias for ccard is three eight seven six six nine two four one eight three six three three seven,creditCardNumber,1,CCARD
 1011432,Agent,11/08/2019 00:00,an alias for ccard is three two six seven four nine eight oh four zero two oh zero eight nine,ccNum,1,CCARD
-1011432,Agent,11/08/2019 00:00,an alias for email is Angela@gmail.com,EMAIL_ADDRESS,1,EMAIL
-1011432,Agent,11/08/2019 00:00,an alias for email is Yvette@gmail.com,emailAddress,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an alias for email is Verena@hotmail.com,EMAIL_ADDRESS,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an alias for email is Delores@gmail.com,emailAddress,1,EMAIL
 1011432,Agent,11/08/2019 00:00,an token for zip is four nine two six eight,<ZIP/>,1,ZIP
 1011432,Agent,11/08/2019 00:00,an token for pin is six seven seven three,<PIN/>,1,PIN
 1011432,Agent,11/08/2019 00:00,an token for pin is four zero five four,<CVV/>,1,PIN

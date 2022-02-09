@@ -15,9 +15,9 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Agent,11/08/2019 00:00,the date is 05/09/2021,DATE,1,
 1011432,Agent,11/08/2019 00:00,the same date is 05/09/2021,DATE,1,
 1011432,Agent,11/08/2019 00:00,a new date is 03/06/2023,DATE,2,
-1011432,Client,11/08/2019 00:00,the email is Roni@gmail.com,EMAIL,1,
-1011432,Client,11/08/2019 00:00,the same email is Roni@gmail.com,EMAIL,1,
-1011432,Client,11/08/2019 00:00,a new email is Elizabeth@gmail.com,EMAIL,2,
+1011432,Client,11/08/2019 00:00,the email is Roni@msn.com,EMAIL,1,
+1011432,Client,11/08/2019 00:00,the same email is Roni@msn.com,EMAIL,1,
+1011432,Client,11/08/2019 00:00,a new email is Cherri@hotmail.com,EMAIL,2,
 1011432,Agent,11/08/2019 00:00,the event is conference,EVENT,1,
 1011432,Agent,11/08/2019 00:00,the same event is conference,EVENT,1,
 1011432,Agent,11/08/2019 00:00,a new event is conference,EVENT,2,
@@ -42,9 +42,9 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Client,11/08/2019 00:00,the loc is Easton,LOC,1,
 1011432,Client,11/08/2019 00:00,the same loc is Easton,LOC,1,
 1011432,Client,11/08/2019 00:00,a new loc is Sunrise Manor,LOC,2,
-1011432,Agent,11/08/2019 00:00,the money is $5.96,MONEY,1,
-1011432,Agent,11/08/2019 00:00,the same money is $5.96,MONEY,1,
-1011432,Agent,11/08/2019 00:00,a new money is $.80,MONEY,2,
+1011432,Agent,11/08/2019 00:00,the money is $182,MONEY,1,
+1011432,Agent,11/08/2019 00:00,the same money is $182,MONEY,1,
+1011432,Agent,11/08/2019 00:00,a new money is $23,MONEY,2,
 1011432,Client,11/08/2019 00:00,the norp is Tajik,NORP,1,
 1011432,Client,11/08/2019 00:00,the same norp is Tajik,NORP,1,
 1011432,Client,11/08/2019 00:00,a new norp is Uruguayan,NORP,2,
@@ -100,8 +100,8 @@ conversation_id,speaker,date_time,text,Element,Index,Alias
 1011432,Agent,11/08/2019 00:00,an alias for cardinal is 2,digits,1,CARDINAL
 1011432,Agent,11/08/2019 00:00,"an alias for ccard is 3,78-915031-90493",creditCardNumber,1,CCARD
 1011432,Agent,11/08/2019 00:00,an alias for ccard is 4433-6005-2301-1000,ccNum,1,CCARD
-1011432,Agent,11/08/2019 00:00,an alias for email is Daphne@gmail.com,EMAIL_ADDRESS,1,EMAIL
-1011432,Agent,11/08/2019 00:00,an alias for email is Cherri@gmail.com,emailAddress,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an alias for email is Willis@hotmail.com,EMAIL_ADDRESS,1,EMAIL
+1011432,Agent,11/08/2019 00:00,an alias for email is Johannah@hotmail.com,emailAddress,1,EMAIL
 1011432,Agent,11/08/2019 00:00,an token for zip is 49267,<ZIP/>,1,ZIP
 1011432,Agent,11/08/2019 00:00,an token for pin is 3279,<PIN/>,1,PIN
 1011432,Agent,11/08/2019 00:00,an token for pin is 1991,<CVV/>,1,PIN

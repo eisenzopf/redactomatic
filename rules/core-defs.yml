@@ -149,6 +149,7 @@ entities:
         group: zip
       voice:
         regex-id: zip-voice
+        group: zip
     anonymizer:  
       model-class: anonymize.AnonZipC
       text:
@@ -208,13 +209,15 @@ entities:
       voice:
         regex-id: email
     anonymizer:
-      model-class: anonymize.AnonEmail
+      model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/baby-names.csv
-        phrase-field: name
+        - phrase-filename: ./data/baby-names.csv
+          phrase-field: name
+        - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
       voice:
-        phrase-filename: ./data/baby-names.csv
-        phrase-field: name
+        - phrase-filename: ./data/baby-names.csv
+          phrase-field: name
+        - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
 
   PHONE:
     redactor:
@@ -259,8 +262,10 @@ entities:
       model-class: redact.RedactorRegex
       text:
         regex-id: pin-text
+        group: pin
       voice:
         regex-id: pin-voice
+        group: pin
     anonymizer:
       model-class: anonymize.AnonRegex
       text:
@@ -318,7 +323,7 @@ regex:
     - 'first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth'
 
   money-text-gen:
-    - '\$(\d{0,3})(\.\d{2}){0,1}'
+    - '\$([1-9]\d{0,2})(\.\d{2}){0,1}'
 
   money-voice-gen:
     - '(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine|) dollars ((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|) (one|two|three|four|five|six|seven|eight|nine) cents){0,1}'
@@ -360,7 +365,7 @@ regex:
 
   pin-text:
     # chat-yes, voice-no
-    - (^|\s)(?:(\d{4}))\s*?
+    - (^|\s)(?<pin>(?:(\d{4})))\s*?
   
   pin-voice:
     # chat-no, voice-yes
@@ -371,7 +376,7 @@ regex:
           (?:(one|two|three|four|five|six|seven|eight|nine|0z))
           ) # end one_to_9 definition
       )
-      (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+      (^|\s)(?<pin>(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)))(?!\s*)?
   
   phone-voice:
     # chat-no, voice-yes
@@ -492,7 +497,7 @@ regex:
           (?:(one|two|three|four|five|six|seven|eight|nine|0z))
           ) # end one_to_9 definition
       )
-      (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+      (^|\s)(?<zip>(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)))(?!\s*)?
 
   ordinal:
     # voice-yes, chat-yes

@@ -11,15 +11,15 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality voice --inputfile ./d
 
 python3 test.py -v
 
-rm -f text_log_l2.csv
-rm -f voice_log_l2.csv
-rm -f voice_output_l2.csv
-rm -f text_output_l2.csv
-rm -f voice_output_anonymized_l2.csv
-rm -f text_output_anonymized_l2.csv
-rm -f text_log_l3.csv
-rm -f voice_log_l3.csv
-rm -f voice_output_l3.csv
-rm -f text_output_l3.csv
-rm -f text_output_anonymized_only.csv
-rm -f voice_output_anonymized_only.csv
+#rm -f text_log_l2.csv
+#rm -f voice_log_l2.csv
+#rm -f voice_output_l2.csv
+#rm -f text_output_l2.csv
+#rm -f voice_output_anonymized_l2.csv
+#rm -f text_output_anonymized_l2.csv
+#rm -f text_log_l3.csv
+#rm -f voice_log_l3.csv
+#rm -f voice_output_l3.csv
+#rm -f text_output_l3.csv
+#rm -f text_output_anonymized_only.csv
+#rm -f voice_output_anonymized_only.csv
