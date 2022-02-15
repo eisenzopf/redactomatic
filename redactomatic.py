@@ -1,3 +1,4 @@
+from pyrsistent import v
 import redact
 import anonymize
 import entity_map as em
@@ -49,7 +50,7 @@ def config_args(): # add --anonymize
 def df_load_files(args):
     dfs = []
     for file in args.inputfile:
-        print("Loading " + file + "...")
+        print("Loading datafile " + file + "...")
         dfs.append(pd.read_csv(file))
     df = pd.concat(dfs, ignore_index=True)
     df.iloc[:, args.column-1].replace('', np.nan, inplace=True)
@@ -101,12 +102,12 @@ def main():
         df, texts, ids = df_load_files(args)
 
         #If IGNORE isn't specified in the running order then add it first. This keeps backwards compatibility.
-        if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
-        if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
+        #if not "_IGNORE_" in redaction_order: redaction_order.insert(0,"_IGNORE_")
+        #if not "_IGNORE_" in entities: entities.insert(0,"_IGNORE_")
             
         #If SPACY isn't specified in the running order then add it last. This keeps backwards compatibility.
-        if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
-        if not "_SPACY_" in entities: entities.append("_SPACY_")
+        #if not "_SPACY_" in redaction_order: redaction_order.append("_SPACY_")
+        #if not "_SPACY_" in entities: entities.append("_SPACY_")
         
         #Get a list of the entities in the level specified on the command line ordered by the redaction_order.
         rule_order=[x for x in redaction_order if x in entities]
@@ -151,6 +152,8 @@ def main():
         if args.uppercase:
             texts = redact.convert_to_uppercase(texts)
 
+        print("Writing outfile ",args.outputfile)
+
         # write the redacted data back to the Dataframe
         df.iloc[:, args.column-1] = texts
 
@@ -159,10 +162,10 @@ def main():
 
         # write audit log
         if args.log:
-            print("Writing log to " + args.log)
+            print("Writing logfile " + args.log)
             entity_values.write_csv(args.log)
 
-        print("Done. Output file is",args.outputfile)
+        print("Done.")
 
 
 if __name__ == "__main__":

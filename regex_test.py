@@ -29,14 +29,13 @@ class RegexTest():
 
         #Step through each regex-id in the regex-test section
         for _regex_id, _test_rule_set in self._entity_rules.regex_test_set.items():
+            print("Testing ",_regex_id)
             #Step through each test rule for this regex-id
             for _test_rule in _test_rule_set:            
                 _group=_test_rule.get("group",0)  
                 _engine_type=ru.to_engine_type(_test_rule.get("engine","REGEX").upper())
                 _match_type=MatchType[_test_rule.get("match-type","ONE_OR_MORE_MATCH").upper()]
                 _flags=ru.flags_from_array(_test_rule.get("flags",["IGNORECASE"]),_engine_type)
-
-                print ("flags:",_flags)
 
                 #Get the regex rules and make them a list
                 _regex_set=self._entity_rules.get_regex(_regex_id)
@@ -128,13 +127,13 @@ class RegexTest():
                     
                     #Now work out if this utterance passed or failed the test, and add the result to all results for this utterance.
                     #print (_match_type,_exact_match_count,_partial_match_count,len(_pattern_set))
-                    _test_pass=self.get_pass_fail(_match_type,_exact_match_count,_partial_match_count,len(_pattern_set))
+                    _phrase_test_pass=self.get_pass_fail(_match_type,_exact_match_count,_partial_match_count,len(_pattern_set))
                     df_utt_result["test_type"]=str(_match_type)                    
-                    df_utt_result["pass"]=_test_pass
+                    df_utt_result["pass"]=_phrase_test_pass
                     df=df.append(df_utt_result)
 
-                    if (not _test_pass): 
-                        print ("FAIL: regex-id: "+_regex_id+" => '"+str(test_text)+"'")
+                    if (not _phrase_test_pass): 
+                        print ("FAIL: regex-id: "+_regex_id +" => '"+str(test_text)+"' "+str(_match_type)+" "+str(_flags))
                         _test_pass=False
                         _phrase_fail_count +=1
                 if not _test_pass:
@@ -144,7 +143,7 @@ class RegexTest():
         print("Saving test report to:",report_filename)
         df.to_csv(report_filename)
 
-        if (_test_fail_count>0): print("FAIL: Regular expression test failed with "+str(_test_fail_count)+" broken rules and "+str(_phrase_fail_count)+" non-matching phrase(s).")
+        if (_test_fail_count>0): print("FAIL: Regular expression test failed with "+str(_test_fail_count)+" broken rule(s) and "+str(_phrase_fail_count)+" non-matching phrase(s).")
         else: print("SUCCESS: Regular expression tests completed successfully.")
         
     def get_pass_fail(self,match_type,exact_match_count,partial_match_count,pattern_count):

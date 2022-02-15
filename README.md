@@ -345,7 +345,7 @@ My mother lives at [streetAddress].
 
 The entry in the anon-map shown above means that redaction labels in the text of the form **[streetAddress]** or **[streetAddress-nnn]** will be anonymized using the rules defined for the entity **ADDRESS**.
 
-You may be wondering why this is neccessary and how the redacted text can come to have labels that are not defined in the configuration files.  There are two main reasons this can occur. 
+You may be wondering why this is neccessary and how the redacted text can have labels that are not defined in the configuration files.  There are two main reasons this can occur. 
 
 * The input file was redacted by another process and we are using Redactomatic to anonymize the resulting text.  For example a company may have their own redaction algorithm but want to use Redactomatic to put plausible text back into the transcripts.
 
@@ -439,7 +439,7 @@ regex-test:
       phrases:
       - 'first and foremost'
       - 'the 10th person to see him'  
-    - module: regex
+    - engine: regex
       match-type: NO_MATCHES
       phrases:
       - 'the person who was seconded to the team.'
@@ -458,13 +458,11 @@ An optional `regex-test` section can be included which will test individual regu
 - NO_EXACT_MATCHES
 - NO_PARTIAL_MATCHES
 
-By default the ONE_OR_MORE_MATCH options is used.   This will pass the test if the regular expression finds one or match within the phrase.
-
- Recall that regular expression rules can comprise multiple patterns.
+By default the ONE_OR_MORE_MATCH options is used.   This will pass the test if the regular expression finds one or match within the phrase.  Recall that regular expression rules can comprise multiple patterns.
 
 The `flags` parameter behaves as described for `redact.RedactorRegex`.
 
-The` module` paramter is intended to select for either the 're' or 'regex' module. It is currently ignored and the PCRE compliant regex is always used.  
+The `engine` paramter defines whether the match is performed using the 're' or 'regex' module.  The 'regex' module supports PCRE matching and is the default engine if none is specified.
 
 A particularly useful feature of the regex-test is that it stores detailed information about the test results in the file specified by the `--testoutputfile`command line option.  
 
@@ -503,6 +501,7 @@ Redactomatic has three built-in Redactor classes.  New redactors can be added by
 
 ```
 ...
+  MYDOMAIN:
     redactor:
       model-class: redact.RedactorRegex
       text:
@@ -511,10 +510,10 @@ Redactomatic has three built-in Redactor classes.  New redactors can be added by
         group: my-named-group
         flags: [ ASCII, IGNORECASE, ... ]
       voice:
-        {as per text}
+        ...
 ```
 
-The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `rule-id` key in the `regex `section.    By default the whole rule has to match, but the matching `group `can be specified which can be a numbered group or a named group (using PCRE naming).  
+The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `regex-id` key in the `regex `section.    The whole regex pattern must match part or all of the phrase.  Then the matching part of the phrase will be redacted with the redaction label (e.g. [MYDOMAIN-23] ).  It is possible to redact only part of the matching area of the phrase but specifying the `group ` parameter.  This can be an integer group number or a named group (using PCRE naming).  
 
 Flags for the regular expression match can be specified via the `flags`value.  This is a list of items as given below . By default  [ IGNORECASE ] is used.
 
@@ -530,27 +529,48 @@ Flags for the regular expression match can be specified via the `flags`value.  T
 
 - LOCALE, L
 
-If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
+It is possible to specify more than one regular expression for the redactor.  If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
 
 #### redact.RedactorPhraseList
 
 ```
 ...
+  EMPLOYEENAMES:  
     redactor:
       model-class: redact.RedactorPhraseList
       text:
-        phrase-list: {list of words to match}
-        phrase-filename: {filename containing the word list}
-        flags: {regex pattern match flags (raw integer mask}}
+        #phrase-list: [fred, joe, stacy, kylie]
+        phrase-filename: ./data/employeenames.csv
+        phrase-field: name
+        phrase-column: 1
+        phrase-header: True
+        flags: [ ASCII, IGNORECASE, ... ]
+
       voice:
-        {as per text}
+        ...
 ```
 
-The `redact.RedactorPhraseList` class is very similar to redact.RedactorRegex but instead of matching regular expressions it matches lists of phrases.  The phrases can be defined inline by attaching a list to the `phrase-list` key or defined in an external text file using the value of `phrase-filename`.
+**Example RedactorPhraseList definition.** (alternative phrase-list shown as comment)
 
-The `flags` parameter behaves as described for `redact.RedactorRegex`.
+The `redact.RedactorPhraseList` class is very similar to redact.RedactorRegex but instead of matching regular expressions it matches lists of phrases.  
 
-This class is used by in the default definition of the `_IGNORE_` entity redactor that can be found in the release file ***ignore.yml***.   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
+The phrase list can be specified directly inline:
+
+- phrase-list - a list of phrases to select from randomly.
+
+Alterntively if no phrase list is specified then the class will attempt to read the phrase list from a CSV file using the following parameters:
+
+- phrase-filename - The name of a CSV file containing the phrases
+
+- phrase-header - True/False The CSV file has a header row (default=True)
+
+- phrase-field - The name of the column to select (phrase-header=True only)
+
+- phrase-column - Alternative to phrase-field. An integer column number (Default=0)
+
+This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
+
+This class is used by in the definition of the `_IGNORE_` entity redactor that can be found in the release file [data/ignore.yml](data/ignore.yml).   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
 
 ```
 entities:
@@ -602,7 +622,7 @@ Redactomatic currently has several built-in anonymizer classes.  There are four 
         limit: 10
         flags: [ IGNORECASE ]
       voice:
-        {as per text}
+        ...
 ```
 
 The `anonomizer.AnonRegex` class is used to generate random text strings using a regular expression as a generative grammar.  The regular expressions can be expressed inline via the `regex` parameter or by reference rules in the `regex `section using the `regex-id` parameter.  The `limit `parameter defines the maximum number of repeats that a  repeating pattern will be permitted to follow before terminating.  This prevents infinite loops and can be used to limit computationally costly patterns.   This is set to 10 by default.  For more details see [xeger PyPI](https://pypi.org/project/xeger/).  The `flags `parameter behaves as described for `redact.RedactorRegex`.   This class does not support PCRE.
@@ -632,11 +652,11 @@ entities:
       model-class: anonymize.AnonRestoreEntityText
 ```
 
-The `anonomizer.AnonRestoreEntityText` class is used to restore all the text that was previously redacted by the named entity.   It takes no parameters. 
+The `anonomizer.AnonRestoreEntityText` class is used to restore any text that was redacted by a redactor rule for the same named entity.  This class will restore the text for an entity regardless of which class was used to anonymize it. It takes no parameters.
 
-In the default configuration the \_IGNORE\_ entity tag is redacted using the redactor.RedactPhraseList class and then restored at the end using the anonymize.AnonRestoreEntityText class.   This is one example of how the ignore/restore pattern can be used but you can use it however you want to restore text redacted by other classes and have as many restorable entities as you want.
+In the default configuration file [data/ignore.yml](data/ignore.yml) , the \_IGNORE\_ entity tag is redacted using the `redactor.RedactPhraseList` class and then restored at the end using the `anonymize.AnonRestoreEntityText` class.   This is one example of how the ignore/restore pattern can be used but you can use this class to restore text redacted by other classes and have as many restorable entities as you want.
 
-This class restores the original text so do not use it for anything the contains PII that needs to remain redacted.
+As this class restores the original text take care not to accidentially restore PII that needs to remain redacted.
 
 #### anonymize.AnonNullString
 
@@ -657,14 +677,20 @@ entities:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
+        #phrase-list: [fred, joe, stacy, kylie]
         phrase-filename: ./data/baby-names.csv
         phrase-field: name
         phrase-column: 1
         phrase-header: True
-        phrase-list: [fred, joe, stacy, kylie]
+      voice:
+        ...
 ```
 
+**Example AnonPhraseList definition.** (alternative phrase-list shown as comment)
+
 The `anonomizer.AnonPhraseList` class enables anonymization of fields based on the random selection of a phrase from a phrase list.  
+
+This class has very similar parameters to `redactor.RedactPhraseList` class.
 
 The phrase list can be specified directly inline:
 
@@ -686,14 +712,14 @@ A number of entities are anonymized using custom classes written specifically fo
 
 The following classes generate number entities (text or voice) using random number generation within a pattern.
 
-- anonymize.AnonSSN
-- anonymize.AnonPhone    
+- `anonymize.AnonSSN`
+- `anonymize.AnonPhone`  
 
-The following are specializations of AnonPhraseList.  They accept the same parameters but then add specific formatting to phrase once a random item has been selected.
+The following are specializations of `anonymize.AnonPhraseList`.  They accept the same parameters but then add specific formatting to phrase once a random item has been selected.
 
-- anonymize.AnonAddress    
-- anonymize.AnonZipC
-- anonymize.AnonEmail
+- `anonymize.AnonAddress`    
+- `anonymize.AnonZipC`
+- `anonymize.AnonEmail`
 
 ## License
 

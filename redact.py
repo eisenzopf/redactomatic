@@ -168,18 +168,27 @@ class RedactorPhraseList(RedactorRegex):
         #If the paramters do not contain a definition for the current modality then assume that the model is not designed for this and return None.
         if _model_params is None: return None
 
-        #Note the filename for the match.
+        #Get the possible parameters
         _phrase_filename=_model_params.get("phrase-filename",None)   
+        _phrase_field=_model_params.get("phrase-field",None)
+        _phrase_column=_model_params.get("phrase-column",0)
+        _phrase_header=_model_params.get("phrase-header",True)
         _phrase_list=_model_params.get("phrase-list",None)   
-        if (_phrase_list is not None):
-            self._phrase_list=_phrase_list
-            #print("Phrase list: "+str(self._phrase_list))
-        elif (_phrase_filename is not None):
-            with open(self._phrase_filename) as json_file:
-                #print ("Open ",self._phrase_filename)
-                self._phrase_list = json.load(json_file)
-        else:
-            raise er.EntityRuleConfigException("ERROR: No phrase list defined for phrase-list entity definition.")
+
+        #Load the phrase list depending on how it is specified.
+        if (_phrase_list is None) and  (_phrase_filename is not None):
+            if _phrase_header is None:  _df = pd.read_csv(_phrase_filename, Header=None)
+            else: _df = pd.read_csv(_phrase_filename)
+            if _phrase_field is None:
+                _phrase_list=(_df.iloc[:,_phrase_column]).to_list()
+            else:
+                _phrase_list=_df[_phrase_field].to_list()
+        
+        #If the list is ok then add it to the phrase list set.
+        if (not isinstance(_phrase_list,list)) or len(_phrase_list)==0:
+            raise er.EntityRuleConfigException("ERROR: Invalid or empty phrase list rule for entity: "+str(self._id))
+        
+        self._phrase_list=_phrase_list    
 
     #was ignore_phrases()
     def redact(self, texts, eCount, ids):
