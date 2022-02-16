@@ -128,9 +128,10 @@ class RedactorRegex(RedactorBase):
     def redact(self, texts, eCount, ids):
         new_texts = []
         for text, d_id in zip(texts,ids):
+            newString = text
             for pattern in self._pattern_set:
                 matches = list(pattern.finditer(text))
-                newString = text
+
                 for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
                     #name=entity-text found by pattern
                     if self._group != 1 and e.captures(self._group):

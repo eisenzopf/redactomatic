@@ -92,6 +92,11 @@ class AnonymizerBase():
                 else:
                     this_regex = this_regex + "|" + entity
                 counter = counter + 1
+        
+        #treat the type as the entity if no other maps were specified.
+        if counter==0:
+            this_regex = "\[" + type + "(-\d+)?\]"
+            
         return this_regex
 
     @property

@@ -1,6 +1,8 @@
 {
     "level" : {
         "1": [
+            "_IGNORE_",
+            "_SPACY_",
             "PHONE",
             "PERSON",
             "ADDRESS",
@@ -10,7 +12,9 @@
             "PIN"
 		],
 		"2": [
-			"PHONE",
+            "_IGNORE_",
+            "_SPACY_",
+            "PHONE",
 			"PERSON",
 			"ADDRESS",
 			"CCARD",
@@ -22,6 +26,8 @@
 			"PIN"
 		],
 		"3": [
+            "_IGNORE_",
+            "_SPACY_",
 			"PHONE",
 			"PERSON",
 			"ADDRESS",
