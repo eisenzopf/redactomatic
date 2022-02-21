@@ -38,17 +38,11 @@ class RegexTest():
                 _flags=ru.flags_from_array(_test_rule.get("flags",["IGNORECASE"]),_engine_type)
 
                 #Get the regex rules and make them a list
-                _regex_set=self._entity_rules.get_regex(_regex_id)
-                if isinstance(_regex_set,str): _regex_set=[_regex_set]
-                if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")   
-
+                _regex_set=self._entity_rules.get_regex_set(_regex_id)
+ 
                 #compile the patterns with the designated regular expression engine..
                 try:
-                    if _engine_type==ru.EngineType.REGEX: 
-                        _pattern_set = [regex.compile(r, _flags) for r in _regex_set]
-                    else:
-                        _pattern_set = [re.compile(r, _flags) for r in _regex_set]
-                    
+                    _pattern_set = [ru.compile(r, _flags, _engine_type) for r in _regex_set]
                 except Exception as exc:
                     raise Exception("ERROR: Failed to compile regex set for ':"+_regex_id+"' with error: "+str(exc))
 
@@ -72,6 +66,7 @@ class RegexTest():
                     for pattern in _pattern_set:
                         _pattern_ix+=1
                         matches = list(pattern.finditer(test_text))
+
                         for e in matches:  
                             #name=entity-text found by pattern
                             try:

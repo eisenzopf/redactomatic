@@ -1,9 +1,6 @@
 import yaml
 import json
-import redact
-import anonymize
 import regex
-import sys
 from random import Random
 
 # Exception classes for redactors
@@ -133,10 +130,37 @@ class EntityRules():
     def print_rulefile(self,f):
         print(self._rules,file=f)
 
-    def get_regex(self, rulename):
-        '''Return the regular expression associated with the rulename'''
-        regex= self._rules["regex"][rulename]
-        return regex
+    def resolve_regex_includes(self,s):
+        #extract the regexp ID for any text of the form: ?INCLUDE<one_to_9-voice>
+        include_pattern=regex.compile('\?INCLUDE<(?<rule_id>([^>]*))>')
+        e = regex.search(include_pattern,s)
+        if (e is None):
+            return s
+        else: 
+            _matched_rule_id = e.group("rule_id")
+            _matched_include = e.group()
+            _start = e.start()
+            _end= e.end()
+            _left_text=s[:_start]
+            _right_text=s[_end:]
+            _substitution_text=self.get_regex_set(_matched_rule_id)[0]
+            regex_string=_left_text+_substitution_text+_right_text
+            #print("REGEX:"+regex_string)
+
+            #Recursively resolve inlcudes until we are all done.
+            return self.resolve_regex_includes(regex_string)
+
+    def get_regex_set(self, rulename):
+        '''Return the regular expression associated with the rulename.  Process INCLUDEs of other rules.'''
+        _regex_set= self._rules["regex"][rulename]
+
+        #Make it a list if it isn't already.
+        if isinstance(_regex_set,str): _regex_set=[_regex_set]
+        if not isinstance(_regex_set,list): raise TypeError("ERROR: 'regex' rules should be lists or single strings.")   
+
+        #Now parse each regex in the list to add in any includes.
+        _regex_set=[self.resolve_regex_includes(r) for r in _regex_set]
+        return _regex_set
 
     def get_redactor_model(self,id,entity_map, entity_values):
         return self.get_model(id,"redactor",entity_map, entity_values)

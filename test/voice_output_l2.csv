@@ -2,9 +2,9 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:00,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
 1011432,Client,11/08/2019 00:00,[PERSON-15] [PERSON-14]
 1011432,Agent,11/08/2019 00:00,And what is your account number?
-1011432,Client,11/08/2019 00:00,It's [PHONE-5] I think.
+1011432,Client,11/08/2019 00:00,It's [PHONE-6] I think.
 1011432,Agent,11/08/2019 00:00,And your social security number?
-1011432,Client,11/08/2019 00:00,It's [ZIP-8] [PIN-12].
+1011432,Client,11/08/2019 00:00,It's [ZIP-9] [PIN-12].
 1011432,Agent,11/08/2019 00:00,And what is your email address?
 1011432,Client,11/08/2019 00:00,It's [EMAIL-11]
 1011432,Agent,11/08/2019 00:00,Thank you [PERSON-15]. How may I help you today?
@@ -18,7 +18,7 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:00,What is the name of the bank for your debit card?
 1011432,Client,11/08/2019 00:00,Sorry I meant five hundred even. My bank is Wells Fargo.
 1011432,Agent,11/08/2019 00:01,Can you please confirm the debit card number for me please?
-1011432,Client,11/08/2019 00:01,It's four oh one two zero zero zero zero [ZIP-9] four three nine
+1011432,Client,11/08/2019 00:01,It's [CCARD-5]
 1011432,Agent,11/08/2019 00:01,and the expiration?
 1011432,Client,11/08/2019 00:01,July of two thousand twenty three
 1011432,Agent,11/08/2019 00:01,And the CV code?
@@ -34,7 +34,7 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:03,The system is telling me that it needs your physical address associated with the card.
 1011432,Client,11/08/2019 00:04,Ok. It's four one three main street in Deluth Georgia in the United States. The zip is [ZIP-10] or <ZIP/>.
 1011432,Agent,11/08/2019 00:05,I also need a phone number associated with the account.
-1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's [PHONE-7]. It could also be my land line which is [PHONE-6].
+1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's [PHONE-8]. It could also be my land line which is [PHONE-7].
 1011432,Agent,11/08/2019 00:06,And what is your four digit PIN code?
 1011432,Client,11/08/2019 00:06,I believe it's <PIN/>. Or it could be [PIN-13]
 1011432,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.

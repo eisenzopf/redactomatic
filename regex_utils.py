@@ -27,12 +27,12 @@ def flags_from_array(flist,etype):
 
 def flag_from_string(s,etype):
     if etype==EngineType.REGEX:
-        if (s=="ASCII" or s=="A"): return re.ASCII	
-        if (s=="IGNORECASE" or s=="I"): return re.IGNORECASE
-        if (s=="MULTILINE" or s=="M"): return re.MULTILINE
-        if (s=="DOTALL" or s=="S"): return re.DOTALL
-        if (s=="VERBOSE" or s=="X"): return re.VERBOSE
-        if (s=="LOCALE" or s=="L"): return re.LOCALE
+        if (s=="ASCII" or s=="A"): return regex.ASCII	
+        if (s=="IGNORECASE" or s=="I"): return regex.IGNORECASE
+        if (s=="MULTILINE" or s=="M"): return regex.MULTILINE
+        if (s=="DOTALL" or s=="S"): return regex.DOTALL
+        if (s=="VERBOSE" or s=="X"): return regex.VERBOSE
+        if (s=="LOCALE" or s=="L"): return regex.LOCALE
         else: return 0
 
     elif etype==EngineType.RE:
@@ -46,3 +46,9 @@ def flag_from_string(s,etype):
 
     else:
         return 0   #Can't happen
+
+def compile(s,flags,etype):
+    if etype==EngineType.REGEX:
+        return regex.compile(s,flags)
+    elif etype==EngineType.RE:
+        return re.compile(s,flags)

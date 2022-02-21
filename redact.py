@@ -102,7 +102,7 @@ class RedactorRegex(RedactorBase):
                 
         #Get the regex from an inline definition, a ruleref, or an external file (NOT YET SUPPORTED)
         if (_regex_id is not None): 
-            _regex_set=self._entity_rules.get_regex(_regex_id)
+            _regex_set=self._entity_rules.get_regex_set(_regex_id)
         elif (_regex_filename is not None):
             #IMPLEMENT THIS!
             raise er.EntityRuleConfigException("ERROR: regex-filename is not yet supported.")
@@ -111,15 +111,11 @@ class RedactorRegex(RedactorBase):
         else:
             raise er.EntityRuleConfigException("ERROR: No valid regex defined in rule: "+str(self._id))
         
-        #ensure we have a list of regexp expressions (even if there is just one in the list.)  
-        if isinstance(_regex_set,str): _regex_set=[_regex_set]
-        if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")   
-
         self._group=_model_params.get("group",1)     
         self._flags=ru.flags_from_array(_model_params.get("flags",["IGNORECASE"]),ru.EngineType.REGEX)
         
         try:
-            self._pattern_set = [regex.compile(r, self._flags) for r in _regex_set]
+           self._pattern_set = [ru.compile(r, self._flags, ru.EngineType.REGEX) for r in _regex_set]
         except Exception as exc:
             print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc))
 
@@ -198,7 +194,7 @@ class RedactorPhraseList(RedactorRegex):
             #print("Phrase: "+str(phrase))
             _my_redactor=RedactorRegex(self._id,self._entity_rules)
             _my_model_params=self._params.copy()
-            _my_model_params[self._entity_rules.args.modality]["regex"]=str(phrase)
+            _my_model_params[self._entity_rules.args.modality]["regex"]=[str(phrase)]
             #print("my_model_params:",_my_model_params)
 
             _my_redactor.configure(_my_model_params, self._entity_map, self._entity_values)

@@ -1,0 +1,20 @@
+regex-test:
+    pin-text:
+        - engine: regex    
+          match-type: ONE_OR_MORE_MATCH
+          phrases: 
+            - '1234'
+            - 'the pin number is 1234.'
+
+        - engine: regex      
+          match-type: NO_MATCHES
+          phrases:
+            - 'abc1234de'
+            - '1 2 3 4'
+
+    pin-voice:
+        - engine: regex    
+          match-type: ONE_OR_MORE_MATCH
+          phrases: 
+            - 'one two three four'
+            - 'the pin number is one two three four maiden name is walsh'

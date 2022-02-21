@@ -137,7 +137,7 @@ class AnonRegex(AnonymizerBase):
         
         #Get the regex from an inline definition, a ruleref, or an external file (NOT YET SUPPORTED)
         if (_regex_id is not None): 
-            _regex_set=self._entity_rules.get_regex(_regex_id)
+            _regex_set=self._entity_rules.get_regex_set(_regex_id)
         elif (_regex_filename is not None):
             #IMPLEMENT THIS!
             raise er.EntityRuleConfigException("ERROR: regex-filename is not yet supported.")
@@ -146,15 +146,10 @@ class AnonRegex(AnonymizerBase):
         else:
             raise er.EntityRuleConfigException("ERROR: No valid regex defined in rule: "+str(self._id))
 
-        #ensure we have a list of regexp expressions (even if there is just one in the list.)  
-        if isinstance(_regex_set,str): _regex_set=[_regex_set]
-        if not isinstance(_regex_set,list): raise er.EntityRuleConfigException("ERROR: regular expression rules should be lists or single strings.")    
-
-        #self._flags=_model_params.get("flags",0)
         self._flags=ru.flags_from_array(_model_params.get("flags",[]),ru.EngineType.RE)
         
         try:
-            self._pattern_set = [regex.compile(r, self._flags) for r in _regex_set]
+            self._pattern_set = [ru.compile(r, self._flags, ru.EngineType.RE) for r in _regex_set]
         except Exception as exc:
             print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc))
 

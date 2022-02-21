@@ -1,0 +1,7 @@
+,regex_id,test_type,pass,group,ix,match,left,matched_text,right,pattern_ix,test_text
+0,pin-text,MatchType.ONE_OR_MORE_MATCH,True,0.0,1.0,exact,,1234,,1.0,1234
+0,pin-text,MatchType.ONE_OR_MORE_MATCH,True,0.0,1.0,partial,the pin number is, 1234,.,1.0,the pin number is 1234.
+0,pin-text,MatchType.NO_MATCHES,True,0.0,0.0,none,,,,1.0,abc1234de
+0,pin-text,MatchType.NO_MATCHES,True,0.0,0.0,none,,,,1.0,1 2 3 4
+0,pin-voice,MatchType.ONE_OR_MORE_MATCH,True,0.0,1.0,exact,,one two three four,,1.0,one two three four
+0,pin-voice,MatchType.ONE_OR_MORE_MATCH,True,0.0,1.0,partial,the pin number is, one two three four, maiden name is walsh,1.0,the pin number is one two three four maiden name is walsh
