@@ -186,7 +186,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 You can set how strict the redaction script will be. Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
 
-You can also define your own levels in the *config.json* file if desired, for example if you define the redaction labels that you want to redact in a new secton of *config.json* called called `'Level-custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
+You can also define your own levels in the *config.yml* file if desired, for example if you define the redaction labels that you want to redact in a new secton of *config.yml* called called `'Level-custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
 
 ## Supported Languages and Regions
 
@@ -231,7 +231,7 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 
 The [rules/](rules/) directory contains default files used to define the core redaction.   
 
-- [config.json](rules/config.json) - fields to be redacted, anonymized, levels and anonymyzation order
+- [config.yml](rules/config.yml) - fields to be redacted, anonymized, levels and anonymyzation order
 
 - [core-defs.yml](rules/core-defs.yml)- definitions for redaction and anonymization of all core fields
 
@@ -271,49 +271,45 @@ The top-level dictionary keys are as follows:
 
 Each configuration dictionary must have one of these keys as its head.  Configuration files are treated as a single common namespace.  This means that defintions can be mixed into one file or arbitrarily spread across multiple files.  You will not be warned however if one of your rules is overwriting another one so take care with naming.
 
-In the default configuration in the release the top-four keys are present in the file *[config.json](rules/config.json)* and the remaining two keys are defined in the file [core-defs.yml](rules/core-defs.yml). 
+In the default configuration in the release the top-four keys are present in the file *[config.yml](rules/config.yml)* and the remaining two keys are defined in the file [core-defs.yml](rules/core-defs.yml). 
 
 ### level
 
 ```
-{
-    "level" : {
-        "1": [
-            "PHONE",
-            "PERSON",
-            "ADDRESS",
-            "CCARD",
-            "MONEY",
-            "SSN",
-            "PIN"
-        ],
-        "2": [
-            "PHONE",
-            "PERSON",
-            etc..
+level:
+    '1': 
+        - _IGNORE_
+        - _SPACY_
+        - PHONE
+        - PERSON
+        - ADDRESS
+        - CCARD
+        - MONEY
+        - SSN
+        - PIN
+    '2':
+        - _IGNORE_
+        - _SPACY_
+        - PHONE
 ```
 
-**Example level definition (JSON)**
+**Example level definition (YAML)**
 
 Any number of level definitions may be set.  By default level keys '1', '2' and '3' are defined.  The ` --level `option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
 
 ### redaction-order
 
 ```
-    "redaction-order": [
-        "_IGNORE_",
-        "PERSON",
-        "ADDRESS",
-        "SSN",
-        ...
-        "SSN",
-        "EMAIL",
-        "PIN"
-        "_SPACY_",
-    ],
+redaction-order:
+    - _IGNORE_
+    - PERSON
+    - ADDRESS
+    - SSN
+    -  ...
+
 ```
 
-**Example redaction-order (JSON)**
+**Example redaction-order (YAML)**
 
 The `redaction-order` section lists the order in which the redactor functions for the entities are computed (See the entities section).  This section can be re-ordered if you want certain redactors to run before others.
 
@@ -326,16 +322,17 @@ The other special label ***\_IGNORE\_*** is uses to run a redactor that labels a
 ### anon-map
 
 ```
-    "anon-map": {
-        "ADDRESS": [ "ADDRESS", "streetAddress" ],
-        "CARDINAL": [ "CARDINAL", "DIGITS", "digits" ],
-        "CCARD": [ "CCARD", "creditCardNumber", "ccNum" ],
-        "CREDENTIALS": [ "credentials" ],
-        ...
-    ]
+anon-map:
+    ADDRESS: [ ADDRESS, streetAddress ]
+    CARDINAL: [ CARDINAL, DIGITS, digits ]
+    CCARD: [ CCARD, creditCardNumber, ccNum ]
+    CREDENTIALS: [ credentials ]
+    DATE: [ DATE, expDate ]
+    ...
+
 ```
 
-**Example anon-map (JSON)**
+**Example anon-map (YAML)**
 
 The `anon-map` section defines which redaction labels are aliases for redaction entities.   Consider the following text that has already been redacted.  The address has been converted into the label **[streetAddress]** which is not a native entity that is defined in the ```entities``` section of the configuration.  it is also not referenced in the ```level``` or ```redacton-order```.  
 
@@ -354,24 +351,23 @@ You may be wondering why this is neccessary and how the redacted text can have l
 If there is a 1:1 correspondence between the entity and its anonymizer then it is not neccessary to map it to itself.  However if a mapping is included then it should also map to itself if intended.
 
 ```
-    "anon-map": {
-        "ENTITY1": [ "ENTITY1" ],               # Not needed to map ENTITY1 to itself
-        "ENTITY1": [ "ENTITY1", "ENTITY2" ]     # Needed to continune mapping ENTITY1 to itself
+anon-map: 
+        ENTITY1: [ "ENTITY1" ]               # Not needed to map ENTITY1 to itself
+        ENTITY2: [ "ENTITY2", "ENTITY3" ]    # Needed to continune mapping ENTITY2 to itself
         ...
 ```
 
 ### token-map
 
 ```
-    "token-map": {
-        "ZIP": [ "<ZIP\/>" ],
-        "PIN": [ "<PIN\/>", "<CVV\/>" ],
-        "CCARD": [ "<ccNum\/>" ],
-        "DATE": [ "<expDate\/>" ]
-    }
+token-map:
+    ZIP: [ "<ZIP\/>" ]
+    PIN: [ "<PIN\/>", "<CVV\/>" ]
+    CCARD: [ "<ccNum\/>" ]
+    DATE: [ "<expDate\/>" ]
 ```
 
-**Example token-map (JSON)**
+**Example token-map (YAML)**
 Token maps are very like anon-maps but are used to map entity labels that are not in the correct Redactomatic format for anonymization.  They are typically used to anonymize data that has come from programs other than redactomatic. In the example input text below a different redaction algorithm has labelled ZIP codes using XML labels.  
 
 ```
@@ -455,7 +451,6 @@ regex
       (^|\s)
       (?<ccard>( ((?&zero_to_nine)\s+){12,15}) (?&zero_to_nine) )
       (?!\s*)?
-
 ```
 
 **Example of an ?INCLUDE macro.**
@@ -775,7 +770,7 @@ Please see the [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Known Issues
 
-The following entity types are referenced in the *anon-map* section in *config.json* but are not yet implemented for redaction or anonymization: **[CREDENTIALS]**, **[IPADDRESS]**, **[PASSWORD]**, **[URL]**, **[USERNAME]**.  
+The following entity types are referenced in the *anon-map* section in *config.yml* but are not yet implemented for redaction or anonymization: **[CREDENTIALS]**, **[IPADDRESS]**, **[PASSWORD]**, **[URL]**, **[USERNAME]**.  
 
 Implementations for these will be welcomed from contributors.
 
