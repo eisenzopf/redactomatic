@@ -384,14 +384,15 @@ The token-map above will ensure that this label is anonymized using the entity r
 
 ```
 regex
-    ordinal:
+  ordinal:
     # voice-yes, chat-yes
     - >
     (?x)
     (?(DEFINE)
+
     (?<one_to_9>  
-    (fir|seco|thi|four|fif|six|seven|eigh|nin|[1-9])(?:st|nd|rd|th)
-    ) # end one_to_9 definition
+    (fir|seco|thi|four|fif|six|seven|eigh|nin|[1-9])(?:st|nd|rd|th)
+    ) # end one_to_9 definition
 
     (?<ten_to_19>     (?:(?:(ten|eleven|twelf)|((?:thir|four|fif|six|seven|eigh|nine)teen))th|((10|11|12|13|14|15|16|17|18|19)th))
     ) # end ten_to_19 definition
@@ -429,13 +430,41 @@ Regular expressions can be defined in one place in the rule set and referenced b
 
 The example above shows extracts from the regex section of the core-def.yml file included in the release. Three rules can be seen, attached to three keys `ordinal`, `ordinal-text-gen`, and`ordinal-voice -gen`.
 
-As can be seen in the next section, the `ordinal `regular expression will be used to define a shared text and voice redactor for the **ORDINAL** entity. Redactomatic currenly support Perl Compatible Regular Expressions (PCRE) for redaction via the `redactor.RedactorRegex` class.  This means that the extremely useful (DEFINE) syntax can be used - amongst other features of PCRE.  
+As can be seen in the next section, the `ordinal `regular expression will be used to define a shared text and voice redactor for an **ORDINAL** entity. Redactomatic currenly support Perl Compatible Regular Expressions (PCRE) for redaction via the `redactor.RedactorRegex` class.  This means that the extremely useful (DEFINE) syntax can be used - amongst other features of PCRE.  
 
 The two rules `ordinal-text-gen`, and `ordinal-voice -gen` are used as generative grammars for the anonymizers for the **ORDINAL ** entity for text and voice modalities. The `anonymizer.AnonRegex` class used for this does not currently support PCRE.  
 
 The definitions in the `regex `section are just that - they are definitions.  By themselves they do not make anything happen.  In order to be useful they need to be referenced in `regex-id` parameters in the redaction and anonymization sections of the `entities `definitions.
 
 The values of the named id keys in the `regex `section can be a **single pattern** or a **list of patterns**.  The interpretation of what to do with a list of regular expressions is left up to the redactor or anonymizer that uses the regex definition.
+
+#### ?INCLUDE< rule-id >
+
+```
+regex
+  zero_to_nine-voice:
+      - >
+        (?<zero_to_nine> 
+        (?:(one|two|three|four|five|six|seven|eight|nine|zero|oh|0z))
+        )
+
+  ccard-voice:      
+    # chat-yes, voice-no
+    (?xi)
+      (?(DEFINE)?INCLUDE<zero_to_nine-voice>)
+      (^|\s)
+      (?<ccard>( ((?&zero_to_nine)\s+){12,15}) (?&zero_to_nine) )
+      (?!\s*)?
+
+```
+
+**Example of an ?INCLUDE macro.**
+
+Redactomatic has its own special macro to include a regular expression defined in one rule as a macro in another rule.  
+
+In the example given above the regular expression zero_to_nine-voice is just a standard regular expression definition.
+
+In the ccard-voice rule this is then inserted via the macro **?INCLUDE< rule-id >** macro.   This macro is a direct text substitution of the rule in place of the invocation.  Macros can insert other macros but take care not to create infinite recursion.
 
 ### regex-test
 
