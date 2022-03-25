@@ -2,15 +2,15 @@ _IGNORE_-0,first and
 _IGNORE_-1,today
 _IGNORE_-2,CV
 _IGNORE_-4,tomorrow
-PHONE-5, one two four nine eight seven four six two three
-PHONE-6," five nine one, two six eight, five five nine one"
-PHONE-7, two one eight seven three oh four three oh oh
-ZIP-8, two three four two three
-ZIP-9, nine eight seven six five
-ZIP-10, five five eight one two
+CCARD-5,four oh one two zero zero zero zero nine eight seven six five four three nine
+PHONE-6, one two four nine eight seven four six two three
+PHONE-7," five nine one, two six eight, five five nine one"
+PHONE-8, two one eight seven three oh four three oh oh
+ZIP-9,two three four two three
+ZIP-10,five five eight one two
 EMAIL-11,eisen@discourse.ai
-PIN-12, two three four three
-PIN-13, one one six eight
+PIN-12,two three four three
+PIN-13,one one six eight
 PERSON-15,David
 MONEY-17,three cents
 MONEY-18,Five hundred dollars

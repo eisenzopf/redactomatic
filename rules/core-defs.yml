@@ -3,10 +3,6 @@ entities:
     redactor:
       model-class: redact.RedactorSpacy
 
-  PERSON:
-    anonymizer:
-      model-class: anonymize.AnonPerson
-
   MONEY:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -15,10 +11,6 @@ entities:
       text:
         regex-id: money-text-gen
 
-  LOC:
-    anonymizer:
-      model-class: anonymize.AnonLoc
- 
   DATE:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -39,10 +31,6 @@ entities:
     anonymizer:
       model-class: anonymize.AnonNullString
 
-  GPE:
-    anonymizer:
-      model-class: anonymize.AnonGPE
-  
   LANGUAGE:
     anonymizer:
       model-class: anonymize.AnonRegex
@@ -58,14 +46,6 @@ entities:
   LAW:
     anonymizer:
       model-class: anonymize.AnonNullString
-
-  NORP:
-    anonymizer:
-      model-class: anonymize.AnonNorp
-
-  ORG:
-    anonymizer:
-      model-class: anonymize.AnonCompany
 
   PERCENT:
     anonymizer:
@@ -99,9 +79,85 @@ entities:
       text:
         regex-id: time-text-gen
 
+  LOC:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-field: city
+      voice:
+        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-field: city
+  
+  GPE:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/gpe.csv
+        phrase-header: False
+        phrase-column: 0
+      voice:
+        phrase-filename: ./data/gpe.csv
+        phrase-header: False
+        phrase-column: 0
+
+  ORG:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-field: Company
+      voice:
+        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-field: Company
+
+  NORP:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/nationalities.csv
+        phrase-field: Nationality
+      voice:
+        phrase-filename: ./data/nationalities.csv
+        phrase-field: Nationality
+
+  PERSON:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+      voice:
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+
   WORK_OF_ART:
     anonymizer:
-      model-class: anonymize.AnonWorkOfArt
+      model-class: anonymize.AnonPhraseList
+      text:
+        phrase-filename: ./data/Artworks.csv
+        phrase-field: Title
+      voice:
+        phrase-filename: ./data/Artworks.csv
+        phrase-field: Title
+
+  ZIP:  
+    redactor:
+      model-class: redact.RedactorRegex
+      text:
+        regex-id: zip-text
+        group: zip
+      voice:
+        regex-id: zip-voice
+        group: zip
+    anonymizer:  
+      model-class: anonymize.AnonZipC
+      text:
+        phrase-filename: ./data/zip_code_database.csv
+        phrase-field: zip
+      voice:
+        phrase-filename: ./data/zip_code_database.csv
+        phrase-field: zip
 
   SSN:
     redactor:
@@ -119,7 +175,7 @@ entities:
     redactor:
       model-class: redact.RedactorRegex
       text:
-        regex-id: ccard
+        regex-id: ccard-text
       voice:
         regex-id: ccard-voice
     anonymizer:
@@ -138,17 +194,30 @@ entities:
         regex-id: address
     anonymizer:
       model-class: anonymize.AnonAddress
+      text:
+        phrase-filename: ./data/street-names.csv
+        phrase-field: Streets
+      voice:
+        phrase-filename: ./data/street-names.csv
+        phrase-field: Streets
 
-  ZIP:  
+  EMAIL:
     redactor:
       model-class: redact.RedactorRegex
       text:
-        regex-id: zip-text
-        group: zip
+        regex-id: email
       voice:
-        regex-id: zip-voice
+        regex-id: email
     anonymizer:
-      model-class: anonymize.AnonZipC
+      model-class: anonymize.AnonPhraseList
+      text:
+        - phrase-filename: ./data/baby-names.csv
+          phrase-field: name
+        - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
+      voice:
+        - phrase-filename: ./data/baby-names.csv
+          phrase-field: name
+        - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
 
   PHONE:
     redactor:
@@ -159,16 +228,6 @@ entities:
         regex-id: phone-voice
     anonymizer:
       model-class: anonymize.AnonPhone
-
-  EMAIL:
-    redactor:
-      model-class: redact.RedactorRegex
-      text:
-        regex-id: email
-      voice:
-        regex-id: email
-    anonymizer:
-      model-class: anonymize.AnonEmail
 
   ORDINAL:
     redactor:
@@ -203,8 +262,10 @@ entities:
       model-class: redact.RedactorRegex
       text:
         regex-id: pin-text
+        group: pin
       voice:
         regex-id: pin-voice
+        group: pin
     anonymizer:
       model-class: anonymize.AnonRegex
       text:
@@ -262,7 +323,7 @@ regex:
     - 'first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth'
 
   money-text-gen:
-    - '\$(\d{0,3})(\.\d{2}){0,1}'
+    - '\$([1-9]\d{0,2})(\.\d{2}){0,1}'
 
   money-voice-gen:
     - '(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety) (one|two|three|four|five|six|seven|eight|nine|) dollars ((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|) (one|two|three|four|five|six|seven|eight|nine) cents){0,1}'
@@ -304,31 +365,35 @@ regex:
 
   pin-text:
     # chat-yes, voice-no
-    - (^|\s)(?:(\d{4}))\s*?
-  
+    - (^|\s)(?<pin>(?:(\d{4})))\s*?
+
+  zero_to_nine-voice:
+      - >
+        (?<zero_to_nine> 
+        (?:(one|two|three|four|five|six|seven|eight|nine|zero|oh|0z))
+        )
+
+  oh_to_nine-voice:
+      - >
+        (?<oh_to_nine> 
+        (?:(one|two|three|four|five|six|seven|eight|nine|oh|0z))
+        )
+
   pin-voice:
     # chat-no, voice-yes
     - >
       (?xi)
-      (?(DEFINE)
-          (?<one_to_9> 
-          (?:(one|two|three|four|five|six|seven|eight|nine|0z))
-          ) # end one_to_9 definition
-      )
-      (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
-  
+      (?(DEFINE)?INCLUDE<oh_to_nine-voice>)
+      (^|\s)(?<pin>(?:(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)))(?!\s*)?
+
   phone-voice:
     # chat-no, voice-yes
     - >
       (?xi)
-      (?(DEFINE)
-        (?<one_to_9>  
-        (?:(one|two|three|four|five|six|seven|eight|nine|0z|oh))
-        )       # end one_to_9 definition
-      )
-      (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)[\s,]{1,2}
-      (?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)[\s,]{1,2}
-      (?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+      (?(DEFINE)?INCLUDE<oh_to_nine-voice>)
+      (^|\s)(?:(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)[\s,]{1,2}
+      (?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)[\s,]{1,2}
+      (?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine))(?!\s*)?
   
   phone-text:
     # chat-yes, voice-no
@@ -415,7 +480,7 @@ regex:
     # chat-yes, voice-no
     - '(?<address1>(?>\d{1,6}(?>\ 1\/[234])?( (N(orth)?|S(outh)?)? ?(E(ast)?|W(est)?))?((?> \d+ ?(th|rd|st|nd))|(?> [A-Z](?>[a-z])+)+) (?>(?i)THROUGHWAY|TRAFFICWAY|CROSSROADS|EXPRESSWAY|BOULEVARD|CROSSROAD|EXTENSION|JUNCTIONS|MOUNTAINS|STRAVENUE|UNDERPASS|CAUSEWAY|CRESCENT|CROSSING|JUNCTION|MOTORWAY|MOUNTAIN|OVERPASS|PARKWAYS|TURNPIKE|VILLIAGE|VILLAGES|CENTERS|CIRCLES|COMMONS|CORNERS|ESTATES|EXPRESS|FORESTS|FREEWAY|GARDENS|GATEWAY|HARBORS|HIGHWAY|HOLLOWS|ISLANDS|JUNCTON|LANDING|MEADOWS|MOUNTIN|ORCHARD|PARKWAY|PASSAGE|PRAIRIE|RANCHES|SPRINGS|SQUARES|STATION|STRAVEN|STRVNUE|STREETS|TERRACE|TRAILER|TUNNELS|VALLEYS|VIADUCT|VILLAGE|ALLEE|ARCADE|AVENUE|BLUFFS|BOTTOM|BRANCH|BRIDGE|BROOKS|BYPASS|CANYON|CAUSWA|CENTER|CENTRE|CIRCLE|CLIFFS|COMMON|CORNER|COURSE|COURTS|CRSENT|CRSSNG|DIVIDE|DRIVES|ESTATE|EXTNSN|FIELDS|FOREST|FORGES|FREEWY|GARDEN|GATEWY|GATWAY|GREENS|GROVES|HARBOR|HIGHWY|HOLLOW|ISLAND|ISLNDS|JCTION|JUNCTN|KNOLLS|LIGHTS|MANORS|MEADOW|MEDOWS|MNTAIN|ORCHRD|PARKWY|PLAINS|POINTS|RADIAL|RADIEL|RAPIDS|RIDGES|SHOALS|SHOARS|SHORES|SKYWAY|SPRING|SPRNGS|SQUARE|STRAVN|STREAM|STREME|STREET|SUMITT|SUMMIT|TRACES|TRACKS|TRAILS|TUNNEL|TURNPK|UNIONS|VALLEY|VIADCT|VILLAG|ALLEE|ALLEY|ANNEX|AVENU|AVNUE|BAYOO|BAYOU|BEACH|BLUFF|BOTTM|BOULV|BRNCH|BRDGE|BROOK|BURGS|BYPAS|CANYN|CENTR|CNTER|CIRCL|CRCLE|CLIFF|COURT|COVES|CREEK|CRSNT|CREST|CURVE|DRIVE|FALLS|FERRY|FIELD|FLATS|FORDS|FORGE|FORKS|FRWAY|GARDN|GRDEN|GRDNS|GTWAY|GLENS|GREEN|GROVE|HARBR|HRBOR|HAVEN|HIWAY|HILLS|HOLWS|ISLND|ISLES|JCTNS|KNOLL|LAKES|LNDNG|LIGHT|LOCKS|LODGE|LOOPS|MANOR|MILLS|MISSN|MOUNT|MNTNS|PARKS|PKWAY|PKWYS|PATHS|PIKES|PINES|PLAIN|PLAZA|POINT|PORTS|RANCH|RNCHS|RAPID|RIDGE|RIVER|ROADS|ROUTE|SHOAL|SHOAR|SHORE|SPRNG|SPNGS|SPURS|STATN|STRAV|STRVN|SUMIT|TRACE|TRACK|TRAIL|TRLRS|TUNEL|TUNLS|TUNNL|TRNPK|UNION|VALLY|VIEWS|VILLG|VILLE|VISTA|WALKS|WELLS|ALLY|ANEX|ANNX|AVEN|BEND|BLUF|BLVD|BOUL|BURG|BYPA|BYPS|CAMP|CNYN|CAPE|CSWY|CENT|CNTR|CIRC|CRCL|CLFS|CLUB|CORS|CRSE|COVE|CRES|XING|DALE|DRIV|ESTS|EXPR|EXPW|EXPY|EXTN|EXTS|FALL|FRRY|FLDS|FLAT|FLTS|FORD|FRST|FORG|FORK|FRKS|FORT|FRWY|GRDN|GDNS|GTWY|GLEN|GROV|HARB|HIWY|HWAY|HILL|HLLW|HOLW|INLT|ISLE|JCTN|JCTS|KEYS|KNOL|KNLS|LAKE|LAND|LNDG|LANE|LOAF|LOCK|LCKS|LDGE|LODG|LOOP|MALL|MNRS|MDWS|MEWS|MILL|MSSN|MNTN|MTIN|NECK|ORCH|OVAL|PARK|PKWY|PASS|PATH|PIKE|PINE|PNES|PLNS|PLZA|PORT|PRTS|RADL|RAMP|RNCH|RPDS|REST|RDGE|RDGS|RIVR|ROAD|SHLS|SHRS|SPNG|SPGS|SPUR|SQRE|SQRS|STRA|STRM|STRT|TERR|TRCE|TRAK|TRKS|TRLS|TRLR|TUNL|VLLY|VLYS|VDCT|VIEW|VILL|VLGS|VIST|VSTA|WALK|WALL|WAYS|WELL|ALY|ANX|ARC|AVE|AVN|BCH|BND|BLF|BOT|BTM|BRG|BRK|BYP|CMP|CPE|CEN|CTR|CIR|CLF|CLB|COR|CTS|CRK|DAM|DIV|DVD|DRV|EST|EXP|EXT|FLS|FRY|FLD|FLT|FRD|FRG|FRK|FRT|FWY|GLN|GRN|GRV|HBR|HVN|HTS|HWY|HLS|ISS|JCT|KEY|KYS|KNL|LKS|LGT|LCK|LDG|MNR|MDW|MNT|MTN|NCK|OVL|PRK|PKY|PLN|PLZ|PTS|PRT|PRR|RAD|RPD|RST|RDG|RIV|RVR|RDS|ROW|RUE|RUN|SHL|SHR|SPG|SQR|SQU|STA|STN|STR|SMT|TER|TRK|TRL|VLY|VIA|VWS|VLG|VIS|VST|WAY|WLS|AV|BR|CP|CT|CV|DL|DM|DV|DR|FT|HT|HL|IS|KY|LK|LN|LF|MT|PL|PT|PR|RD|SQ|ST|UN|VW|VL|WY))( (N(orth)?|S(outh)?)? ?(E(ast)?|W(est)?)?)?)'
 
-  ccard:      
+  ccard-text:      
     # chat-yes, voice-no
     - '(?:\d[ -]*?){13,16}'
 
@@ -464,12 +529,8 @@ regex:
     # chat-no, voice-yes
     - >
       (?xi)
-      (?(DEFINE)
-          (?<one_to_9>  
-          (?:(one|two|three|four|five|six|seven|eight|nine|0z))
-          ) # end one_to_9 definition
-      )
-      (^|\s)(?:(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9)\s?(?&one_to_9))(?!\s*)?
+      (?(DEFINE)?INCLUDE<oh_to_nine-voice>)
+      (^|\s)(?<zip>(?:(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)\s?(?&oh_to_nine)))(?!\s*)?
 
   ordinal:
     # voice-yes, chat-yes

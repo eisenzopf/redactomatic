@@ -1,4 +1,7 @@
 import filecmp
+
+regex_test="regextest.csv"
+
 text_log_l2 = "text_log_l2.csv"
 text_redacted_l2 = "text_output_l2.csv"
 text_redact_anonymized_l2 = "text_output_anonymized_l2.csv"
@@ -15,6 +18,9 @@ voice_redact_anonymized_l3 = "voice_output_anonymized_l3.csv"
 
 text_anonymized_only = "text_output_anonymized_only.csv"
 voice_anonymized_only = "voice_output_anonymized_only.csv"
+
+#Check the regex test
+print( "Is the regex test output file correct?:", filecmp.cmp(regex_test, "test/" + regex_test))
 
 # Level 2 redaction and anonymization
 print ("Is the L2 text redaction log correct?:", filecmp.cmp(text_log_l2, "test/" + text_log_l2))

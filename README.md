@@ -40,7 +40,32 @@ Redactomatic supports both transcribed voice and chat conversation text types. T
 
 ### Dictionary of phrases to ignore
 
-Redactomatic includes the ability to ignore key phrases. This comes in handy when redactomatic would otherwise tag something as PII that shouldn't be. For example, if a conversation includes the phrase, *"May I please have your first and last name"*, is the word *first* an ordinal? No it's not. Under normal conditions, Redactomatic would redact the word *first*. In the case where we use the `--anonymize` flag, it would assign a random ordinal in it's place. For example, the previous phrase might have been replaced with, *"May I please have your eighth and last name"*. This obviously doesn't make any sense. We can solve this problem by configuring Redactomatic to ignore the phrase, *"first and"*. We would do this by editing the definition of the *\*_IGNORE\_* rule which is by default located in the file *rules/ignore.yml*.  You can add as many additional phrases as you like.  
+Redactomatic includes the ability to ignore key phrases. This comes in handy when redactomatic would otherwise tag something as PII that shouldn't be. For example, if a conversation includes the phrase, *"May I please have your first and last name"*, is the word *first* an ordinal? No it's not. Under normal conditions, Redactomatic would redact the word *first*. In the case where we use the `--anonymize` flag, it would assign a random ordinal in it's place. For example, the previous phrase might have been replaced with, *"May I please have your eighth and last name"*. This obviously doesn't make any sense. We can solve this problem by configuring Redactomatic to ignore the phrase, *"first and"*. We would do this by editing the definition of the *\_IGNORE\_* rule which is by default located in the file [ignore.yml](rules/ignore.yml)   You can add as many additional phrases as you like.  An example of this file is shown below.
+
+```
+entities:
+  _IGNORE_:
+    redactor:
+      model-class: redact.RedactorPhraseList
+      text:
+        phrase-list:
+          - first name
+          - first and
+          - today
+          - yesterday
+          - CV
+          - tomorrow
+      voice:
+        phrase-list:
+          - first name
+          - first and
+          - today
+          - yesterday
+          - CV
+          - tomorrow
+    anonymizer:
+      model-class: anonymize.AnonRestoreEntityText  
+```
 
 ## Installation
 
@@ -86,26 +111,28 @@ By default, Redactomatic will use the Spacy small ML model. However, if you plan
 Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (`--modality` which must be voice or text), and 3. the column in the CSV containing the text to redact (`--column`), the column containing the conversation ID (`--idcolumn`).
 
 ```
-usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED] [--rulefile RULEFILE [RULEFILE ...]]
+usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED] [--rulefile RULEFILE [RULEFILE ...]] [--regextest] [--testoutputfile TESTOUTPUTFILE]
 ```
 
 ### Command Line Parameters
 
-| Paramter    | Description                                                                                                                                  | Required? |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| column      | The column number containing the text to redact                                                                                              | yes       |
-| idcolumn    | the column number containing the unique conversation id                                                                                      | yes       |
-| inputfile   | The filename containing the conversations to process                                                                                         | yes       |
-| outputfile  | The filename that will contain the redacted output                                                                                           | yes       |
-| modality    | Can be voice or text depending on the type of conversations contained in the inputfile                                                       | yes       |
-| anonymize   | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                           | no        |
-| large       | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                | no        |
-| log         | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.     | no        |
-| uppercase   | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no        |
-| level       | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                           | no        |
-| noredaction | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                    | no        |
-| seed        | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                             | no        |
-| rulefile    | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                      | no        |
+| Paramter       | Description                                                                                                                                  | Required? |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| column         | The column number containing the text to redact                                                                                              | yes       |
+| idcolumn       | the column number containing the unique conversation id                                                                                      | yes       |
+| inputfile      | The filename containing the conversations to process                                                                                         | yes       |
+| outputfile     | The filename that will contain the redacted output                                                                                           | yes       |
+| modality       | Can be voice or text depending on the type of conversations contained in the inputfile                                                       | yes       |
+| anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                           | no        |
+| large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                | no        |
+| log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.     | no        |
+| uppercase      | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no        |
+| level          | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                           | no        |
+| noredaction    | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                    | no        |
+| seed           | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                             | no        |
+| rulefile       | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                      | no        |
+| regextest      | Test the regular rexpressions defeind in the regex-test rules prior to any other processing                                                  | no        |
+| testoutputfile | The file to save test results in.                                                                                                            | no        |
 
 ### Example 1: Redact a text file
 
@@ -159,7 +186,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 You can set how strict the redaction script will be. Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
 
-You can also define your own levels in the *config.json* file if desired, for example if you define the redaction labels that you want to redact in a new secton of *config.json* called called `'Level-custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
+You can also define your own levels in the *config.yml* file if desired, for example if you define the redaction labels that you want to redact in a new secton of *config.yml* called called `'Level-custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
 
 ## Supported Languages and Regions
 
@@ -200,11 +227,31 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 
 ## Data Files
 
-The [data/](data/) directory contains a number of files that are used to anonymize recognized entities. As additional entity types are added for different geographies and languages, the number and size of files will grow. Please see the [data file README](data/README.md) for more information.
+### rules/
+
+The [rules/](rules/) directory contains default files used to define the core redaction.   
+
+- [config.yml](rules/config.yml) - fields to be redacted, anonymized, levels and anonymyzation order
+
+- [core-defs.yml](rules/core-defs.yml)- definitions for redaction and anonymization of all core fields
+
+- [ignore.yml](rules/ignore.yml) - an example file used to specify phrases to be protected
+
+It is important to note that the core rules can all be re-defined or overriden.
+
+The `--rulesfile` option is used to identify which rule files to use. If this option is not specified then all of the files named rules/*.json or rules/*.yml in the rules directory are loaded which results in loading the above files.  
+
+You can add custom rules by putting JSON or YML files in the rules directory, or create your own custom rules directory and point to is using the `--rulesfile` option.  Don't forget to copy the core rules over or keep pointing to the core rules file as well if you want it to be picked up.
+
+Note also that you can define rules in JSON or YML.  Regular expressions are almost impossible to express in JSON so use YML.
+
+### data/
+
+The [data/](data/) directory contains a number of files that are used to anonymize recognized entities. As additional entity types are added for different geographies and languages, the number and size of files will grow. Please see the [data file README](data/README.md) for more information.  The anonymization class AnonPhraseList and its sub-classes can be used to create your own anonymization types based on your own data files.  
+
+### test/
 
 The [test/](test/) directory contains a number of files that are used to verify the test results (see the Test section). These files are not neccessary to the operation of Redactomatic.
-
-The [rules/](ruels/) directory contains files used to define the operation of the redaction.  The --rulesfile option is used to identify which rule files to use.  If this option is not specified then all of the files named  rules/\*.json  or rules/\*.yml in the rules directory are loaded.   
 
 ## Creating and Customizing Models
 
@@ -215,62 +262,58 @@ The configuration can be spread arbitrarily across multiple files which are simp
 The top-level dictionary keys are as follows:
 
 - level
-
 - redaction-order
-
 - anon-map
-
 - token-map
-
 - entities
-
 - regex
+- regex-test
 
-Each configuration dictionary must have one of these keys as its head.  Multiple keys can be mixed into one file or spread across multiple files.  In the default configuration in the release the top-four keys are present in the file *config.json* and the remaining two keys are defined in the file core-defs.yml. 
+Each configuration dictionary must have one of these keys as its head.  Configuration files are treated as a single common namespace.  This means that defintions can be mixed into one file or arbitrarily spread across multiple files.  You will not be warned however if one of your rules is overwriting another one so take care with naming.
+
+In the default configuration in the release the top-four keys are present in the file *[config.yml](rules/config.yml)* and the remaining two keys are defined in the file [core-defs.yml](rules/core-defs.yml). 
 
 ### level
 
 ```
-{
-    "level" : {
-        "1": [
-            "PHONE",
-            "PERSON",
-            "ADDRESS",
-            "CCARD",
-            "MONEY",
-            "SSN",
-            "PIN"
-        ],
-        "2": [
-            "PHONE",
-            "PERSON",
-            etc..
+level:
+    '1': 
+        - _IGNORE_
+        - _SPACY_
+        - PHONE
+        - PERSON
+        - ADDRESS
+        - CCARD
+        - MONEY
+        - SSN
+        - PIN
+    '2':
+        - _IGNORE_
+        - _SPACY_
+        - PHONE
 ```
 
-**Example level definition (JSON)**
+**Example level definition (YAML)**
 
-Any number of level definitions may be set.  By default level keys '1', '2' and '3' are defined.  The ` --level `option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.
+Any number of level definitions may be set.  By default level keys '1', '2' and '3' are defined.  The ` --level `option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
 
 ### redaction-order
 
 ```
-    "redaction-order": [
-        "_IGNORE_",
-        "PERSON",
-        "ADDRESS",
-        "SSN",
-        ...
-        "SSN",
-        "EMAIL",
-        "PIN"
-        "_SPACY_",
-    ],
+redaction-order:
+    - _IGNORE_
+    - PERSON
+    - ADDRESS
+    - SSN
+    -  ...
+
 ```
 
-**Example redaction-order (JSON)**
+**Example redaction-order (YAML)**
 
 The `redaction-order` section lists the order in which the redactor functions for the entities are computed (See the entities section).  This section can be re-ordered if you want certain redactors to run before others.
+
+If a label is not in the `redaction-order` then it cannot be anonymized or redacted even if it is specified in the `level `section.
 
 You will notice the label **\_SPACY\_**.  This defines where the NL ML Spacy model is run in the order of execution. By default it is run after the other rules have been run but it could be moved to any position in the list.
 
@@ -279,16 +322,17 @@ The other special label ***\_IGNORE\_*** is uses to run a redactor that labels a
 ### anon-map
 
 ```
-    "anon-map": {
-        "ADDRESS": [ "ADDRESS", "streetAddress" ],
-        "CARDINAL": [ "CARDINAL", "DIGITS", "digits" ],
-        "CCARD": [ "CCARD", "creditCardNumber", "ccNum" ],
-        "CREDENTIALS": [ "credentials" ],
-        ...
-    ]
+anon-map:
+    ADDRESS: [ ADDRESS, streetAddress ]
+    CARDINAL: [ CARDINAL, DIGITS, digits ]
+    CCARD: [ CCARD, creditCardNumber, ccNum ]
+    CREDENTIALS: [ credentials ]
+    DATE: [ DATE, expDate ]
+    ...
+
 ```
 
-**Example anon-map (JSON)**
+**Example anon-map (YAML)**
 
 The `anon-map` section defines which redaction labels are aliases for redaction entities.   Consider the following text that has already been redacted.  The address has been converted into the label **[streetAddress]** which is not a native entity that is defined in the ```entities``` section of the configuration.  it is also not referenced in the ```level``` or ```redacton-order```.  
 
@@ -298,25 +342,33 @@ My mother lives at [streetAddress].
 
 The entry in the anon-map shown above means that redaction labels in the text of the form **[streetAddress]** or **[streetAddress-nnn]** will be anonymized using the rules defined for the entity **ADDRESS**.
 
-You may be wondering why this is neccessary and how the redacted text can come to have labels that are not defined in the configuration files.  There are two main reasons this can occur. 
+You may be wondering why this is neccessary and how the redacted text can have labels that are not defined in the configuration files.  There are two main reasons this can occur. 
 
 * The input file was redacted by another process and we are using Redactomatic to anonymize the resulting text.  For example a company may have their own redaction algorithm but want to use Redactomatic to put plausible text back into the transcripts.
 
 * The label was generated by special redactor processes such as `_SPACY_` that add multiple label types and you want to share anonymizer rules for these labels.
 
+If there is a 1:1 correspondence between the entity and its anonymizer then it is not neccessary to map it to itself.  However if a mapping is included then it should also map to itself if intended.
+
+```
+anon-map: 
+        ENTITY1: [ "ENTITY1" ]               # Not needed to map ENTITY1 to itself
+        ENTITY2: [ "ENTITY2", "ENTITY3" ]    # Needed to continune mapping ENTITY2 to itself
+        ...
+```
+
 ### token-map
 
 ```
-    "token-map": {
-        "ZIP": [ "<ZIP\/>" ],
-        "PIN": [ "<PIN\/>", "<CVV\/>" ],
-        "CCARD": [ "<ccNum\/>" ],
-        "DATE": [ "<expDate\/>" ]
-    }
+token-map:
+    ZIP: [ "<ZIP\/>" ]
+    PIN: [ "<PIN\/>", "<CVV\/>" ]
+    CCARD: [ "<ccNum\/>" ]
+    DATE: [ "<expDate\/>" ]
 ```
 
-**Example token-map (JSON)**
-Token maps are very like anon-maps but are used to map non-native entity labels for anonymization.  They are typically used anonymize data that has come from programs other than redactomatic. In the example input text below a different redaction algorithm has labelled ZIP codes using XML labels.  
+**Example token-map (YAML)**
+Token maps are very like anon-maps but are used to map entity labels that are not in the correct Redactomatic format for anonymization.  They are typically used to anonymize data that has come from programs other than redactomatic. In the example input text below a different redaction algorithm has labelled ZIP codes using XML labels.  
 
 ```
 My mother's ZIP code is <ZIP\/>
@@ -328,14 +380,15 @@ The token-map above will ensure that this label is anonymized using the entity r
 
 ```
 regex
-    ordinal:
+  ordinal:
     # voice-yes, chat-yes
     - >
     (?x)
     (?(DEFINE)
+
     (?<one_to_9>  
-    (fir|seco|thi|four|fif|six|seven|eigh|nin|[1-9])(?:st|nd|rd|th)
-    ) # end one_to_9 definition
+    (fir|seco|thi|four|fif|six|seven|eigh|nin|[1-9])(?:st|nd|rd|th)
+    ) # end one_to_9 definition
 
     (?<ten_to_19>     (?:(?:(ten|eleven|twelf)|((?:thir|four|fif|six|seven|eigh|nine)teen))th|((10|11|12|13|14|15|16|17|18|19)th))
     ) # end ten_to_19 definition
@@ -369,15 +422,82 @@ regex
 
 **Example regex ruleset for ORDINAL redaction and anonymization (YAML)**
 
+Regular expressions can be defined in one place in the rule set and referenced by redaction or anonymization rules elsewhere in the rules.
+
 The example above shows extracts from the regex section of the core-def.yml file included in the release. Three rules can be seen, attached to three keys `ordinal`, `ordinal-text-gen`, and`ordinal-voice -gen`.
 
-As can be seen in the next section, the `ordinal `regular expression will be used to define a shared text and voice redactor for the **ORDINAL** entity. Redactomatic currenly support Perl Compatible Regular Expressions (PCRE) for redaction, which means that the extremely useful (DEFINE) syntax can be used - amongst other features of PCRE.
+As can be seen in the next section, the `ordinal `regular expression will be used to define a shared text and voice redactor for an **ORDINAL** entity. Redactomatic currenly support Perl Compatible Regular Expressions (PCRE) for redaction via the `redactor.RedactorRegex` class.  This means that the extremely useful (DEFINE) syntax can be used - amongst other features of PCRE.  
 
-The two rules `ordinal-text-gen`, and `ordinal-voice -gen` are used as generative grammars for the anonymizers for the **ORDINAL ** entity for text and voice modalities. Redactomatic does not currently support PCRE during anonymization.  
+The two rules `ordinal-text-gen`, and `ordinal-voice -gen` are used as generative grammars for the anonymizers for the **ORDINAL ** entity for text and voice modalities. The `anonymizer.AnonRegex` class used for this does not currently support PCRE.  
 
-The definitions in the `regex `section are just that - they are definitions.  By themselves they do not make anything happen.  In order to be useful they need to be referenced by the rules defining redaction and anonymization in the `entities `section.
+The definitions in the `regex `section are just that - they are definitions.  By themselves they do not make anything happen.  In order to be useful they need to be referenced in `regex-id` parameters in the redaction and anonymization sections of the `entities `definitions.
 
 The values of the named id keys in the `regex `section can be a **single pattern** or a **list of patterns**.  The interpretation of what to do with a list of regular expressions is left up to the redactor or anonymizer that uses the regex definition.
+
+#### ?INCLUDE< rule-id >
+
+```
+regex
+  zero_to_nine-voice:
+      - >
+        (?<zero_to_nine> 
+        (?:(one|two|three|four|five|six|seven|eight|nine|zero|oh|0z))
+        )
+
+  ccard-voice:      
+    # chat-yes, voice-no
+    (?xi)
+      (?(DEFINE)?INCLUDE<zero_to_nine-voice>)
+      (^|\s)
+      (?<ccard>( ((?&zero_to_nine)\s+){12,15}) (?&zero_to_nine) )
+      (?!\s*)?
+```
+
+**Example of an ?INCLUDE macro.**
+
+Redactomatic has its own special macro to include a regular expression defined in one rule as a macro in another rule.  
+
+In the example given above the regular expression zero_to_nine-voice is just a standard regular expression definition.
+
+In the ccard-voice rule this is then inserted via the macro **?INCLUDE< rule-id >** macro.   This macro is a direct text substitution of the rule in place of the invocation.  Macros can insert other macros but take care not to create infinite recursion.
+
+### regex-test
+
+```
+regex-test:
+  ordinal:
+    - engine: regex
+      flags: [IGNORECASE,DOTALL] 
+      match-type: ONE_OR_MORE_MATCH
+      phrases:
+      - 'first and foremost'
+      - 'the 10th person to see him'  
+    - engine: regex
+      match-type: NO_MATCHES
+      phrases:
+      - 'the person who was seconded to the team.'
+```
+
+**Example regex-test ruleset for the rule with regex-id 'ordinal' (YAML)**
+
+An optional `regex-test` section can be included which will test individual regular expressions with groups of test phrases.  you can test for exact phrase matches, partial matches, of parts of the phrase, or test that phrases do NOT match.  This is controlled by the `match-type` parameter which can have one of the following values:
+
+- ONE_OR_MORE_MATCH  (Default)
+- ONE_OR_MORE_EXACT_MATCH
+- ONE_OR_MORE_PARTIAL_MATCH
+- ALL_EXACT_MATCH
+- ALL_PARTIAL_MATCH
+- NO_MATCHES
+- NO_EXACT_MATCHES
+- NO_PARTIAL_MATCHES
+
+By default the ONE_OR_MORE_MATCH options is used.   This will pass the test if the regular expression finds one or match within the phrase.  Recall that regular expression rules can comprise multiple patterns.
+
+The `flags` parameter behaves as described for `redact.RedactorRegex`.
+
+The `engine` paramter defines whether the match is performed using the 're' or 'regex' module.  The 'regex' module supports PCRE matching and is the default engine if none is specified.
+
+A particularly useful feature of the regex-test is that it stores detailed information about the test results in the file specified by the `--testoutputfile`command line option.  
 
 ### entities
 
@@ -414,40 +534,76 @@ Redactomatic has three built-in Redactor classes.  New redactors can be added by
 
 ```
 ...
+  MYDOMAIN:
     redactor:
       model-class: redact.RedactorRegex
       text:
-        regex: {regex inline}
-        regex-id: {regex rule-id}
-        group: {regex pattern match group}
-        flags: {regex pattern match flags (raw integer mask}}
+        regex: '\d{1-3}\.com'
+        regex-id: my-rule-id
+        group: my-named-group
+        flags: [ ASCII, IGNORECASE, ... ]
       voice:
-        {as per text}
+        ...
 ```
 
-The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `rule-id` key in the `regex `section.    By default the whole rule has to match, but the matching `group `can be specified which can be a numbered group or a named group (using PCRE naming).  Flags for the regular expression match can be specified via the flag value.  This needs to be the integer mask for the required combination of flags currently. By default the mask value for `regex.IGNORECASE` is used.
+The `redact.RedactorRegex` class uses a regular expression to match the entity.  The regular expression can be specified via a `regex ` inline pattern, or be a shared rule  with the `regex-id` key in the `regex `section.    The whole regex pattern must match part or all of the phrase.  Then the matching part of the phrase will be redacted with the redaction label (e.g. [MYDOMAIN-23] ).  It is possible to redact only part of the matching area of the phrase but specifying the `group ` parameter.  This can be an integer group number or a named group (using PCRE naming).  
 
-If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
+Flags for the regular expression match can be specified via the `flags`value.  This is a list of items as given below . By default  [ IGNORECASE ] is used.
+
+- ASCII, A, 
+
+- IGNORECASE, I, 
+
+- MULTILINE, M, 
+
+- DOTALL, S, 
+
+- VERBOSE, X, 
+
+- LOCALE, L
+
+It is possible to specify more than one regular expression for the redactor.  If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
 
 #### redact.RedactorPhraseList
 
 ```
 ...
+  EMPLOYEENAMES:  
     redactor:
       model-class: redact.RedactorPhraseList
       text:
-        phrase-list: {list of words to match}
-        phrase-filename: {filename containing the word list}
-        flags: {regex pattern match flags (raw integer mask}}
+        #phrase-list: [fred, joe, stacy, kylie]
+        phrase-filename: ./data/employeenames.csv
+        phrase-field: name
+        phrase-column: 1
+        phrase-header: True
+        flags: [ ASCII, IGNORECASE, ... ]
+
       voice:
-        {as per text}
+        ...
 ```
 
-The `redact.RedactorPhraseList` class is very similar to redact.RedactorRegex but instead of matching regular expressions it matches lists of phrases.  The phrases can be defined inline by attaching a list to the `phrase-list` key or defined in an external text file using the value of `phrase-filename`.
+**Example RedactorPhraseList definition.** (alternative phrase-list shown as comment)
 
-Flags for the regular expression match can be specified via the flag value. This needs to be the integer mask for the required combination of flags currently. By default the mask value for `regex.IGNORECASE` is used.
+The `redact.RedactorPhraseList` class is very similar to redact.RedactorRegex but instead of matching regular expressions it matches lists of phrases.  
 
-This class is used by in the default definition of the `_IGNORE_` entity redactor that can be found in the release file ***ignore.yml***.   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
+The phrase list can be specified directly inline:
+
+- phrase-list - a list of phrases to select from randomly.
+
+Alterntively if no phrase list is specified then the class will attempt to read the phrase list from a CSV file using the following parameters:
+
+- phrase-filename - The name of a CSV file containing the phrases
+
+- phrase-header - True/False The CSV file has a header row (default=True)
+
+- phrase-field - The name of the column to select (phrase-header=True only)
+
+- phrase-column - Alternative to phrase-field. An integer column number (Default=0)
+
+This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
+
+This class is used by in the definition of the `_IGNORE_` entity redactor that can be found in the release file [data/ignore.yml](data/ignore.yml).   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
 
 ```
 entities:
@@ -477,6 +633,8 @@ entities:
 #### redact.RedactorSpacy
 
 ```
+entities:  
+  _SPACY_:  
     redactor:
       model-class: redact.RedactorSpacy
 ```
@@ -485,6 +643,8 @@ The `redact.RedactorSpacy` class implements the redaction of text using the Spac
 
 ## Built-In Anonymizer Classes
 
+Redactomatic currently has several built-in anonymizer classes.  There are four generic anonymizers and a number of custom anonymizers for specific entities.
+
 #### anonomizer.AnonRegex
 
 ```
@@ -492,15 +652,15 @@ The `redact.RedactorSpacy` class implements the redaction of text using the Spac
     anonymizer:
       model-class: anonymize.AnonRegex
       text:
-        regex: {regex inline}
-        regex-id: {regex rule-id}
-        limit: {regex pattern match group}
-        flags: {regex pattern match flags (raw integer mask}}
+        regex: '[a-z]{0-16}\.com'
+        regex-id: my-rule-id
+        limit: 10
+        flags: [ IGNORECASE ]
       voice:
-        {as per text}
+        ...
 ```
 
-The `anonomizer.AnonRegex` class is used to generate random text strings using a regular expression as a generative grammar.  The regular expressions can be expressed inline via the `regex` parameter or by reference using the `regex-id` parameter.  The `limit `parameter defines the maximum number of repeats that a  repeating pattern will be permitted to follow before terminating.  This prevents infinite loops and can be used to limit computationally costly patterns.   This is set to 10 by default.  For more details see [xeger PyPI](https://pypi.org/project/xeger/).  This class does not support PCRE.
+The `anonomizer.AnonRegex` class is used to generate random text strings using a regular expression as a generative grammar.  The regular expressions can be expressed inline via the `regex` parameter or by reference rules in the `regex `section using the `regex-id` parameter.  The `limit `parameter defines the maximum number of repeats that a  repeating pattern will be permitted to follow before terminating.  This prevents infinite loops and can be used to limit computationally costly patterns.   This is set to 10 by default.  For more details see [xeger PyPI](https://pypi.org/project/xeger/).  The `flags `parameter behaves as described for `redact.RedactorRegex`.   This class does not support PCRE.
 
 ```
 entities:
@@ -527,9 +687,11 @@ entities:
       model-class: anonymize.AnonRestoreEntityText
 ```
 
-The `anonomizer.AnonRestoreEntityText` class is used to restore text that was redacted using the class `redact.RedactorPhraseList`.  It takes no parameters. 
+The `anonomizer.AnonRestoreEntityText` class is used to restore any text that was redacted by a redactor rule for the same named entity.  This class will restore the text for an entity regardless of which class was used to anonymize it. It takes no parameters.
 
-This pair of classes is used to implement the ignore/restore feature of Redactomatic but it is available to be used to restore other entities if a use-case is found for this.  This class restores the original text so do not use it for anything the contains PII that needs to remain redacted.
+In the default configuration file [data/ignore.yml](data/ignore.yml) , the \_IGNORE\_ entity tag is redacted using the `redactor.RedactPhraseList` class and then restored at the end using the `anonymize.AnonRestoreEntityText` class.   This is one example of how the ignore/restore pattern can be used but you can use this class to restore text redacted by other classes and have as many restorable entities as you want.
+
+As this class restores the original text take care not to accidentially restore PII that needs to remain redacted.
 
 #### anonymize.AnonNullString
 
@@ -542,23 +704,57 @@ entities:
 
 The `anonomizer.AnonNullString` class is used to remove redaction labels and replace them with a null string.  In the example shown above the LAUGHTER entity (received from a speech recognizer for example) is removed and no text is put in its place.
 
+#### anonymize.AnonPhraseList
+
+```
+entities:
+  PERSON:
+    anonymizer:
+      model-class: anonymize.AnonPhraseList
+      text:
+        #phrase-list: [fred, joe, stacy, kylie]
+        phrase-filename: ./data/baby-names.csv
+        phrase-field: name
+        phrase-column: 1
+        phrase-header: True
+      voice:
+        ...
+```
+
+**Example AnonPhraseList definition.** (alternative phrase-list shown as comment)
+
+The `anonomizer.AnonPhraseList` class enables anonymization of fields based on the random selection of a phrase from a phrase list.  
+
+This class has very similar parameters to `redactor.RedactPhraseList` class.
+
+The phrase list can be specified directly inline:
+
+- phrase-list - a list of phrases to select from randomly.
+
+Alterntively if no phrase list is specified then the class will attempt to read the phrase list from a CSV file using the following parameters:
+
+- phrase-filename - The name of a CSV file containing the phrases
+
+- phrase-header - True/False The CSV file has a header row (default=True)
+
+- phrase-field - The name of the column to select (phrase-header=True only)
+
+- phrase-column - Alternative to phrase-field. An integer column number (Default=0)  
+
 #### Other Built-In Anonymizers
 
-A number of entities are anonymized using custom classes written specifically for that entity.  These include:
+A number of entities are anonymized using custom classes written specifically for that entity.  
 
-- anonymize.AnonZipC
-- anonymize.AnonWorkOfArt
-- anonymize.AnonSSN
-- anonymize.AnonPhone    
-- anonymize.AnonPerson    
-- anonymize.AnonNorp    
-- anonymize.AnonLoc    
-- anonymize.AnonGPE    
-- anonymize.AnonEmail    
-- anonymize.AnonCompany    
-- anonymize.AnonAddress    
+The following classes generate number entities (text or voice) using random number generation within a pattern.
 
-Many of these classes use the contents of data files in the [/data](/data) directory.  Later releases are likely to re-implement these are more generic anonymizer classes.
+- `anonymize.AnonSSN`
+- `anonymize.AnonPhone`  
+
+The following are specializations of `anonymize.AnonPhraseList`.  They accept the same parameters but then add specific formatting to phrase once a random item has been selected.
+
+- `anonymize.AnonAddress`    
+- `anonymize.AnonZipC`
+- `anonymize.AnonEmail`
 
 ## License
 
@@ -574,13 +770,13 @@ Please see the [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Known Issues
 
-The following entity types are referenced in the *anon-map* section in *config.json* but are not yet implemented for redaction or anonymization: **[CREDENTIALS]**, **[IPADDRESS]**, **[PASSWORD]**, **[URL]**, **[USERNAME]**.  
+The following entity types are referenced in the *anon-map* section in *config.yml* but are not yet implemented for redaction or anonymization: **[CREDENTIALS]**, **[IPADDRESS]**, **[PASSWORD]**, **[URL]**, **[USERNAME]**.  
 
 Implementations for these will be welcomed from contributors.
 
 ## Authors
 
-Jonathan Eisenzopf
+Jonathan Eisenzopf, David Attwater
 
 ## Copyright
 

@@ -1,7 +1,7 @@
 import os
 import csv
 
-#A class to keep track of the replaced entity values for replacing ignored values and logging them.
+#A class to keep track of the replaced entity values for use in subsequent anonymization including restoring text where required.
 class EntityValues():
     def __init__(self):
         self._entity_values={}
