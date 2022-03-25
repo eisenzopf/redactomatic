@@ -199,7 +199,7 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 | Entity Type                                      | Redaction Tag | Parsers      | Voice Support | Chat Support | Can be Anonymized |
 | ------------------------------------------------ | ------------- | ------------ | ------------- | ------------ | ----------------- |
 | Address                                          | [ADDRESS]     | Regex        | No            | Yes          | Yes               |
-| Credit Card Number                               | [CCARD]       | Regex        | No            | Yes          | Yes               |
+| Credit Card Number                               | [CCARD]       | Regex        | Yes            | Yes          | Yes               |
 | Cardinal                                         | [CARDINAL]    | Spacy, Regex | Yes           | Yes          | Yes               |
 | Date                                             | [DATE]        | Spacy        | Yes           | Yes          | Yes               |
 | Email                                            | [EMAIL]       | Regex        | No            | Yes          | Yes               |
@@ -219,7 +219,7 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 | Phone                                            | [PHONE]       | Regex        | Yes           | Yes          | Yes               |
 | Product                                          | [PRODUCT]     | Spacy        | Yes           | Yes          | No                |
 | Quantity                                         | [QUANTITY]    | Spacy        | Yes           | Yes          | Yes               |
-| SSN                                              | [SSN]         | Regex        | No            | Yes          | Yes               |
+| SSN                                              | [SSN]         | Regex        | Yes            | Yes          | Yes               |
 | Time                                             | [TIME]        | Spacy        | Yes           | Yes          | Yes               |
 | Work of Art                                      | [WORK_OF_ART] | Spacy        | Yes           | Yes          | Yes               |
 | Zip Code                                         | [ZIP]         | Regex        | Yes           | Yes          | Yes               |

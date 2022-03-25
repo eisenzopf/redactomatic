@@ -55,9 +55,9 @@ redaction-order:
     - _IGNORE_
     - PERSON
     - ADDRESS
-    - SSN
     - CCARD
     - PHONE
+    - SSN
     - ZIP
     - EMAIL
     - MONEY
