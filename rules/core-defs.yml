@@ -110,7 +110,7 @@ entities:
         regex-id: ssn
         group: ssn
       voice:
-        regex-id: ssn
+        regex-id: ssn-voice
         group: ssn
     anonymizer:
       model-class: anonymize.AnonSSN
@@ -121,7 +121,7 @@ entities:
       text:
         regex-id: ccard
       voice:
-        regex-id: ccard
+        regex-id: ccard-voice
     anonymizer:
       model-class: anonymize.AnonRegex
       voice:
@@ -419,9 +419,42 @@ regex:
     # chat-yes, voice-no
     - '(?:\d[ -]*?){13,16}'
 
+  ccard-voice:
+    # chat-no, voice-yes
+    - >
+      (?xi)
+        (?(DEFINE)
+          (?<zero_to_7>  
+            (?:(one|two|three|four|five|six|seven|oh|zero))
+          )
+          (?<zero_to_9>  
+            (?:(one|two|three|four|five|six|seven|eight|nine|oh|zero))
+          )
+          (?<visa>
+            (?:(four|for)\s((?&zero_to_9)\s){14}(?&zero_to_9))
+          )
+          (?<mastercard>
+            (?:five\s(one|two|to|three|four|for|five)\s((?&zero_to_9)\s){13}(?&zero_to_9))
+          )
+          (?<amex>
+            (?:three\s(four|for|seven)\s((?&zero_to_9)\s){12}(?&zero_to_9))
+          )
+        )
+      (?<ccard>(?:(?&visa)|(?&mastercard)|(?&amex)))
+
   ssn:
     # chat-yes, voice-no
     - '(^|\s)(?<ssn>(?!000|666)[0-8][0-9]{2}(-|\s)?(?!00)[0-9]{2}(-|\s)?(?!0000)[0-9]{4})(\s|$|\.)'
+
+  ssn-voice:
+    # chat-no, voice-yes
+    - >
+      (?xi)
+        (?(DEFINE)
+          (?<zero_to_7>(?:(one|two|three|four|five|six|seven|oh|zero)))
+          (?<zero_to_9>(?:(one|two|three|four|five|six|seven|eight|nine|oh|zero)))
+        )
+      (?<ssn>(?:(?&zero_to_7)\s((?&zero_to_9)\s){7}(?&zero_to_9)))
 
   zip-text:
     # chat-yes, voice-no supports US zip+4 and Canadian postal codes
