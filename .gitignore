@@ -151,3 +151,7 @@ rules/ignore.yml
 rules/custom-anon.yml_
 rules/custom-test.yml_
 test_regex_gen.py
+desktop.ini
+data/desktop.ini
+rules/desktop.ini
+test/desktop.ini
