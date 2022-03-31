@@ -2,11 +2,11 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:00,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
 1011432,Client,11/08/2019 00:00,Eduardo Sheryl
 1011432,Agent,11/08/2019 00:00,And what is your account number?
-1011432,Client,11/08/2019 00:00,It's four seven two nine three eight four seven four eight I think.
+1011432,Client,11/08/2019 00:00,It's seven six six four three eight six six six three I think.
 1011432,Agent,11/08/2019 00:00,And your social security number?
-1011432,Client,11/08/2019 00:00,It's four nine two seven seven two four one five.
+1011432,Client,11/08/2019 00:00,It's nine three eight seven four seven nine one five.
 1011432,Agent,11/08/2019 00:00,And what is your email address?
-1011432,Client,11/08/2019 00:00,It's Erline@yahoo.com
+1011432,Client,11/08/2019 00:00,It's Nita@icloud.com
 1011432,Agent,11/08/2019 00:00,Thank you Eduardo. How may I help you today?
 1011432,Client,11/08/2019 00:00,I'm trying to pay my bill but it's not working.
 1011432,Agent,11/08/2019 00:00,Ok is this the first time you've tried to make the payment?
@@ -14,32 +14,76 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:00,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
 1011432,Client,11/08/2019 00:00,I'm paying with my debit card.
 1011432,Agent,11/08/2019 00:00,What amount are you trying to pay?
-1011432,Client,11/08/2019 00:00,ten dollars and fourty seventeen dollars
+1011432,Client,11/08/2019 00:00,thirteen dollars eighty three cents and fourty eighteen dollars thirty eight cents
 1011432,Agent,11/08/2019 00:00,What is the name of the bank for your debit card?
 1011432,Client,11/08/2019 00:00,Sorry I meant five hundred even. My bank is Wells Fargo.
 1011432,Agent,11/08/2019 00:01,Can you please confirm the debit card number for me please?
-1011432,Client,11/08/2019 00:01,It's three six six six nine five two oh six zero five five eight zero six
+1011432,Client,11/08/2019 00:01,It's three nine five two oh six zero five five eight zero six three two eight
 1011432,Agent,11/08/2019 00:01,and the expiration?
 1011432,Client,11/08/2019 00:01,July of two thousand twenty three
 1011432,Agent,11/08/2019 00:01,And the CV code?
 1011432,Client,11/08/2019 00:01,What is that?
 1011432,Agent,11/08/2019 00:01,It's a three digit number usually on the back of your debit card next to the signature strip.
-1011432,Client,11/08/2019 00:01,Oh ok. It's four four nine seven or four one two
+1011432,Client,11/08/2019 00:01,Oh ok. It's zero seven five nine or four one two
 1011432,Agent,11/08/2019 00:01,When did you want the payment to process?
 1011432,Client,11/08/2019 00:01,Can you make the payment process tomorrow please?
-1011432,Agent,11/08/2019 00:01,Do I have your authorization to run your debit card in the amount of thirteen dollars ?
+1011432,Agent,11/08/2019 00:01,Do I have your authorization to run your debit card in the amount of forty nine dollars seventy eight cents?
 1011432,Client,11/08/2019 00:01,Yes.
 1011432,Agent,11/08/2019 00:02,Ok one moment please while I run your debit card.
 1011432,Client,11/08/2019 00:02,Ok
 1011432,Agent,11/08/2019 00:03,The system is telling me that it needs your physical address associated with the card.
-1011432,Client,11/08/2019 00:04,Ok. It's four one three main street in Deluth Georgia in the United States. The zip is four nine two seven four or four nine two six five.
+1011432,Client,11/08/2019 00:04,Ok. It's four one three main street in Deluth Georgia in the United States. The zip is four nine two six nine or four nine two six nine.
 1011432,Agent,11/08/2019 00:05,I also need a phone number associated with the account.
-1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's eight zero five three zero four six two zero zero. It could also be my land line which is two three one two two two one four one six.
+1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's four three six eight nine three four five eight four. It could also be my land line which is nine seven nine six seven zero five seven four seven.
 1011432,Agent,11/08/2019 00:06,And what is your four digit PIN code?
-1011432,Client,11/08/2019 00:06,I believe it's seven three six six. Or it could be eight five one seven
+1011432,Client,11/08/2019 00:06,I believe it's seven five six five. Or it could be seven nine zero three
 1011432,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.
 1011432,Client,11/08/2019 00:07,Ok thanks.
-1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of thirteen dollars was made on August eleventh at eleven fifty nine AM. Is there anything else I can help you with?
+1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of forty nine dollars seventy eight cents was made on August eleventh at eleven fifty nine AM. Is there anything else I can help you with?
 1011432,Client,11/08/2019 00:09,And you're one hundred percent sure it went through?
 1011432,Agent,11/08/2019 00:09,Yes the payment was successful.
 1011432,Client,11/08/2019 00:10,Nope that's it.
+1011433,Agent,11/08/2019 00:00,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
+1011433,Client,11/08/2019 00:00,Amelie Buck
+1011433,Agent,11/08/2019 00:00,And what is your account number?
+1011433,Client,11/08/2019 00:00,It's two two two six two six two six three eight I think.
+1011433,Agent,11/08/2019 00:00,And your social security number?
+1011433,Client,11/08/2019 00:00,It's seven one nine nine five four one one zero.
+1011433,Agent,11/08/2019 00:00,And what is your email address?
+1011433,Client,11/08/2019 00:00,It's Jenna@gmail.com
+1011433,Agent,11/08/2019 00:00,Thank you Amelie. How may I help you today?
+1011433,Client,11/08/2019 00:00,I'm trying to pay my bill but it's not working.
+1011433,Agent,11/08/2019 00:00,Ok is this the first time you've tried to make the payment?
+1011433,Client,11/08/2019 00:00,yes
+1011433,Agent,11/08/2019 00:00,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
+1011433,Client,11/08/2019 00:00,I'm paying with my debit card.
+1011433,Agent,11/08/2019 00:00,What amount are you trying to pay?
+1011433,Client,11/08/2019 00:00,fifty one dollars and fourty eighty nine dollars seventy eight cents
+1011433,Agent,11/08/2019 00:00,What is the name of the bank for your debit card?
+1011433,Client,11/08/2019 00:00,Sorry I meant five hundred even. My bank is Wells Fargo.
+1011433,Agent,11/08/2019 00:01,Can you please confirm the debit card number for me please?
+1011433,Client,11/08/2019 00:01,It's four zero zero zero nine seven zero five nine two five zero seven two six six
+1011433,Agent,11/08/2019 00:01,and the expiration?
+1011433,Client,11/08/2019 00:01,July of two thousand twenty three
+1011433,Agent,11/08/2019 00:01,And the CV code?
+1011433,Client,11/08/2019 00:01,What is that?
+1011433,Agent,11/08/2019 00:01,It's a three digit number usually on the back of your debit card next to the signature strip.
+1011433,Client,11/08/2019 00:01,Oh ok. It's one eight four zero or four one two
+1011433,Agent,11/08/2019 00:01,When did you want the payment to process?
+1011433,Client,11/08/2019 00:01,Can you make the payment process tomorrow please?
+1011433,Agent,11/08/2019 00:01,Do I have your authorization to run your debit card in the amount of dollars ?
+1011433,Client,11/08/2019 00:01,Yes.
+1011433,Agent,11/08/2019 00:02,Ok one moment please while I run your debit card.
+1011433,Client,11/08/2019 00:02,Ok
+1011433,Agent,11/08/2019 00:03,The system is telling me that it needs your physical address associated with the card.
+1011433,Client,11/08/2019 00:04,Ok. It's four one three main street in Deluth Georgia in the United States. The zip is four nine two seven six or four nine two seven two.
+1011433,Agent,11/08/2019 00:05,I also need a phone number associated with the account.
+1011433,Client,11/08/2019 00:06,It’s probably my cell phone. That's three nine zero eight four four five eight five six. It could also be my land line which is three two three nine six zero six four five zero.
+1011433,Agent,11/08/2019 00:06,And what is your four digit PIN code?
+1011433,Client,11/08/2019 00:06,I believe it's zero seven zero four. Or it could be one nine two five
+1011433,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.
+1011433,Client,11/08/2019 00:07,Ok thanks.
+1011433,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of dollars was made on August eleventh at eleven fifty nine AM. Is there anything else I can help you with?
+1011433,Client,11/08/2019 00:09,And you're one hundred percent sure it went through?
+1011433,Agent,11/08/2019 00:09,Yes the payment was successful.
+1011433,Client,11/08/2019 00:10,Nope that's it.

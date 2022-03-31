@@ -34,7 +34,7 @@ class AnonymizerBase():
         self._entity_values=None
         self._params={}
         self._id=id
-     
+
     '''Virtual prototype for configuring an anonymizer with a specific set of parameters.'''
     def configure(self, params,entity_map, entity_values):
         self._params=params
@@ -98,6 +98,21 @@ class AnonymizerBase():
             this_regex = "\[" + type + "(-\d+)?\]"
             
         return this_regex
+    
+    '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''
+    def absolute_path(self,path):
+        if os.path.isabs(path):
+            print("ABSOLUTE",path,file=sys.stderr)
+            return path
+        else:
+            #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
+            _homedir=os.getenv("REDACT_HOME")
+            if (_homedir is None): 
+                _homedir=os.path.dirname(os.path.realpath(__file__))
+                print("RELATIVE-No variable",_homedir,file=sys.stderr)
+            else:
+                print("RELATIVE-REDACT_HOME",_homedir,file=sys.stderr)
+            return os.path.join(_homedir,path)
 
     @property
     def random(self):
@@ -218,8 +233,8 @@ class AnonPhraseList(AnonymizerBase):
 
             #Load the phrase list depending on how it is specified.
             if (_phrase_list is None) and  (_phrase_filename is not None):
-                if _phrase_header is None:  _df = pd.read_csv(_phrase_filename, Header=None)
-                else: _df = pd.read_csv(_phrase_filename)
+                if _phrase_header is None:  _df = pd.read_csv(self.absolute_path(_phrase_filename), Header=None)
+                else: _df = pd.read_csv(self.absolute_path(_phrase_filename),)
                 if _phrase_field is None:
                     _phrase_list=(_df.iloc[:,_phrase_column]).to_list()
                 else:

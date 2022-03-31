@@ -16,13 +16,15 @@ The tool is completely configurable.  Redaction and anonymization rules can be a
 
 Redactomatic assumes that each row in the input CSV file specified by `--inputfile`. Only two columns in this file are used.
 
-- The  `--column` command line parameter specifies the column containing the text to be redacted
+- The text to be redacted.  Specified by either the `--column` command line parameter or the `--header` and  `--columnname` parameter (which is '**text**' by default)
 
-- The `--idcolumn` command line parameter specifies the column containing a unique identifier for the current conversation.
+- A unique identifier for the current conversation.  The `--idcolumn` command line parameter or the `--header` and `--idcolumnname` parameter (which is '**conversation_id**' by default)
 
 Redactomatic does not currently support other input formats like JSON. 
 
-The script writes a new CSV file specified by the `--outputfile` command-line parameter. Other than the column that is redacted and specified by `--column`, the output CSV will be in the same format with the same information as the inputfile. As Redactomatic processes each row of an input CSV file, it replaces each recognized entity in the text with an entity type tag such as **[PHONE-*nn*]**, **[ZIP-nn]**, or **[CARDINAL-*nn*]**. The index number ***nn*** identifies unique occurences of specific entities.  For example if the name 'David' appears more than once in during the conversation each instance of it will be assigned the same index number.
+The script writes a new CSV file specified by the `--outputfile` command-line parameter. Other than the text column that is redacted, the output CSV will be in the same format with the same information as the inputfile. 
+
+As Redactomatic processes each row of an input CSV file, it replaces each recognized entity in the text with an entity type tag such as **[PHONE-*nn*]**, **[ZIP-nn]**, or **[CARDINAL-*nn*]**. The index number ***nn*** identifies unique occurences of specific entities.  For example if the name 'David' appears more than once in during the conversation each instance of it will be assigned the same index number.
 
 ### Anonymization
 
@@ -88,6 +90,7 @@ sh test.sh
 This should report a number of clean test results as shown below:
 
 ```Is
+Is the regex test output file correct?: True
 Is the L2 text redaction log correct?: True
 Is the L2 redacted text output file correct?: True
 Is the L2 redacted and anonymized text output file correct?: True
@@ -104,37 +107,57 @@ Is the anonymized voice output file correct?: True
 
 ## Hardware Requirements
 
-By default, Redactomatic will use the Spacy small ML model. However, if you plan to use the large model via the `--large` command line flag, be sure that the machine is utilizing a GPU capable of running large Transformer models. Also, you will need memory at least four times as large as the input data file. You can reduce this requirement by breaking up input files into smaller pieces and including each of them with the *--inputfile* flag.
+By default, Redactomatic will use the Spacy small ML model. However, if you plan to use the large model via the `--large` command line flag, be sure that the machine is utilizing a GPU capable of running large Transformer models. 
+
+Also, its easy to run out of memory.  if you don't chunk the file then you will need memory at least four times as large as the input data file. You can reduce this requirement by using the `--chunksize` command line option and process the file in smaller chunks at a time.
 
 ## Usage
 
-Once installed, redactomatic needs at a minimum the 1. name of the input conversation file (--inputfile) in CSV format, 2. the modaility (`--modality` which must be voice or text), and 3. the column in the CSV containing the text to redact (`--column`), the column containing the conversation ID (`--idcolumn`).
+Once installed, redactomatic needs at a minimum:
+
+1. The name of the input conversation file (--inputfile) in CSV format, 
+
+2. The modaility (`--modality` which must be voice or text)
+
+3. Either:
+   
+   1. The column in the CSV containing the text to redact (`--column`), the column containing the conversation ID (`--idcolumn`).
+   
+   2. The` --header` option which uses the first line of the CSV file as headers.  By default this will look for the columns named 'text' and 'conversation_id'.
+
+
 
 ```
-usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED]usage: redactomatic.py [-h] --column COLUMN --idcolumn COLUMN --inputfile INPUTFILE [INPUTFILE ...] --outputfile OUTPUTFILE --modality voice|text [--anonymize] [--large] [--log LOG_FILE] [--seed SEED] [--rulefile RULEFILE [RULEFILE ...]] [--regextest] [--testoutputfile TESTOUTPUTFILE]
+usage: redactomatic.py [-h] [--column COLUMN] [--idcolumn IDCOLUMN] [--inputfile INPUTFILE [INPUTFILE ...]] [--outputfile OUTPUTFILE] [--modality {text,voice}] [--anonymize] [--large] [--log LOG]
+                       [--uppercase] [--level LEVEL] [--noredaction] [--seed SEED] [--rulefile [RULEFILE [RULEFILE ...]]] [--regextest] [--testoutputfile TESTOUTPUTFILE] [--chunksize CHUNKSIZE] [--header]
+                       [--columnname COLUMNNAME] [--idcolumnname IDCOLUMNNAME]### Command Line Parameters
 ```
 
-### Command Line Parameters
+| Paramter       | Description                                                                                                                                            | Required? |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| header         | If set to True then the first line of the input files will be treated as a header and the output file will also have a header line. (default is False) | yes (*)   |
+| column         | The column number containing the text to redact                                                                                                        | yes (*)   |
+| idcolumn       | the column number containing the unique conversation id                                                                                                | yes (*)   |
+| columnname     | The name of the column to be redacted (if header=True)                                                                                                 | no        |
+| idcolumname    | The name of the column containing the conversatoin IDs (if header=True)                                                                                | no        |
+| inputfile      | The filename containing the conversations to process                                                                                                   | yes       |
+| outputfile     | The filename that will contain the redacted output                                                                                                     | yes       |
+| modality       | Can be voice or text depending on the type of conversations contained in the inputfile                                                                 | yes       |
+| chunksize      | The number of lines to read in as a chunk before processing them.                                                                                      | no        |
+| anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                                     | no        |
+| large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                          | no        |
+| log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.               | no        |
+| uppercase      | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps.           | no        |
+| level          | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                                     | no        |
+| noredaction    | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                              | no        |
+| seed           | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                                       | no        |
+| rulefile       | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                                | no        |
+| regextest      | Test the regular rexpressions defeind in the regex-test rules prior to any other processing                                                            | no        |
+| testoutputfile | The file to save the regular expression test results in.                                                                                               | no        |
 
-| Paramter       | Description                                                                                                                                  | Required? |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| column         | The column number containing the text to redact                                                                                              | yes       |
-| idcolumn       | the column number containing the unique conversation id                                                                                      | yes       |
-| inputfile      | The filename containing the conversations to process                                                                                         | yes       |
-| outputfile     | The filename that will contain the redacted output                                                                                           | yes       |
-| modality       | Can be voice or text depending on the type of conversations contained in the inputfile                                                       | yes       |
-| anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                           | no        |
-| large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                | no        |
-| log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.     | no        |
-| uppercase      | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps. | no        |
-| level          | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                           | no        |
-| noredaction    | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                    | no        |
-| seed           | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                             | no        |
-| rulefile       | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                      | no        |
-| regextest      | Test the regular rexpressions defeind in the regex-test rules prior to any other processing                                                  | no        |
-| testoutputfile | The file to save test results in.                                                                                                            | no        |
+(*) The command must either specifiy the --header option or give the --column and --idcolumn options.*
 
-### Example 1: Redact a text file
+### Example 1: Redact a text file with no header
 
 The following command will use the sample input file included in the Redactomatic distribution [data/sample_data.csv](data/sample_data.csv) and create an output file called output.csv:
 
@@ -144,15 +167,15 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 If you review the sample data file, you will notice that the first column contains the conversation ID and that the fourth column contains the text we want to redact.
 
-### Example 2: Anonymize a voice transcribed file with anonymization
+### Example 2: Anonymize a voice transcribed file with anonymization with a header
 
 In this second example, we are going to use a sample voice transcribed conversation and we are going to also anonymize the PII tags. This will replaced all PII with randomized values with context. When we say "with context", we mean that Redactomatic temporarily remembers when the same PII entity value has been used in the conversation and will replace it with the same randomized value. For example, If Mary is talking to John, we would first redact Mary as [PERSON-1] and John as [PERSON-2]. If we turn on anonymization via the `--anonymization` command-line parameter, Redactomatic will replace all instances of [PERSON-1] with the same randomized name so that the anonymized output is more coherent.
 
 ```sh
-python3 redactomatic.py --column 4 --idcolumn 1 --modality voice --inputfile ./data/sample_data.csv --outputfile output.csv --anonymize
+python3 redactomatic.py --header --modality voice --inputfile ./data/sample_data.csv --outputfile output.csv --anonymize
 ```
 
-Notice that the *--modality* parameter is now *voice* and that we have added the *--anonymize* parameter, which replaces all redaction tags with randomized values.
+Notice that the *`--modality`* parameter is now *voice* and that we have added the *`--anonymize`* parameter, which replaces all redaction tags with randomized values. note also that there is a `--header` option instead of ` --column` and `--idcolumn` options
 
 ### Example 3: Using the large NER Model Example
 
@@ -186,7 +209,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 You can set how strict the redaction script will be. Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
 
-You can also define your own levels in the *config.yml* file if desired, for example if you define the redaction labels that you want to redact in a new secton of *config.yml* called called `'Level-custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
+You can also define your own levels in the *config.yml* file if desired, for example if you define the redaction labels that you want to redact in a new subsection of the `'level'` secton of *config.yml* called called `'custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
 
 ## Supported Languages and Regions
 
@@ -194,18 +217,18 @@ Redactomatic currently supports English. Most entities support the US and Canada
 
 ## Supported Entities
 
-The following entities are supported by default by Redactomatic. The Spacy [English NER model](https://spacy.io/models/en) is trained from the [Ontonotes 5.0 corpus](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf) and therefore uses the 18 entity types from that corpus plus the additional entity types that were added to Redactomatic. The *[LAUGHTER]* tag is specific to NICE Nexidia transcription. Some numeric types such as *[ADDRESS]*, *[CCARD]*, and *[PHONE]* are not supported for voice transcriptions yet. However, they will still end up being redacted by *[ORDINAL]* or *[CARDINAL]* entity types. If an entity cannot be anonymized, in the case of a text entity, the redaction tag will be deleted and replaced with an empty string; in the case of numeric entity types like *[CCARD]* and *[ZIP]*, the numbers will be replaced by randomly generated cardinals.
+The following entities are supported by default by Redactomatic. The Spacy [English NER model](https://spacy.io/models/en) is trained from the [Ontonotes 5.0 corpus](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf) and therefore uses the 18 entity types from that corpus plus the additional entity types that were added to Redactomatic. The *[LAUGHTER]* tag is specific to NICE Nexidia transcription. Some numeric types such as *[ADDRESS]*, are not supported for voice transcriptions yet.  If an entity cannot be anonymized, in the case of a text entity, the redaction tag will be deleted and replaced with an empty string; 
 
 | Entity Type                                      | Redaction Tag | Parsers      | Voice Support | Chat Support | Can be Anonymized |
 | ------------------------------------------------ | ------------- | ------------ | ------------- | ------------ | ----------------- |
 | Address                                          | [ADDRESS]     | Regex        | No            | Yes          | Yes               |
-| Credit Card Number                               | [CCARD]       | Regex        | Yes            | Yes          | Yes               |
+| Credit Card Number                               | [CCARD]       | Regex        | Yes           | Yes          | Yes               |
 | Cardinal                                         | [CARDINAL]    | Spacy, Regex | Yes           | Yes          | Yes               |
 | Date                                             | [DATE]        | Spacy        | Yes           | Yes          | Yes               |
 | Email                                            | [EMAIL]       | Regex        | No            | Yes          | Yes               |
 | Event                                            | [EVENT]       | Spacy        | Yes           | Yes          | Yes               |
 | Facility                                         | [FAC]         | Spacy        | Yes           | Yes          | No                |
-| Country, City, State                             | [GPE]         | Spacy        | Yes           | Yes          | No                |
+| Country, City, State                             | [GPE]         | Spacy        | Yes           | Yes          | Yes               |
 | Language                                         | [LANGUAGE]    | Spacy        | Yes           | Yes          | Yes               |
 | Laughter                                         | [LAUGHTER]    | NICE         | Yes           | No           | No                |
 | Law                                              | [LAW]         | Spacy        | Yes           | Yes          | No                |
@@ -217,9 +240,9 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 | Percent                                          | [PERCENT]     | Spacy        | Yes           | Yes          | Yes               |
 | Person                                           | [PERSON]      | Spacy        | Yes           | Yes          | Yes               |
 | Phone                                            | [PHONE]       | Regex        | Yes           | Yes          | Yes               |
-| Product                                          | [PRODUCT]     | Spacy        | Yes           | Yes          | No                |
+| Product                                          | [PRODUCT]     | Spacy        | Yes           | Yes          | Yes               |
 | Quantity                                         | [QUANTITY]    | Spacy        | Yes           | Yes          | Yes               |
-| SSN                                              | [SSN]         | Regex        | Yes            | Yes          | Yes               |
+| SSN                                              | [SSN]         | Regex        | Yes           | Yes          | Yes               |
 | Time                                             | [TIME]        | Spacy        | Yes           | Yes          | Yes               |
 | Work of Art                                      | [WORK_OF_ART] | Spacy        | Yes           | Yes          | Yes               |
 | Zip Code                                         | [ZIP]         | Regex        | Yes           | Yes          | Yes               |
@@ -306,7 +329,6 @@ redaction-order:
     - ADDRESS
     - SSN
     -  ...
-
 ```
 
 **Example redaction-order (YAML)**
@@ -329,7 +351,6 @@ anon-map:
     CREDENTIALS: [ credentials ]
     DATE: [ DATE, expDate ]
     ...
-
 ```
 
 **Example anon-map (YAML)**
@@ -601,6 +622,8 @@ Alterntively if no phrase list is specified then the class will attempt to read 
 
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)
 
+The phrase-filename can be an absolute path, or a relative path.  If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set.  if it is not set then it will search relative to installation directory of redactomatic.py.  
+
 This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
 
 This class is used by in the definition of the `_IGNORE_` entity redactor that can be found in the release file [data/ignore.yml](data/ignore.yml).   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
@@ -740,6 +763,8 @@ Alterntively if no phrase list is specified then the class will attempt to read 
 - phrase-field - The name of the column to select (phrase-header=True only)
 
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)  
+
+The phrase-filename can be an absolute path, or a relative path. If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set. if it is not set then it will search relative to installation directory of redactomatic.py.
 
 #### Other Built-In Anonymizers
 

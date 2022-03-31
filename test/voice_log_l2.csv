@@ -1,17 +1,32 @@
 _IGNORE_-0,first and
 _IGNORE_-1,today
-_IGNORE_-2,CV
-_IGNORE_-4,tomorrow
-CCARD-5,four oh one two zero zero zero zero nine eight seven six five four three nine
-PHONE-6, one two four nine eight seven four six two three
-PHONE-7," five nine one, two six eight, five five nine one"
-PHONE-8, two one eight seven three oh four three oh oh
-ZIP-9,two three four two three
-ZIP-10,five five eight one two
-EMAIL-11,eisen@discourse.ai
-PIN-12,two three four three
-PIN-13,one one six eight
-PERSON-15,David
-MONEY-17,three cents
-MONEY-18,Five hundred dollars
-MONEY-19,five hundred dollars
+PHONE-2, one two four nine eight seven four six two three
+SSN-3,two three four two three two three four three
+EMAIL-4,eisen@discourse.ai
+PERSON-6,David
+MONEY-8,three cents
+MONEY-9,Five hundred dollars
+_IGNORE_-10,CV
+_IGNORE_-12,tomorrow
+CCARD-13,four oh one two zero zero zero zero nine eight seven six five four three nine
+PHONE-14," five nine one, two six eight, five five nine one"
+PHONE-15, two one eight seven three oh four three oh oh
+ZIP-16,five five eight one two
+PIN-17,one one six eight
+MONEY-18,five hundred dollars
+_IGNORE_-19,first and
+_IGNORE_-20,today
+PHONE-21, one two four nine eight seven four six two three
+SSN-22,two three four two three two three four three
+EMAIL-23,eisen@discourse.ai
+PERSON-26,David
+_IGNORE_-28,CV
+_IGNORE_-30,tomorrow
+CCARD-31,four oh one two zero zero zero zero nine eight seven six five four three nine
+ZIP-32,five five eight one two
+MONEY-33,three cents
+MONEY-34,Five hundred dollars
+MONEY-35,five hundred dollars
+PHONE-36," five nine one, two six eight, five five nine one"
+PHONE-37, two one eight seven three oh four three oh oh
+PIN-38,one one six eight
