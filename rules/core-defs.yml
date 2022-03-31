@@ -334,7 +334,7 @@ regex:
 
   ccard-text-gen:
     - '4\d{3}-\d{4}-\d{4}-\d{4}' # visa
-    - '3[4,7]\d{2}-\d{6}-\d{5}' # amex
+    - '3[47]\d{2}-\d{6}-\d{5}' # amex
   
   ccard-voice-gen:
     - 'four ( (zero|oh|one|two|three|four|five|six|seven|eight|nine)){15}' # visa
