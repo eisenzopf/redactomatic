@@ -102,16 +102,12 @@ class AnonymizerBase():
     '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''
     def absolute_path(self,path):
         if os.path.isabs(path):
-            print("ABSOLUTE",path,file=sys.stderr)
             return path
         else:
             #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
             _homedir=os.getenv("REDACT_HOME")
             if (_homedir is None): 
                 _homedir=os.path.dirname(os.path.realpath(__file__))
-                print("RELATIVE-No variable",_homedir,file=sys.stderr)
-            else:
-                print("RELATIVE-REDACT_HOME",_homedir,file=sys.stderr)
             return os.path.join(_homedir,path)
 
     @property
