@@ -172,9 +172,12 @@ class RedactorPhraseList(RedactorRegex):
         #Now use the parameters passed, plus the modality in the entity_rules to congifure up this class.
         #Get params.voice or params.text if they are specified.
         _model_params=params.get(self._entity_rules.args.modality,None)
-
+        #print("RedactorPhraseList.configure()._model_params:",str(_model_params),file=sys.stderr)
+ 
         #If the paramters do not contain a definition for the current modality then assume that the model is not designed for this and return None.
-        if _model_params is None: return None
+        if _model_params is None: 
+            print("WARNING. Using a null model. No model defined for id:",self._id,"modality:",self._entity_rules.args.modality,file=sys.stderr)
+            return None
 
         #Get the possible parameters
         _phrase_filename=_model_params.get("phrase-filename",None)   
@@ -196,6 +199,9 @@ class RedactorPhraseList(RedactorRegex):
         if (not isinstance(_phrase_list,list)) or len(_phrase_list)==0:
             raise er.EntityRuleConfigException("ERROR: Invalid or empty phrase list rule for entity: "+str(self._id))
         
+        #Debug
+        #print("RedactorPhraseList.configure()._phrase_list:",self._phrase_list,file=sys.stderr)
+
         self._phrase_list=_phrase_list    
 
     #was ignore_phrases()

@@ -33,6 +33,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--regextest', required=False, default=False, action='store_true', help='Test the regular rexpressions defeind in the regex-test rules prior to any other processing.')
     parser.add_argument('--testoutputfile', required=False, help='The file to save test results in.')
     parser.add_argument('--chunksize', required=False, default=100000, type=int, help='The number of lines to read before processing a chunk.(default = 100000)' )
+    parser.add_argument('--chunklimit', required=False, default=None, type=int, help='The number of chunks to run before stopping (used primarily for benchmarking).' )
     parser.add_argument('--header', default=False, action='store_true', help='Expect headers in the input files and print a header on the output. (default=False)')
     parser.add_argument('--columnname', type=str, default="text", help='The header name for the text; used if --header=True; overridden by --column; default is text')
     parser.add_argument('--idcolumnname', type=str, default="conversation_id", help='The header name for the conversation ID, used if --header=True; overridden by --idcolumn; default is text')
@@ -49,6 +50,7 @@ def config_args(): # add --anonymize
             if (not _args.idcolumn): _err_str="ERROR: The --idcolumn option is required when --header is False."
         if (not _args.inputfile): _err_str="ERROR: The --inputfile option is required."
         if (not _args.outputfile): _err_str="ERROR: The --outputfile option is required."
+        if (not _args.modality): _err_str="ERROR: The --modality option is required."
     if _err_str:
         parser.error(_err_str)
 
@@ -170,6 +172,12 @@ def main():
                 print("Writing outfile ",args.outputfile, "chunk ",chunk)
                 if chunk==0: df.to_csv(args.outputfile, index=False, header=args.header)
                 else: df.to_csv(args.outputfile, mode='a', header=False, index=False)
+                
+                #Quit if the chunklimit has been reached.
+                if (args.chunklimit is not None) and (chunk+1>=args.chunklimit):
+                    print("QUIT. chunklimit reached:",args.chunklimit,file=sys.stderr)
+                    break
+
                 chunk=chunk+1
 
         # write audit log

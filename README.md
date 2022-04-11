@@ -125,11 +125,9 @@ Once installed, redactomatic needs at a minimum:
    
    2. The` --header` option which uses the first line of the CSV file as headers.  By default this will look for the columns named 'text' and 'conversation_id'.
 
-
-
 ```
 usage: redactomatic.py [-h] [--column COLUMN] [--idcolumn IDCOLUMN] [--inputfile INPUTFILE [INPUTFILE ...]] [--outputfile OUTPUTFILE] [--modality {text,voice}] [--anonymize] [--large] [--log LOG]
-                       [--uppercase] [--level LEVEL] [--noredaction] [--seed SEED] [--rulefile [RULEFILE [RULEFILE ...]]] [--regextest] [--testoutputfile TESTOUTPUTFILE] [--chunksize CHUNKSIZE] [--header]
+                       [--uppercase] [--level LEVEL] [--noredaction] [--seed SEED] [--rulefile [RULEFILE [RULEFILE ...]]] [--regextest] [--testoutputfile TESTOUTPUTFILE] [--chunksize CHUNKSIZE] [--chunklimit CHUNKLIMIT]  [--header]
                        [--columnname COLUMNNAME] [--idcolumnname IDCOLUMNNAME]### Command Line Parameters
 ```
 
@@ -144,6 +142,7 @@ usage: redactomatic.py [-h] [--column COLUMN] [--idcolumn IDCOLUMN] [--inputfile
 | outputfile     | The filename that will contain the redacted output                                                                                                     | yes       |
 | modality       | Can be voice or text depending on the type of conversations contained in the inputfile                                                                 | yes       |
 | chunksize      | The number of lines to read in as a chunk before processing them.                                                                                      | no        |
+| chunklimit     | An integer number of chunks to process before stopping.   Included primarily to support benchmarking.   Default=None (i.e. all of them)                | no        |
 | anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                                     | no        |
 | large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                          | no        |
 | log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.               | no        |
