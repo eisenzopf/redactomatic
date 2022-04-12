@@ -45,10 +45,12 @@ class AnonymizerBase():
     def anonymize(self, texts, conversation_ids):
         new_texts = []
             
+        #Get a regex to match any entities to be replaced (if any).
         this_regex = self.anon_regex(self._id)
-        for text,id in zip(texts,conversation_ids):
-            new_text = regex.sub(this_regex,lambda x: self.callback(x,id), text)
-            new_texts.append(new_text)
+        if this_regex!="":
+            for text,id in zip(texts,conversation_ids):
+                new_text = regex.sub(this_regex,lambda x: self.callback(x,id), text)
+                new_texts.append(new_text)
         return new_texts
 
     '''Virtual function for callback to support anonymize().  Override this function to return the new value for the anonymized entity.'''
@@ -72,31 +74,25 @@ class AnonymizerBase():
         else:
             r=entity_value
         return r
-
+        
+    '''create a regular expression which matches an entity label of the type specified.  Includes anon_map and token_map definitions as well.'''
     def anon_regex(self, type):
         anon_map=self._entity_rules.anon_map
         token_map=self._entity_rules.token_map
 
-        counter = 0
+        counter=0
+        this_regex=""
         if type in anon_map.keys():
             for entity in anon_map[type]:
-                if counter == 0:
-                    this_regex = "\[" + entity + "(-\d+)?\]"
-                else:
-                    this_regex = this_regex + "|\[" + entity + "(-\d+)?\]"
-                counter = counter + 1
+                if (counter>0): this_regex=this_regex+'|' 
+                this_regex = this_regex + "\[" + entity + "(-\d+)?\]"
+                counter+=1
         if type in token_map.keys():
             for entity in token_map[type]:
-                if counter == 0:
-                    this_regex = entity
-                else:
-                    this_regex = this_regex + "|" + entity
-                counter = counter + 1
-        
-        #treat the type as the entity if no other maps were specified.
-        if counter==0:
-            this_regex = "\[" + type + "(-\d+)?\]"
-            
+                if (counter>0): this_regex=this_regex+'|' 
+                this_regex = this_regex + entity
+                counter+=1
+
         return this_regex
     
     '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''

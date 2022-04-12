@@ -8,7 +8,7 @@ Many companies have security, privacy, and regulatory standards that require the
 
 ## How it works
 
-Redactomatic is a multi-pass redaction tool with an optional anonymization function and reads in CSV files as input. When PII is detected, it is removed and replaced with an entity tag, like **[ORDINAL]**. If the `--anonymization` flag is added, Redactomatic will replace PII entity tags with randomized values. For example, **[PERSON]** might be replaced by the name John. This is useful when sharing datasets that need PII removed but also need some real world like value.  By default, a redaction pass will be made using the Spacy 3 named entity recognition library is used.  You have the option of using the large Spacy library if you add the `--large` command-line parameter, which will increase the number of correctly recognized PII entities, but will also take longer. In addition to the Spacy NER pass, passes are made using regular expressions. The reason multiple passes are needed is that machine learning libraries like Spacy are not reliable and cannot catch all PII. That is obviously not acceptable for financial services and other regulated industries. While large companies use this tool for mission critical applications, please test and validate the results before using it in production and report any anomalies to the authors.
+Redactomatic is a multi-pass redaction tool with an optional anonymization function and reads in CSV files as input. When PII is detected, it is removed and replaced with an entity tag, like **[ORDINAL]**. If the `--anonymization` flag is added, Redactomatic will replace PII entity tags with randomized values. For example, **[PERSON]** might be replaced by the name John. This is useful when sharing datasets that need PII removed but also need some real world like value.  By default, a redaction pass will be made using the Spacy 3 named entity recognition library.  You have the option of using the large Spacy library if you add the `--large` command-line parameter, which will increase the number of correctly recognized PII entities, but will also take longer. In addition to the Spacy NER pass, passes are made using regular expressions. The reason multiple passes are needed is that machine learning libraries like Spacy are not reliable and cannot catch all PII. That is obviously not acceptable for financial services and other regulated industries. While large companies use this tool for mission critical applications, please test and validate the results before using it in production and report any anomalies to the authors.
 
 The tool is completely configurable.  Redaction and anonymization rules can be added or removed and new rules can be defined.  The redaction and anonymization rules are defined by JSON or YAML files.  By default these are looked for in the [rules/](rules/) directory.  The 
 
@@ -42,7 +42,11 @@ Redactomatic supports both transcribed voice and chat conversation text types. T
 
 ### Dictionary of phrases to ignore
 
-Redactomatic includes the ability to ignore key phrases. This comes in handy when redactomatic would otherwise tag something as PII that shouldn't be. For example, if a conversation includes the phrase, *"May I please have your first and last name"*, is the word *first* an ordinal? No it's not. Under normal conditions, Redactomatic would redact the word *first*. In the case where we use the `--anonymize` flag, it would assign a random ordinal in it's place. For example, the previous phrase might have been replaced with, *"May I please have your eighth and last name"*. This obviously doesn't make any sense. We can solve this problem by configuring Redactomatic to ignore the phrase, *"first and"*. We would do this by editing the definition of the *\_IGNORE\_* rule which is by default located in the file [ignore.yml](rules/ignore.yml)   You can add as many additional phrases as you like.  An example of this file is shown below.
+Redactomatic includes the ability to ignore key phrases. This comes in handy when redactomatic would otherwise tag something as PII that shouldn't be. For example, if a conversation includes the phrase, *"May I please have your first and last name"*, is the word *first* an ordinal? No it's not. Under normal conditions, Redactomatic would redact the word *first*. In the case where we use the `--anonymize` flag, it would assign a random ordinal in it's place. For example, the previous phrase might have been replaced with, *"May I please have your eighth and last name"*. This obviously doesn't make any sense. We can solve this problem by configuring Redactomatic to ignore the phrase, *"first and"*. 
+
+Redactomatic implements this feature by first redacting the text to be ignored and then restoring it during anonymization.  
+
+In the default configuration this is done by editing the definition of the *\_IGNORE\_* rule which is by default located in the file [ignore.yml](rules/ignore.yml)   You can add as many additional phrases as you like.  An example of this file is shown below.
 
 ```
 entities:
@@ -66,8 +70,10 @@ entities:
           - CV
           - tomorrow
     anonymizer:
-      model-class: anonymize.AnonRestoreEntityText  
+      model-class: anonymize.AnonRestoreEntityText 
 ```
+
+If you are interested in how this is implemented, notice how the definition of the  *\_IGNORE\_*  rule uses the redadctor `redact.RedactorPhraseList`  to first redact the words to be ingored, and then uses the anonymizer `anonymize.AnonRestoreEntityText `to restore the text again.  In addition to this entityalso needs to be added to the *always-anonymize* section of the configuration to ensure that it is anonymized even when the -`--anonymize` option is not set.    Each of these steps are explained in detail later in this document.
 
 ## Installation
 
@@ -127,7 +133,7 @@ Once installed, redactomatic needs at a minimum:
 
 ```
 usage: redactomatic.py [-h] [--column COLUMN] [--idcolumn IDCOLUMN] [--inputfile INPUTFILE [INPUTFILE ...]] [--outputfile OUTPUTFILE] [--modality {text,voice}] [--anonymize] [--large] [--log LOG]
-                       [--uppercase] [--level LEVEL] [--noredaction] [--seed SEED] [--rulefile [RULEFILE [RULEFILE ...]]] [--regextest] [--testoutputfile TESTOUTPUTFILE] [--chunksize CHUNKSIZE] [--chunklimit CHUNKLIMIT]  [--header]
+                       [--uppercase] [--level LEVEL] [--no-redact] [--seed SEED] [--rulefile [RULEFILE [RULEFILE ...]]] [--regextest] [--testoutputfile TESTOUTPUTFILE] [--chunksize CHUNKSIZE] [--chunklimit CHUNKLIMIT]  [--header]
                        [--columnname COLUMNNAME] [--idcolumnname IDCOLUMNNAME]### Command Line Parameters
 ```
 
@@ -144,11 +150,13 @@ usage: redactomatic.py [-h] [--column COLUMN] [--idcolumn IDCOLUMN] [--inputfile
 | chunksize      | The number of lines to read in as a chunk before processing them.                                                                                      | no        |
 | chunklimit     | An integer number of chunks to process before stopping.   Included primarily to support benchmarking.   Default=None (i.e. all of them)                | no        |
 | anonymize      | If included will replace redaction tags with randomized values. Useful if you need simulated data.                                                     | no        |
+| no-anonymize   | Do not anonymize (This is the default)                                                                                                                 | no        |
+| redact         | Redact the text (This is the default)                                                                                                                  | no        |
+| no-redact      | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                              | no        |
 | large          | If included will use the large Spacy language model. Not recommended unless you have a GPU or don't mind waiting a long time.                          | no        |
 | log            | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.               | no        |
 | uppercase      | If included will convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps.           | no        |
 | level          | The redaction level (1-3). The default is 2. See more documentation below on what the levels mean.                                                     | no        |
-| noredaction    | If included, will ignore the redaction pass and only anonymize recognized redaction tags.                                                              | no        |
 | seed           | If included, this integer will seed the anonymizer random selection. Use this if you want deterministic results.                                       | no        |
 | rulefile       | A list of filenames where the rules are defined.  These are globbable. By default this uses: `rules/*.json rules/*.yml`                                | no        |
 | regextest      | Test the regular rexpressions defeind in the regex-test rules prior to any other processing                                                            | no        |
@@ -201,7 +209,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 ```
 
 ```sh
-python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --anonymize --noredaction
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --anonymize --no-redact
 ```
 
 ## Redaction Levels
@@ -285,6 +293,8 @@ The top-level dictionary keys are as follows:
 
 - level
 - redaction-order
+- always-anonymize
+- anonymization-order
 - anon-map
 - token-map
 - entities
@@ -340,21 +350,51 @@ You will notice the label **\_SPACY\_**.  This defines where the NL ML Spacy mod
 
 The other special label ***\_IGNORE\_*** is uses to run a redactor that labels areas of text to be protected so that it can be restored at a later date.
 
+### always-anonymize (optional)
+
+```
+always-anonymize:
+    - _IGNORE_
+```
+
+**Default always-anonymize (YAML) rule**
+
+The `always-anonymize` section lists entities that are anonymized even if the `--anonymize` flag is not set. This allows entities that catch text to be ignored to restore them afterwards even if anonymization is not performed.
+
+This section is optional and if it is omitted then the rule shown above is implemented by default. This is to provide backwards compatibility. It is recommended that this section is included for clarity. If this section is defined then it overrides the default. This means that you should explicitly include the *_IGNORE_* entity if you with to use this entity to protect and restore text.
+
+The always-anonymize section can be used to anonymize entities with any kind of anonymizer defined. This feature can be used for things other than restoring ignored text. You can also have multiple entities in this section if desired.
+
+### anonymization-order (optional)
+
+```
+anonymization-order:
+    - _IGNORE_
+    - PERSON
+    - ADDRESS
+    - SSN
+    -  ...
+```
+
+**Example anonymization-order (YAML)**
+
+The `anonymization-order` section of the rules file is optional.  If it is not defined then the order of the entities in the `redaction-order` section is used to determine the order of anonymization.  In the current implementation of redactomatic the order of anonymization is not important so this section is usually omitted.  It is included to future-proof the tool should the order of anonymization ever be important.
+
 ### anon-map
 
 ```
 anon-map:
-    ADDRESS: [ ADDRESS, streetAddress ]
-    CARDINAL: [ CARDINAL, DIGITS, digits ]
-    CCARD: [ CCARD, creditCardNumber, ccNum ]
+    ADDRESS: [ streetAddress ]
+    CARDINAL: [ DIGITS, digits ]
+    CCARD: [ creditCardNumber, ccNum ]
     CREDENTIALS: [ credentials ]
-    DATE: [ DATE, expDate ]
+    DATE: [ expDate ]
     ...
 ```
 
 **Example anon-map (YAML)**
 
-The `anon-map` section defines which redaction labels are aliases for redaction entities.   Consider the following text that has already been redacted.  The address has been converted into the label **[streetAddress]** which is not a native entity that is defined in the ```entities``` section of the configuration.  it is also not referenced in the ```level``` or ```redacton-order```.  
+The `anon-map` section defines which redaction labels are aliases for redaction entities.   Consider the following text that has already been redacted.  The address has been converted into the label **[streetAddress]** which is not a native entity that is defined in the ```entities``` section of the configuration.  It is also not referenced in the ```level``` or ```redacton-order```.  
 
 ```
 My mother lives at [streetAddress].
@@ -362,20 +402,29 @@ My mother lives at [streetAddress].
 
 The entry in the anon-map shown above means that redaction labels in the text of the form **[streetAddress]** or **[streetAddress-nnn]** will be anonymized using the rules defined for the entity **ADDRESS**.
 
-You may be wondering why this is neccessary and how the redacted text can have labels that are not defined in the configuration files.  There are two main reasons this can occur. 
+You may be wondering why this is neccessary and how the redacted text can contain labels that are not defined in the configuration files.  There are two main reasons this can occur. 
 
 * The input file was redacted by another process and we are using Redactomatic to anonymize the resulting text.  For example a company may have their own redaction algorithm but want to use Redactomatic to put plausible text back into the transcripts.
 
 * The label was generated by special redactor processes such as `_SPACY_` that add multiple label types and you want to share anonymizer rules for these labels.
 
-If there is a 1:1 correspondence between the entity and its anonymizer then it is not neccessary to map it to itself.  However if a mapping is included then it should also map to itself if intended.
+If redactomatic is expecting to anonymize and entity and does not find an entry for it in the anon-map then it will assume that the entity maps to itself.  However if an entity is defined in the key of the anon-map then only the entities found in the map will use the anonymizer defined for that entity.    
 
 ```
 anon-map: 
         ENTITY1: [ "ENTITY1" ]               # Not needed to map ENTITY1 to itself
-        ENTITY2: [ "ENTITY2", "ENTITY3" ]    # Needed to continune mapping ENTITY2 to itself
-        ...
+        ENTITY2: [ ENTITY2", "ENTITY3" ]    # Not needed to map ENTITY2 to ENTITY2
 ```
+
+It is is possible to supress the use of a particular anonymizer for an entity by mapping it to an empty set of entities.  It is also possible to use a different anonymizer to anonymize that entity instead.
+
+```
+anon-map:
+    ENTITY1: []           #Suppress use of the anonymizer for ENTITY1
+    ENTITY2: [ENTITY1]    #Use anonymizer for ENTITY2 for ENTITY1
+```
+
+Redactomatic does not prevent you from mapping an entity to more than one anonymizer but it is not a useful thing to attempt.  If this does happen then Redactomatic will map the entity with the first mapping that it finds when it follows the` anonymization-order `(or `redaction-order` if `anonymization-order` is not specified).  It will then try to map it using later anonymizers but will not find the entity because it will already have been anonymized.
 
 ### token-map
 

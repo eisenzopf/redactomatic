@@ -79,6 +79,19 @@ class EntityRules():
         return _item
     
     @property  
+    def always_anonymize(self):
+        '''Return the restore_order list set in the rules. If none are specified return '_IGNORE_ for backwards compatibility.'''
+        _item=self._rules.get('always-anonymize',['_IGNORE_'])
+        return _item
+
+    @property  
+    def anonymization_order(self):
+        '''Return the anonymization list set in the rules. If none defined then return the redation_order.'''
+        _item=self._rules.get('anonymization-order',None)
+        if _item is None: return self.redaction_order
+        return _item
+
+    @property  
     def regex_test_set(self):
         '''Return a list of entities in the regex-test section of the rules.'''
         _item=self._rules.get('regex-test',None)
@@ -87,16 +100,18 @@ class EntityRules():
 
     @property  
     def anon_map(self):
-        '''Return the anon_map list fromt the rules'''
-        _item= self._rules.get('anon-map',None)
-        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(anon-map) not found in rules.")
+        '''Return the anon_map list from the rules'''
+        _item= self._rules.get('anon-map',{})
+        for rule in self.anonymization_order:
+            if not rule in _item:
+                _item[rule]=[rule]
         return _item
 
     @property  
     def token_map(self):
         '''Return the token_map list from the rules.  If not defined return an empty array. '''
         _item=self._rules.get('token-map',None)  
-        if _item is None: raise EntityRuleConfigException("WARNING: entity_rules(token-map) not found in rules. Please add an empty token-map rule if you don't need any token mapping.")
+        if _item is None: _item={} 
         return _item
 
     @property  

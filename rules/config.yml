@@ -51,6 +51,10 @@ level:
         - SSN
         - EMAIL
         - PIN
+
+always-anonymize:
+    - _IGNORE_
+
 redaction-order:
     - _IGNORE_
     - PERSON
@@ -80,39 +84,21 @@ redaction-order:
     - _SPACY_
     - ORDINAL
     - CARDINAL
+
 anon-map:
     ADDRESS: [ ADDRESS, streetAddress ]
-    CARDINAL: [ CARDINAL, DIGITS, digits ]
+    CARDINAL: [ CARDINAL, digits, DIGITS ]
     CCARD: [ CCARD, creditCardNumber, ccNum ]
-    CREDENTIALS: [ credentials ]
+    CREDENTIALS: [ CREDENTIALS, credentials ]
     DATE: [ DATE, expDate ]
     EMAIL: [ EMAIL, EMAIL_ADDRESS, emailAddress ]
-    EVENT: [ EVENT ]
-    FAC: [ FAC ]
-    GPE: [ GPE ]
-    IPADDRESS: [ ipAddress ]
-    LANGUAGE: [ LANGUAGE ]
-    LAUGHTER: [ LAUGHTER ]
-    LAW: [ LAW ]
-    LOC: [ LOC ]
-    MONEY: [ MONEY ]
-    NORP: [ NORP ]
-    ORDINAL: [ ORDINAL ]
-    ORG: [ ORG ]
+    IPADDRESS: [ IPADDRESS, ipAddress ]
     PASSWORD: [ PASSWORD, password ]
-    PERCENT: [ PERCENT ]
-    PERSON: [ PERSON ]
-    PHONE: [ PHONE, PHONE_NUMBER, VODACOMDIREC-PHONE_NUMBER, phoneNumber ]
-    PHONE_NUMBER: [ PHONE ]
-    PRODUCT: [ PRODUCT ]
-    QUANTITY: [ QUANTITY ]
+    PHONE: [ PHONE, PHONE_NUMBER, phoneNumber ]
     SSN: [ SSN, usSocialSecurityNumber ]
-    TIME: [ TIME ]
-    URL: [ URL ]
     USERNAME: [ USERNAME, username ]
-    WORK_OF_ART: [ WORK_OF_ART ]
     ZIP: [ ZIP, zipcode ]
-    PIN: [ PIN ]
+
 token-map:
     ZIP: [ "<ZIP\/>" ]
     PIN: [ "<PIN\/>", "<CVV\/>" ]
