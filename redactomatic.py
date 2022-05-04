@@ -134,9 +134,8 @@ def process_chunk(df,curr_id, chunk,entity_values,entity_rules,redact_entity_map
     df.iloc[:, args.column-1] = texts
     return curr_id
 
-def main():
-     # get command line params and then initialize an empty rules base, passing these arguments to it.
-    args = config_args()
+def main(args):
+    #Initialize an empty rules base and pass the args namespace to it.
     entity_rules = er.EntityRules(args)
 
     #Load the config rules filess into the entity rules base. 
@@ -195,4 +194,6 @@ def main():
         print("Done.")
 
 if __name__ == "__main__":
-    main()
+    # get command line params.
+    args = config_args()
+    main(args)

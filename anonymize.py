@@ -67,7 +67,7 @@ class AnonymizerBase():
 
         this_match = regex.fullmatch('\[?(.*)-(.*?)\]?', tag)
 
-        if this_match:   # handling for ENTITY-dddd tags    
+        if (this_match and self._params.get("persist",True)):   # handling for ENTITY-dddd tags    
             m_ix=this_match[2]
             m_cat=this_match[1]
             r=self._entity_map.update_entities(m_ix, id, entity_value, m_cat)

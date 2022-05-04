@@ -5,6 +5,8 @@ class EntityMap():
         self._emap={}
 
     #Check and store aliases (e_val) for a key (e_ix) with for unique conversation_id(d_id) and entity category(e_cat) combinations.
+    #During redaction:       e_ix=text,         d_id=conversaton_id, e_val=entity_index, e_cat=entity
+    #During anonymization:   e_ix=entity_index, d_id=conversaton_id, e_val=entity_value, e_cat=entity
     #Used to consistently replace words with index-numbers during redaction and then consistenly replace index-numers with redacted words during anonymization. 
     def update_entities(self, e_ix, d_id, e_val, e_cat="GLOBAL"):
         #e_ix: the key that we want to store this entity under (i.e. word or index-value)
