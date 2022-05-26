@@ -14,7 +14,7 @@ conversation_id,speaker,date_time,text
 1011432,Agent,11/08/2019 00:00,Ok I can help you with that. Are you trying to pay with a bank draft or a credit card?
 1011432,Client,11/08/2019 00:00,I'm paying with my debit card.
 1011432,Agent,11/08/2019 00:00,What amount are you trying to pay?
-1011432,Client,11/08/2019 00:00,[MONEY-19] and fourty [MONEY-18]
+1011432,Client,11/08/2019 00:00,[MONEY-19] and [MONEY-18]
 1011432,Agent,11/08/2019 00:00,What is the name of the bank for your debit card?
 1011432,Client,11/08/2019 00:00,Sorry I meant [CARDINAL-21] even. My bank is [ORG-20].
 1011432,Agent,11/08/2019 00:01,Can you please confirm the debit card number for me please?
@@ -39,7 +39,7 @@ conversation_id,speaker,date_time,text
 1011432,Client,11/08/2019 00:06,I believe it's <PIN/>. Or it could be [PIN-12]
 1011432,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.
 1011432,Client,11/08/2019 00:07,Ok thanks.
-1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of [MONEY-25] was made on [DATE-32] at [TIME-31]. Is there anything else I can help you with?
+1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of [MONEY-25] was made on [EVENT-32] at [QUANTITY-31]. Is there anything else I can help you with?
 1011432,Client,11/08/2019 00:09,And you're [PERCENT-34] sure it went through?
 1011432,Agent,11/08/2019 00:09,Yes the payment was successful.
 1011432,Client,11/08/2019 00:10,Nope that's it.
