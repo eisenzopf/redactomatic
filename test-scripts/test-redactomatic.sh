@@ -41,11 +41,16 @@ python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality voice --rulef
 
 # Now compare the results.
 python3 compare-files.py $regex_test $TESTEXPECTED/$regex_test 'Is the regex test output file correct?'
+python3 compare-files.py $text_log_l2 $TESTEXPECTED/$text_log_l2 'Is the L2 text redaction log correct?'
 python3 compare-files.py $text_redacted_l2 $TESTEXPECTED/$text_redacted_l2 'Is the L2 redacted text output file correct?'
 python3 compare-files.py $text_redact_anonymized_l2 $TESTEXPECTED/$text_redact_anonymized_l2 'Is the L2 redacted and anonymized text output file correct?'
 python3 compare-files.py $voice_log_l2 $TESTEXPECTED/$voice_log_l2 'Is the L2 voice redaction log correct?'
 python3 compare-files.py $voice_redacted_l2 $TESTEXPECTED/$voice_redacted_l2 'Is the L2 redacted voice output file correct'
 python3 compare-files.py $voice_redact_anonymized_l2 $TESTEXPECTED/$voice_redact_anonymized_l2 'Is the L2 redacted and anonymized voice output file correct?'
+python3 compare-files.py $text_log_l3 $TESTEXPECTED/$text_log_l3 'Is the L2 voice redaction log correct?'
+python3 compare-files.py $text_redacted_l3 $TESTEXPECTED/$text_redacted_l3 'Is the L2 redacted voice output file correct'
+python3 compare-files.py $voice_log_l3 $TESTEXPECTED/$voice_log_l3 'Is the L2 voice redaction log correct?'
+python3 compare-files.py $voice_redacted_l3 $TESTEXPECTED/$voice_redacted_l3 'Is the L2 redacted voice output file correct'
 python3 compare-files.py $text_anonymized_only $TESTEXPECTED/$text_anonymized_only 'Is the pure text anonymization file correct?'
 python3 compare-files.py $voice_anonymized_only $TESTEXPECTED/$voice_anonymized_only 'Is the pure voice anonymization file correct?'
 
