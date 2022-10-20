@@ -1,66 +1,41 @@
-import json
 import os
-#from pyrsistent import v
 import spacy
-import regex
 import pandas as pd
-import numpy as np
-import entity_map as em
 import entity_rules as er
+import processor_base as pb
 import sys
 import regex_utils as ru
 
+# Pattern and compiled regex to define labels that need to be protected
+REDACT_LABEL_PATTERN="\[\w+(-\d+){0,1}\]"
+REDACT_LABEL_RU=ru.compile(REDACT_LABEL_PATTERN, 0, ru.EngineType.REGEX) 
+
 # Exception classes for redactors
-
-#Helper functions
-
-def clean(texts):
-    print("Cleaning text (Regex)...")
-    spaces = regex.compile('\s+')
-    dotdot = regex.compile(r'\.\.\.')
-    unknown = regex.compile(r'\<UNK\>')
-    add_space = regex.compile(r'(\]\[)')
-    add_space2 = regex.compile(r'((\w+)\[)')
-    add_space3 = regex.compile(r'(\](\w+))')
-    new_texts = []
-    for text in texts:
-        new_text = dotdot.sub('', text, concurrent=True)
-        new_text = spaces.sub(' ', new_text, concurrent=True)
-        new_text = unknown.sub('', new_text, concurrent=True)
-        new_text = add_space.sub('] [', new_text, concurrent=True)
-        new_text = add_space2.sub(r'\2 [', new_text, concurrent=True)
-        new_text = add_space3.sub(r'] \2', new_text, concurrent=True)
-        new_text = new_text.strip()
-        new_texts.append(new_text)
-    return new_texts
-
-def convert_to_uppercase(texts):
-    print("Converting letters to uppercase...")
-    new_texts=[]
-    for text in texts:
-        new_text = text.upper()
-        new_texts.append(new_text)
-    return new_texts
 
 ## Redactor classes ##
 
 #Base class from which all redactors are derived.
-class RedactorBase():
+class RedactorBase(pb.ProcessorBase):
     '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
     def __init__(self,id,entity_rules):
-        self._entity_rules=entity_rules
         self._entity_map=None
         self._entity_values=None
-        self._params={}
-        self._id=id
+        super().__init__(id, entity_rules)
      
     '''Virtual function defining what a configuration call should look like.'''
     # entity_map : a map to keep track of indexes assoigned to redacted words to enable restoration of consitent anonymized words later.
     # entity_values: a dictionary to keep the substituted entity values keyed by their substituted labels (e.g. ) entity_values["PIN-45"=1234]
     def configure(self, params, entity_map, entity_values):
-        self._params=params
+        #Call the base class configurator.
+        super().configure(params)
         self._entity_map=entity_map
         self._entity_values=entity_values
+
+    #Implement the generic processor rule.  
+    def process(self,df):
+        #This is currently not defined and will throw an exception.
+        #In the future this would call or replace redact() by converting the dataframe to a text and id array.
+        raise NotImplementedError
 
     # IMPLEMENT THIS FUNCTION TO:
     # Find match to pattern of type label; keeping entities map updated and tracking ID-TEXT connection,
@@ -125,8 +100,9 @@ class RedactorRegex(RedactorBase):
         self._group=_model_params.get("group",1)     
         self._flags=ru.flags_from_array(_model_params.get("flags",["IGNORECASE"]),ru.EngineType.REGEX)
         
+        #Compile these regexs after adding a pattern to also detect existing redaction labels so we can save them later.
         try:
-           self._pattern_set = [ru.compile(r, self._flags, ru.EngineType.REGEX) for r in _regex_set]
+           self._pattern_set = [ru.compile(REDACT_LABEL_PATTERN + "|" + r, self._flags, ru.EngineType.REGEX) for r in _regex_set]
         except Exception as exc:
             print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc))
 
@@ -148,7 +124,8 @@ class RedactorRegex(RedactorBase):
                         name = e.group()
                         start = e.span()[0]
 
-                    if not (self._id == "CARDINAL" and "[" in name and "]" in name): #not capture label ids as cardinal
+                    #Add a redaction label if the thing we matched wasn't already a redaction label.
+                    if (REDACT_LABEL_RU.match(name) is None): 
                         ix = self._entity_map.update_entities(name,d_id,eCount,self._id)
                         end = start + len(name)
                         newLabel=self._entity_values.set_label_value(self._id,ix,name)

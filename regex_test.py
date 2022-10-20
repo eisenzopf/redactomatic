@@ -105,7 +105,7 @@ class RegexTest():
                                     'right' : ""
                                 }                                
                             #Add this match result to the data frame
-                            df_utt_result=pd.concat([df_utt_result,pd.DataFrame(result,index=[0])])
+                            df_utt_result=df_utt_result.append(result,ignore_index=True)
                         if len(matches)==0:
                             result={
                                 'regex_id':_regex_id,
@@ -118,14 +118,14 @@ class RegexTest():
                                 'matched_text' : "",
                                 'right' : ""
                             }
-                            df_utt_result=pd.concat([df_utt_result,pd.DataFrame(result,index=[0])])
+                            df_utt_result=df_utt_result.append(result,ignore_index=True)
                     
                     #Now work out if this utterance passed or failed the test, and add the result to all results for this utterance.
                     #print (_match_type,_exact_match_count,_partial_match_count,len(_pattern_set))
                     _phrase_test_pass=self.get_pass_fail(_match_type,_exact_match_count,_partial_match_count,len(_pattern_set))
                     df_utt_result["test_type"]=str(_match_type)                    
                     df_utt_result["pass"]=_phrase_test_pass
-                    df=pd.concat([df,df_utt_result])
+                    df=df.append(df_utt_result)
 
                     if (not _phrase_test_pass): 
                         print ("FAIL: regex-id: "+_regex_id +" => '"+str(test_text)+"' "+str(_match_type)+" "+str(_flags))

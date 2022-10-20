@@ -13,7 +13,7 @@ PIN-12,one one six eight
 ORG-13,General Corporation
 PERSON-15,David
 ORDINAL-17,first
-MONEY-18,fourty three cents
+MONEY-18,three cents
 MONEY-19,Five hundred dollars
 ORG-20,Wells Fargo
 CARDINAL-21,five hundred
@@ -24,8 +24,8 @@ MONEY-25,five hundred dollars
 GPE-26,the United States
 GPE-27,Deluth Georgia
 ORG-29,PIN
-QUANTITY-31,eleven fifty nine AM
-EVENT-32,August eleventh
+TIME-31,eleven fifty nine AM
+DATE-32,August eleventh
 PERCENT-34,one hundred percent
 CARDINAL-35,two
 CARDINAL-36,one

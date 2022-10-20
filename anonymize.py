@@ -1,15 +1,10 @@
 import pandas as pd
-import numpy as np
-import csv
-import random
 import regex
 import os
-from datetime import date
 import inflect
-import sys
-import entity_map as em
 import entity_rules as er
 import regex_utils as ru
+import processor_base as pb
 from xeger import Xeger
 
 inflector = inflect.engine()
@@ -26,20 +21,24 @@ def digits2words(digits):
 ## Anonymizer classes ##
 
 #Base class from which all anonymizers are derived.
-class AnonymizerBase():
+class AnonymizerBase(pb.ProcessorBase):
     '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
     def __init__(self,id,entity_rules):
-        self._entity_rules=entity_rules
         self._entity_map=None
         self._entity_values=None
-        self._params={}
-        self._id=id
+        super().__init__(id, entity_rules)
 
     '''Virtual prototype for configuring an anonymizer with a specific set of parameters.'''
     def configure(self, params,entity_map, entity_values):
-        self._params=params
+        super().configure(params)
         self._entity_map=entity_map
         self._entity_values=entity_values
+
+    #Implement the generic processor rule.  
+    def process(self,df):
+        #This is currently not defined and will throw an exception.
+        #In the future this would call or replace anonymize() by converting the dataframe to a text and id array.
+        raise NotImplementedError
 
     '''Anonymization function. '''
     def anonymize(self, texts, conversation_ids):

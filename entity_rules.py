@@ -2,6 +2,9 @@ import yaml
 import json
 import regex
 from random import Random
+import glob
+import os
+import sys
 
 # Exception classes for redactors
 class EntityRuleConfigException(Exception):
@@ -141,6 +144,26 @@ class EntityRules():
                 #print("RULES: ",str(self._rules))    
             except yaml.YAMLError as e:
                 raise(e)
+
+    def load_rule_globlist(self, globlist):
+        n=0
+
+        '''Load rule files using a supplied globlist to find them.  These can be yml or json files.file'''
+        for g in globlist:
+            pathlist=glob.glob(g)
+            #print("Pathlist:",pathlist)
+            for file in pathlist:
+                print("Loading rulefile " + file + "...",file=sys.stderr)
+                fname, fext = os.path.splitext(file)
+                if (fext==".yml" or fext==".yaml"):
+                    self.load_rulefile_yaml(file)
+                    n+=1
+                elif (fext==".json"):
+                    self.load_rulefile_json(file)
+                    n+=1
+                else:
+                    print("WARNING: file: "+str(file)+" is being ignored. Rulefiles must have extension .yml, .yaml. or .json.",file=sys.stderr)
+        return n
 
     def print_rulefile(self,f):
         print(self._rules,file=f)

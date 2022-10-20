@@ -1,6 +1,7 @@
 import regex
 import re
 from enum import Enum
+import sys
 
 class EngineType(Enum):
     RE               =0
@@ -46,6 +47,32 @@ def flag_from_string(s,etype):
 
     else:
         return 0   #Can't happen
+
+def recursive_sub(s,find,replace,flags,etype):
+    input=s
+
+    while True:
+        if etype==EngineType.REGEX:
+            output = regex.sub(find, replace, input)
+        elif etype==EngineType.RE:
+            output = re.sub(find, replace, input)
+
+        if input == output:
+            break
+        else:
+            input = output
+
+    return output
+
+def sub(s,find,replace,flags,etype):
+    if etype==EngineType.REGEX:
+        output = regex.sub(find, replace, s)
+        if not output==s:
+            print("FIXED:",s,"=>",output,file=sys.stderr)
+    elif etype==EngineType.RE:
+        output = re.sub(find, replace, s)
+
+    return output
 
 def compile(s,flags,etype):
     if etype==EngineType.REGEX:
