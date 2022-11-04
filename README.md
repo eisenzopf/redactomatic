@@ -10,7 +10,7 @@ Many companies have security, privacy, and regulatory standards that require the
 
 Redactomatic is a multi-pass redaction tool with an optional anonymization function and reads in CSV files as input. When PII is detected, it is removed and replaced with an entity tag, like **[ORDINAL]**. If the `--anonymization` flag is added, Redactomatic will replace PII entity tags with randomized values. For example, **[PERSON]** might be replaced by the name John. This is useful when sharing datasets that need PII removed but also need some real world like value.  By default, a redaction pass will be made using the Spacy 3 named entity recognition library.  You have the option of using the large Spacy library if you add the `--large` command-line parameter, which will increase the number of correctly recognized PII entities, but will also take longer. In addition to the Spacy NER pass, passes are made using regular expressions. The reason multiple passes are needed is that machine learning libraries like Spacy are not reliable and cannot catch all PII. That is obviously not acceptable for financial services and other regulated industries. While large companies use this tool for mission critical applications, please test and validate the results before using it in production and report any anomalies to the authors.
 
-The tool is completely configurable.  Redaction and anonymization rules can be added or removed and new rules can be defined.  The redaction and anonymization rules are defined by JSON or YAML files.  By default these are looked for in the [rules/](rules/) directory.  The
+The tool is completely configurable.  Redaction and anonymization rules can be added or removed and new rules can be defined.  The redaction and anonymization rules are defined by JSON or YAML files.  By default these are looked for in the [rules/](./rules/) directory.  The
 
 ### Redaction
 
@@ -46,7 +46,11 @@ Redactomatic includes the ability to ignore key phrases. This comes in handy whe
 
 Redactomatic implements this feature by first redacting the text to be ignored and then restoring it during anonymization.
 
-By default, a special redaction entity  *\_IGNORE\_*  is defined in the file [rules/ignore.yml](rules/ignore.yml)   
+By default, a special redaction entity  *\_IGNORE\_*  is defined in the file [rules/ignore.yml](./rules/ignore.yml)   
+
+
+
+
 
 ```
 entities:
@@ -227,7 +231,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 You can set how strict the redaction script will be. Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
 
-You can also define your own levels in the *config.yml* file if desired, for example if you define the redaction labels that you want to redact in a new subsection of the `'level'` secton of *config.yml* called called `'custom' `then the command line switch` --level custom`` will cause this new set of labels to be redactor or anonymized.
+You can also define your own levels by editing the [config.yml](./rules/config.yml) or better still adding your own custom configuration file.   For example if you define the redaction labels that you want to redact in a new subsection of the `'level'` section called called `'custom' `then the command line switch `--level custom` will cause this new set of labels to be redacted or anonymized.
 
 ## Supported Languages and Regions
 
@@ -270,19 +274,19 @@ The following entities are supported by default by Redactomatic. The Spacy [Engl
 
 ### rules/
 
-The [rules/](rules/) directory contains default files used to define the core redaction.  
+The [rules/](./rules/) directory contains default files used to define the core redaction.  
 
-- [config.yml](rules/config.yml) - fields to be redacted, anonymized, levels and anonymyzation order
+- [config.yml](./rules/config.yml) - fields to be redacted, anonymized, levels and anonymyzation order
 
-- [core-defs.yml](rules/core-defs.yml)- definitions for redaction and anonymization of all core fields
+- [core-defs.yml](./rules/core-defs.yml)- definitions for redaction and anonymization of all core fields
 
-- [ignore.yml](rules/ignore.yml) - an example file used to specify phrases to be protected
+- [ignore.yml](./rules/ignore.yml) - an example file used to specify phrases to be protected
 
 It is important to note that the core rules can all be re-defined or overriden. See below regarding the `--defaulrules` and `--rulesfile` options.
 
 ### data/
 
-The [data/](data/) directory contains a number of files that are used to anonymize recognized entities. As additional entity types are added for different geographies and languages, the number and size of files will grow. Please see the [data file README](data/README.md) for more information.  The anonymization class AnonPhraseList and its sub-classes can be used to create your own anonymization types based on your own data files.
+The [data/](./data/) directory contains a number of files that are used to anonymize recognized entities. As additional entity types are added for different geographies and languages, the number and size of files will grow. Please see the [data file README](./data/README.md) for more information.  The anonymization class AnonPhraseList and its sub-classes can be used to create your own anonymization types based on your own data files.
 
 ### test/
 
@@ -292,15 +296,119 @@ The [test/](test/) directory contains a number of files that are used to verify 
 
 ### Loading default and custom rule files.
 
-By default the `--defaultrules` option is set to True. When this option is set all of the files named `rules/*.json` or `rules/*.yml` are loaded.  If you put additional `.yml` or `.json` files into the default rules/ directory then they will be also be treated as default rules.
+By default all of the files named `rules/*.json` or `rules/*.yml` are loaded.  If you put additional `.yml` or `.json` files into the default rules/ directory then they will be also be treated as default rules.  
 
-The `--no-defaultrules` option suppresses this behaviour.   If you use this option then you must define all the rules that are to be used using the `--rulesfile` option.  This allows you to completely ignore the default rules supplied with redactomatic, or specify exactly which of the default files you want to include in your configuration.  We do not recommend using this option unless you are an experienced user.
+The `--rulesfile` option can be used used to load custom rules files in addition to the core rules files. These JSON or YML files can be placed anywhere, for example in your own custom rules directory. The paths that you give to the` --rulesfile` option are globbed so you can define things like `--rulefile myrulesdir/*.yml`
 
-The `--rulesfile` option is used to load custom rules files. These JSON or YML files can be placed anywhere, for example in your own custom rules directory. The paths that you give to the` --rulesfile` option are globbed so you can define things like `--rulefile myrulesdir/*.yml`
+The `--no-defaultrules` option suppresses the core rules completely. If you use this option then you must define all the rules that are to be used using the `--rulesfile` option.  This allows you to completely ignore the default rules supplied with redactomatic, or specify exactly which of the default files you want to include in your configuration.  We do not recommend using this option unless you are an experienced user.
 
-Note also that whilst you can define rules in JSON or YML, regular expressions are almost impossible to express in JSON. Use YML files for configuration containing regular expressions.
+Redactomatic configuration files can be in YAML format or JSON format and can be intermixed.  Note also that regular expressions are almost impossible to express in JSON. Use YAML for configuration containing regular expressions.
 
-Redactomatic configuration files can be in YAML format or JSON format and can be intermixed.
+### Example Custom Rule File
+
+```
+  # Define a custom redaction level including our own additional ignore rules and email rules
+  level:
+      'my_custom_level': 
+          - _IGNORE_
+          - _CUSTOM_IGNORE_
+          - _SPACY_
+          - PHONE
+          - PERSON
+          - ADDRESS
+          - CCARD
+          - MONEY
+          - SSN
+          - PIN
+          - CUSTOM_EMAIL
+
+  # Restore phrases in the existing _IGNORE_ rule and also our new _CUSTOM_IGNORE_ rule.
+  always-anonymize:
+      - _IGNORE_
+      - _CUSTOM_IGNORE_
+
+  # Add _CUSTOM_IGNORE_ and CUSTOM_EMAIL rules to the core redaction order.
+  redaction-order:
+      - _IGNORE_
+      - _CUSTOM_IGNORE_
+      - PERSON
+      - ADDRESS
+      - CCARD
+      - PHONE
+      - SSN
+      - ZIP
+      - EMAIL
+      - MONEY
+      - LOC
+      - DATE
+      - EVENT
+      - FAC
+      - GPE
+      - LANGUAGE
+      - LAUGHTER
+      - LAW
+      - NORP
+      - ORG
+      - PERCENT
+      - PRODUCT
+      - QUANTITY
+      - TIME
+      - WORK_OF_ART
+      - PIN
+      - CUSTOM_EMAIL
+      - _SPACY_
+      - ORDINAL
+      - CARDINAL
+
+  #Map XML labels in your input that are already anonymized to built-in anonymization entities.
+  token-map:
+      PIN: [ "<PIN\/>", "<SEC_CODE\/>" ]
+      CCARD: [ "<ccNum\/>" ]
+
+  #Define _CUSTOM_IGNORE_ and CUSTOM_EMAIL entity rules.
+  entities:
+    _CUSTOM_IGNORE_:
+      redactor:
+        model-class: redact.RedactorRegex
+        text:
+          regex:
+            - world one bank
+        voice:
+          regex:
+            - world one bank
+      anonymizer:
+        model-class: anonymize.AnonRestoreEntityText
+
+    CUSTOM_EMAIL:
+      redactor:
+        model-class: redact.RedactorRegex
+        text:
+          regex: ['[a-z]+@.onebank.com']
+        voice:
+          regex: ['[a-z]+ underscore [a-z]+ at one bank dot com']
+      anonymizer:
+        model-class: anonymize.AnonRegex
+        text:
+          regex: ['[a-z]{5}_[a-z]{5}@.onebank.com']
+        voice:
+          regex: ['[a-z]{5} underscore [a-z]{5} at one bank dot com']
+```
+**Example custom.yml rules file** 
+
+An example custom rule file is shown above.  It can be loaded using the option `--rulesfile custom.yml`.  When redactomatic ruls it first loads the core rules files and then it loads the custom rules files.
+
+The custom rules will be overlaid on top of the core rules.  Rules with the same ditionary path as the core rules will be overridden.   Rules with novel paths will be added into the relevant sections.
+
+Reading the custom rules file above will do the following :
+
+- Add an extra level `my_custom_level` to the built in list of '1', '2', and '3'.  This can then be invoked using the switch `--level my_custom_level`.
+- Override the `always-anonymize` section to ensure that we restore the phrases identified using the `_CUSTOM_IGNORE_` rule in addition to keeping the core ones.
+Override the `redaction-order` section to include the new rules `_CUSTOM_IGNORE_` and `_CUSTOM_EMAIL_`.  Note how we keep entities that are not defined in `my-custom-level` level so that core levels `1`, `2` and `3` continue to work if needed. If you don't want to keep this backwards compatiblity then its ok to include just the entities that are in the custom level.
+- Map XML labels `\<PIN/>`, `\<SEC_CODE/>` and `\<ccNum/>` in the input data to the build in anonymizer labels.  This enables the anonymization of data that was already redacted by an external process prior to being input to redactomatic.
+- Define a new entity `_CUSTOM_IGNORE_` which looks for the phrase *'one world bank'* and ensures that this phrase is never redacted.  
+- Define a new entity `CUSTOM_EMAIL` which redacts email like *'amy_grant@onebank.com'* or spoken input of the form *'amy underscore grant at one bank dot com'*.   An anonymizer is also defined which anonymizes this entity to strings like *'anvfg_kujyg@onebank.com'* for text or *'anvfg underscore kujyg at one bank dot com'* for voice..
+
+The following sections describe exactly how this configuration file works, and give a full explanation for how to use other features in the tool in your custom configurations.
 
 ### Top-level rules
 
@@ -318,9 +426,9 @@ The top-level dictionary keys are as follows:
 - regex
 - regex-test
 
-Each configuration dictionary file must have one of these keys as its head.  Configuration files are treated as a single common namespace.  This means that defintions can be mixed into one file or arbitrarily spread across multiple files.  You will not be warned however if one of your rules is overwriting another one so take care with naming.
+Each entry in a configuration dictionary file must have one of these keys as its head.  Configuration files are treated as a single common namespace.  This means that defintions can be mixed into one file or arbitrarily spread across multiple files.  You will not be warned however if one of your rules is overwriting another one so take care with naming.
 
-In the default configuration in the release the top-six keys are present in the file *[config.yml](rules/config.yml)* and the remaining two keys are defined in the file [core-defs.yml](rules/core-defs.yml).
+In the default configuration in the release the top-six keys are present in the file [config.yml](./rules/config.yml) and the remaining two keys are defined in the file [core-defs.yml](./rules/core-defs.yml).
 
 ### level
 
@@ -344,7 +452,7 @@ level:
 
 **Example level definition (YAML)**
 
-Any number of level definitions may be set.  The defalt configuration files contain three level keys '1', '2' and '3', an extract of which is shown above.     The ` --level `option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
+Any number of level definitions may be set.  The defalt configuration files contain three level keys '1', '2' and '3', an extract of which is shown above.     The ` --level` option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
 
 To define a custom level you can add a custom configuraton file with its own level entry as shown below:
 
@@ -382,7 +490,7 @@ You will notice the label **\_SPACY\_**.  This defines where the NL ML Spacy mod
 
 The other special label ***\_IGNORE\_*** is uses to run a redactor that labels areas of text to be protected so that it can be restored at a later date.
 
-The redaction order is defined by default in the `rules/config.ym`l file.   To change this order, edit the default file or define a new config file with its own redaction-order entry in it.  Custom configuration files are loaded after the default configuraton files so the custom entry will override the definition in the default files.
+The redaction order is defined by default in the [config.yml](./rules/config.yml) file.   To change this order, edit the default file or define a custom config file with its own redaction-order entry in it.  Custom configuration files are loaded after the default configuraton files so the custom entry will override the definition in the default files.
 
 ### always-anonymize
 
@@ -399,7 +507,7 @@ This section is optional and if it is omitted then the rule shown above is imple
 
 The always-anonymize section can be used to anonymize entities with any kind of anonymizer defined. This feature can be used for things other than restoring ignored text. You can also have multiple entities in this section if desired.
 
-The default `always-anonymize` rule is defined in the `rules/config.ym`l file.  This rule can be overriden using a custom configuration file.
+The default `always-anonymize` rule is defined in the `./rules/config.ym`l file.  This rule can be overriden using a custom configuration file.
 
 ### anonymization-order (optional)
 
@@ -416,7 +524,7 @@ anonymization-order:
 
 The `anonymization-order` section of the rules file is optional.  If it is not defined then the order of the entities in the `redaction-order` section is used to determine the order of anonymization.  In the current implementation of redactomatic the order of anonymization is not important so this section is usually omitted.  It is included to future-proof the tool should the order of anonymization ever be important.
 
-The default `anonymization-order ` rule is defined in the `rules/config.ym`l file. This rule can be overriden using a custom configuration file.
+The default `anonymization-order ` rule is defined in the `./rules/config.ym`l file. This rule can be overriden using a custom configuration file.
 
 ### anon-map
 
@@ -464,7 +572,7 @@ anon-map:
 
 Redactomatic does not prevent you from mapping an entity to more than one anonymizer but it is not a useful thing to attempt.  If this does happen then Redactomatic will map the entity with the first mapping that it finds when it follows the` anonymization-order `(or `redaction-order` if `anonymization-order` is not specified).  It will then try to map it using later anonymizers but will not find the entity because it will already have been anonymized.
 
-The default `anon-map` rule is defined in the `rules/config.ym`l file but it is empty. This rule can be overriden using a custom configuration file.
+The default `anon-map` rule is defined in the `./rules/config.ym`l file but it is empty. This rule can be overriden using a custom configuration file.
 
 ### token-map
 
@@ -485,7 +593,7 @@ My mother's ZIP code is <ZIP\/>
 
 The token-map above will ensure that this label is anonymized using the entity rules for "ZIP" in the rest of the rules.
 
-The default `token-map` rule is defined in the `rules/config.ym`l file but it is empty. This rule can be overriden using a custom configuration file.
+The default `token-map` rule is defined in the `./rules/config.ym`l file but it is empty. This rule can be overriden using a custom configuration file.
 
 ### regex
 
@@ -572,7 +680,7 @@ In the example given above the regular expression zero_to_nine-voice is just a s
 
 In the ccard-voice rule this is then inserted via the macro **?INCLUDE< rule-id >** macro.   This macro is a direct text substitution of the rule in place of the invocation.  Macros can insert other macros but take care not to create infinite recursion.
 
-A default set  `regex`  rules are defined in the `rules/core-defs.yml`file.  Additional regex rules can be added in custom configuration files.    A defintion of a regex rule in the custom rules file with the same name as a core definition will overwrite the original definition.    You can use this to change individual core regular expressions if you wish to.
+A default set  `regex`  rules are defined in the `./rules/core-defs.yml`file.  Additional regex rules can be added in custom configuration files.    A defintion of a regex rule in the custom rules file with the same name as a core definition will overwrite the original definition.    You can use this to change individual core regular expressions if you wish to.
 
 ### regex-test
 
@@ -612,7 +720,7 @@ The `engine` paramter defines whether the match is performed using the 're' or '
 
 A particularly useful feature of the regex-test is that it stores detailed information about the test results in the file specified by the `--testoutputfile`command line option.
 
-A default set `regextest` rules are defined in the `rules/core-regex-test.yml`file. Additional regex test rules can be added in custom configuration files.  
+A default set `regextest` rules are defined in the `./rules/core-regex-test.yml`file. Additional regex test rules can be added in custom configuration files.  
 
 ### entities
 
@@ -641,7 +749,7 @@ In the example above the rules for redaction and anonymization of the **ORDINAL 
 
 Each redactor or anonymizer takes its configuration from the parameters found in the rules. In general a redactor or anonymizer will expect to have a 'voice' or 'text' key containing the definitions for how to process those two modalities.  The expected parameters for a given class however are entirely up to the class itself.
 
-A default set `entities` are defined in the `rules/core-defs.yml`file.  Additional `entities `can be added in custom configuration files.  Default `entities `can also have their definition overriden in the custom configuration files.
+A default set `entities` are defined in the `./rules/core-defs.yml`file.  Additional `entities `can be added in custom configuration files.  Default `entities `can also have their definition overriden in the custom configuration files.
 
 ### Built-In Redactor Classes
 
@@ -906,7 +1014,9 @@ Please see the [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Known Issues
 
-None.
+There are no known issue.
+
+Implementations for these will be welcomed from contributors.
 
 ## Authors
 
@@ -921,3 +1031,21 @@ Copyright 2021, Jonathan Eisenzopf, All rights reserved.
 Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes.
 Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
 Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the code to use a generic rules base.
+
+# Corpus Tools
+
+# Data Checker
+
+Script to check the quality and Talkmap formatting rules for CSV datasets
+
+It requires pandas to be installed. This can be done with command
+
+```bash
+pip3 install pandas
+```
+
+Then to run the script:
+
+```bash
+python3 checker.py file_with_conversations.csv
+```
