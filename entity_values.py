@@ -26,3 +26,9 @@ class EntityValues():
         for key, value in self._entity_values.items():
             writer.writerow([key, value])
         a_file.close()
+
+    def get_entity_values(self):
+        return self._entity_values
+
+    def is_empty(self):
+        return self._entity_values=={}

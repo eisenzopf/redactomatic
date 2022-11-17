@@ -1,4 +1,5 @@
 import regex
+import os
 
 ## ProcessorBase class and helper functions ##
 
@@ -19,6 +20,17 @@ class ProcessorBase():
     def process(self,df):
         #A processor takes a set of conversation records as a pandas data frame, manipulates them and returns them.
         return df
+
+    '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''
+    def absolute_path(self,path):
+        if os.path.isabs(path):
+            return path
+        else:
+            #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
+            _homedir=os.getenv("REDACT_HOME")
+            if (_homedir is None): 
+                _homedir=os.path.dirname(os.path.realpath(__file__))
+            return os.path.join(_homedir,path)
 
 # Helper functions - These can be refactored as processors operating on the text field at a later date. 
 

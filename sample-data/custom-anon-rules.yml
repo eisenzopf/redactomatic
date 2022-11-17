@@ -1,0 +1,20 @@
+anon-map:
+    ADDRESS: [ ADDRESS, streetAddress ]
+    CARDINAL: [ CARDINAL, digits, DIGITS ]
+    CCARD: [ CCARD, creditCardNumber, ccNum ]
+    CREDENTIALS: [ CREDENTIALS, credentials ]
+    DATE: [ DATE, expDate ]
+    EMAIL: [ EMAIL, EMAIL_ADDRESS, emailAddress ]
+    IPADDRESS: [ IPADDRESS, ipAddress ]
+    PASSWORD: [ PASSWORD, password ]
+    PHONE: [ PHONE, PHONE_NUMBER, phoneNumber ]
+    SSN: [ SSN, usSocialSecurityNumber ]
+    USERNAME: [ USERNAME, username ]
+    ZIP: [ ZIP, zipcode ]
+
+token-map:
+    ZIP: [ "<ZIP\/>" ]
+    PIN: [ "<PIN\/>", "<CVV\/>" ]
+    CCARD: [ "<ccNum\/>" ]
+    DATE: [ "<expDate\/>" ]
+    MONEY: ["\\b0z\\b"]

@@ -1,0 +1,85 @@
+# Define a custom redaction level including our own additional ignore rules and email rules
+level:
+    'custom': 
+        - _IGNORE_
+        - _CUSTOM_IGNORE_
+        - _SPACY_
+        - PHONE
+        - PERSON
+        - ADDRESS
+        - CCARD
+        - MONEY
+        - SSN
+        - PIN
+        - CUSTOM_EMAIL
+
+# Keep restoring the utterances in the existing _IGNORE_ rule and add our custom rule in addition to it.
+always-anonymize:
+    - _IGNORE_
+    - _CUSTOM_IGNORE_
+
+#Now define the redaction order we want including our custom ignore and email rule.
+redaction-order:
+    - _IGNORE_
+    - _CUSTOM_IGNORE_
+    - PERSON
+    - ADDRESS
+    - CCARD
+    - PHONE
+    - SSN
+    - ZIP
+    - EMAIL
+    - MONEY
+    - LOC
+    - DATE
+    - EVENT
+    - FAC
+    - GPE
+    - LANGUAGE
+    - LAUGHTER
+    - LAW
+    - NORP
+    - ORG
+    - PERCENT
+    - PRODUCT
+    - QUANTITY
+    - TIME
+    - WORK_OF_ART
+    - PIN
+    - CUSTOM_EMAIL
+    - _SPACY_
+    - ORDINAL
+    - CARDINAL
+
+#Map XML labels in our input that are already anonymized to built-in anonymization entities.
+token-map:
+    PIN: [ "<PIN\/>", "<SEC_CODE\/>" ]
+    CCARD: [ "<ccNum\/>" ]
+
+#Now define our own custom ignore and email redaction and anonymization rules.
+entities:
+  _CUSTOM_IGNORE_:
+    redactor:
+      model-class: redact.RedactorRegex
+      text:
+        regex:
+          - world one bank
+      voice:
+        regex:
+          - world one bank
+    anonymizer:
+      model-class: anonymize.AnonRestoreEntityText
+
+  CUSTOM_EMAIL:
+    redactor:
+        model-class: redact.RedactorRegex
+        text:
+            regex: ['\b[a-z]+@.onebank.com']
+        voice:
+            regex: ['\b[a-z]+ underscore [a-z]+ at one bank dot com']
+    anonymizer:
+        model-class: anonymize.AnonRegex
+        text:
+            regex: ['[a-z]{5}_[a-z]{5}@.onebank.com']
+        voice:
+            regex: ['[a-z]{5} underscore [a-z]{5} at one bank dot com']

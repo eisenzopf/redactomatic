@@ -856,6 +856,92 @@ entities:
     anonymizer:
       model-class: anonymize.AnonRestoreEntityText
 ```
+#### redact.RedactorPhraseDict
+
+```
+entity:  
+  Common_Cardinal_Phrases:
+    redactor:
+      model-class: redact.RedactorPhraseDict
+      text:
+        phrase-filename: keywords.json
+        phrase-field: keywords
+        prematch:
+          regex: '[1-9]+[ ]'
+        flags: [ ASCII, IGNORECASE, ... ]
+
+      voice:
+        ...
+```
+
+**Example RedactorPhraseDict definition.** (alternative phrase-list shown as comment)
+
+The `redact.RedactorPhraseDict` class is very similar to `redact.RedactorPhraseList` but it reads its phrase list data from a JSON or YML file rather than a CSV.
+
+The following parameters are supported
+
+- phrase-filename - The name of a JSON or YML file containing the phrases
+- phrase-path - A JSON style path to the elements where the phrases are defined (e.g. toplist.words)
+- prematch - A section defining a regular expression pattern to match before the phrase (optional)
+- prematch.regex - an inline regular expression or list ore regular expressions
+- prematch.regex-filename - a filename contaning the regular expression (not supported yet)
+- prematch.regex-id - an ID to a regex definition in the regex section/
+
+The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set.  if it is not set then it will search relative to installation directory of redactomatic.py.
+
+The `phrase-path` defines the path into the JSON or YML file to find the phrase list.  It is intended that this will eventually follow JPATH but currenlty class only supports one sub-level.
+
+```
+{
+    "keywords": [
+      "adjustment",		
+      "activated",
+      ...
+      "weeks",
+      "year",
+      "years"
+    ]
+}
+```
+An example set of keywords in a single dictionary item. (e.g. keywords.json)
+
+In the above example file `phrase-path="keywords"` will take the keywords from the array in the 'keywords' dictionary item.
+
+```
+{
+	"terms": [
+		{
+			"label": ":) t359",
+			"speech": [
+				"smiley t three five nine",
+				"smiley t three hundred fifty nine",
+				"smiley t three fifty nine"
+			],
+      "text": [
+				"t359"
+			]
+    }
+		{
+			"label": "A30",
+			"speech": [
+				"A thirty"
+			],
+ 			"text": [
+				"a30"
+			]
+		},
+
+        ....
+	]
+}
+```
+
+In the above example file `phrase-path="terms.speech"` will take the keywords from all of the arrays in each of the terms.speech dictionary items.
+
+This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
+
+The prematch allows you to define a regular expression that must be true prior to the phrase.     Considering the definition of the Common_Cardinal_Phrases entity shown above.  The keywords are drawn from the 'keywords' section of 'keywords.json' file and then the regular expression `/[1-9]+[ ]/` is prepended to these keywords.  This means it will only match these keywords if they are preceded by one or more digits followed by a space and then followed by the keyword.  for example '1 week' will match but 'a bad year' will not.
+
 
 #### redact.RedactorSpacy
 

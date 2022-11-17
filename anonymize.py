@@ -94,17 +94,6 @@ class AnonymizerBase(pb.ProcessorBase):
 
         return this_regex
     
-    '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''
-    def absolute_path(self,path):
-        if os.path.isabs(path):
-            return path
-        else:
-            #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
-            _homedir=os.getenv("REDACT_HOME")
-            if (_homedir is None): 
-                _homedir=os.path.dirname(os.path.realpath(__file__))
-            return os.path.join(_homedir,path)
-
     @property
     def random(self):
         #common random object to ensure seeding is deterministic
@@ -170,6 +159,12 @@ class AnonRegex(AnonymizerBase):
 class AnonRestoreEntityText(AnonymizerBase):
     '''Class to replace an anonymization token with the original text that was redacted in order to restore the original text.'''
     def anonymize(self, texts, conversation_ids):
+        #If there are no entity values to restore then print a simple abort message ard return.
+        #This deals with the situation where anonymization of a set of IGNORE items is being attempted without the --redact option set.
+        if (self._entity_values.is_empty()):
+            print(f'Aborting  {self._id} ...')
+            return texts
+
         new_texts = []
         pattern = regex.compile(r'(\[('+self._id+'\-\d+)\])')
 
@@ -180,7 +175,12 @@ class AnonRestoreEntityText(AnonymizerBase):
                 name = e.group(2)
                 start = e.span()[0]
                 end = start + len(e.group())
-                newString = newString[:start] + self._entity_values.get_value(name) + newString[end:]
+                try:
+                    newString = newString[:start] + self._entity_values.get_value(name) + newString[end:]
+                except Exception as exc:
+                    #This error should not occur as the exception above should catch it earlier
+                    raise Exception(f'ERROR: entity {name} has no restoration data.')
+                    
             new_texts.append(newString)
         return new_texts
 

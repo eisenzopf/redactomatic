@@ -9,6 +9,8 @@ import regex_test as rt
 import sys
 import os
 
+import traceback
+
 def str_to_bool(value):
     if isinstance(value, bool):
         return value
@@ -45,6 +47,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--header', default=False, action='store_true', help='Expect headers in the input files and print a header on the output. (default=False)')
     parser.add_argument('--columnname', type=str, default="text", help='The header name for the text; used if --header=True; overridden by --column; default is text')
     parser.add_argument('--idcolumnname', type=str, default="conversation_id", help='The header name for the conversation ID, used if --header=True; overridden by --idcolumn; default is text')
+    parser.add_argument('--traceback', action='store_true', default=False, help='Give traceback information when an error is thrown (default=False)')
 
     #Check conditional required options.  
     _err_list=[]
@@ -101,6 +104,11 @@ class RedactomaticProcessor(pb.ProcessorBase):
         if args.redact:
             #Get a list of the entities in the level specified on the command line ordered by the redaction_order.
             redaction_order=[x for x in self._entity_rules.redaction_order if x in entities]
+
+            #Terminate with error message if any entities are not in the redaction_order
+            missing_entities=[x for x in entities if not x in self._entity_rules.redaction_order]
+            if len(missing_entities)>0:
+                raise Exception(f'ERROR: The following entities are not defined in the redaction_order: {missing_entities}')
 
             print("Starting redaction at anonymization level:",self._entity_rules.level)
 
@@ -201,3 +209,5 @@ if __name__ == "__main__":
         main(args)
     except Exception as e:
         print(f"ERROR. Terminating redactomatic with error: {e}",file=sys.stderr)
+        if args.traceback:
+            traceback.print_exc(file=sys.stderr)

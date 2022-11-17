@@ -40,6 +40,8 @@ def merge(source, destination):
             merge(value, node)
             #print("key:",key,"value",value,"node",node,file=sys.stderr)
         else:
+            if key in destination.keys():
+                print("INFORMATION: Overwriting with new value: ",key,value,file=sys.stderr)
             destination[key] = value
 
     return destination
@@ -128,7 +130,7 @@ class EntityRules():
         with open(filepath) as stream:
             try:
                 _new_rules=json.load(stream)
-                self._rules=merge(self._rules,_new_rules)
+                self._rules=merge(_new_rules,self._rules)
                 #print("RULES: ",str(self._rules))    
             except Exception as e:
                 raise(e)
@@ -140,7 +142,7 @@ class EntityRules():
         with open(filepath, "r") as stream:
             try:
                 _new_rules=yaml.safe_load(stream)
-                self._rules=merge(self._rules,_new_rules)
+                self._rules=merge(_new_rules,self._rules)
                 #print("RULES: ",str(self._rules))    
             except yaml.YAMLError as e:
                 raise(e)
