@@ -83,21 +83,21 @@ entities:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-filename: $REDACT_HOME/data/us-area-code-cities.csv
         phrase-field: city
       voice:
-        phrase-filename: ./data/us-area-code-cities.csv
+        phrase-filename: $REDACT_HOME/data/us-area-code-cities.csv
         phrase-field: city
 
   GPE:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/gpe.csv
+        phrase-filename: $REDACT_HOME/data/gpe.csv
         phrase-header: False
         phrase-column: 0
       voice:
-        phrase-filename: ./data/gpe.csv
+        phrase-filename: $REDACT_HOME/data/gpe.csv
         phrase-header: False
         phrase-column: 0
 
@@ -105,40 +105,40 @@ entities:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-filename: $REDACT_HOME/data/Top-100-Retailers.csv
         phrase-field: Company
       voice:
-        phrase-filename: ./data/Top-100-Retailers.csv
+        phrase-filename: $REDACT_HOME/data/Top-100-Retailers.csv
         phrase-field: Company
 
   NORP:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/nationalities.csv
+        phrase-filename: $REDACT_HOME/data/nationalities.csv
         phrase-field: Nationality
       voice:
-        phrase-filename: ./data/nationalities.csv
+        phrase-filename: $REDACT_HOME/data/nationalities.csv
         phrase-field: Nationality
 
   PERSON:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/baby-names.csv
+        phrase-filename: $REDACT_HOME/data/baby-names.csv
         phrase-field: name
       voice:
-        phrase-filename: ./data/baby-names.csv
+        phrase-filename: $REDACT_HOME/data/baby-names.csv
         phrase-field: name
 
   WORK_OF_ART:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        phrase-filename: ./data/Artworks.csv
+        phrase-filename: $REDACT_HOME/data/Artworks.csv
         phrase-field: Title
       voice:
-        phrase-filename: ./data/Artworks.csv
+        phrase-filename: $REDACT_HOME/data/Artworks.csv
         phrase-field: Title
 
   ZIP:
@@ -153,10 +153,10 @@ entities:
     anonymizer:
       model-class: anonymize.AnonZipC
       text:
-        phrase-filename: ./data/zip_code_database.csv
+        phrase-filename: $REDACT_HOME/data/zip_code_database.csv
         phrase-field: zip
       voice:
-        phrase-filename: ./data/zip_code_database.csv
+        phrase-filename: $REDACT_HOME/data/zip_code_database.csv
         phrase-field: zip
 
   SSN:
@@ -195,10 +195,10 @@ entities:
     anonymizer:
       model-class: anonymize.AnonAddress
       text:
-        phrase-filename: ./data/street-names.csv
+        phrase-filename: $REDACT_HOME/data/street-names.csv
         phrase-field: Streets
       voice:
-        phrase-filename: ./data/street-names.csv
+        phrase-filename: $REDACT_HOME/data/street-names.csv
         phrase-field: Streets
 
   EMAIL:
@@ -211,11 +211,11 @@ entities:
     anonymizer:
       model-class: anonymize.AnonPhraseList
       text:
-        - phrase-filename: ./data/baby-names.csv
+        - phrase-filename: $REDACT_HOME/data/baby-names.csv
           phrase-field: name
         - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
       voice:
-        - phrase-filename: ./data/baby-names.csv
+        - phrase-filename: $REDACT_HOME/data/baby-names.csv
           phrase-field: name
         - phrase-list: [ '@gmail.com', '@yahoo.com', '@hotmail.com', '@icloud.com', '@msn.com' ]
 

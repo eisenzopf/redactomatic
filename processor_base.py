@@ -21,16 +21,19 @@ class ProcessorBase():
         #A processor takes a set of conversation records as a pandas data frame, manipulates them and returns them.
         return df
 
-    '''takes a path and returns the absolute path, depending on whether the input is relative or absolute. '''
+    '''takes a path and returns the absolute path. If the path is relative then use the current working directory as the anchor unless the string starts with $REDACT_HOME in which case use the location of the redactomatic file which can be overriden by the environment variable REDACT_HOME.'''
     def absolute_path(self,path):
         if os.path.isabs(path):
             return path
         else:
-            #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
-            _homedir=os.getenv("REDACT_HOME")
-            if (_homedir is None): 
-                _homedir=os.path.dirname(os.path.realpath(__file__))
-            return os.path.join(_homedir,path)
+            if (path.startswith("$REDACT_HOME")):
+                #Use REDACT_HOME if it is specified or use the location of the current file as the base if not.
+                _homedir=os.getenv("REDACT_HOME")
+                if (_homedir is None): 
+                    _homedir=os.path.dirname(os.path.realpath(__file__))
+                return path.replace("$REDACT_HOME",_homedir)
+            else:
+                return os.path.join(os.getcwd(),path)
 
 # Helper functions - These can be refactored as processors operating on the text field at a later date. 
 
