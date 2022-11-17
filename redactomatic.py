@@ -8,8 +8,9 @@ import entity_values as ev
 import regex_test as rt
 import sys
 import os
-
 import traceback
+
+__version__='Redactomatic v1.18'
 
 def str_to_bool(value):
     if isinstance(value, bool):
@@ -48,10 +49,19 @@ def config_args(): # add --anonymize
     parser.add_argument('--columnname', type=str, default="text", help='The header name for the text; used if --header=True; overridden by --column; default is text')
     parser.add_argument('--idcolumnname', type=str, default="conversation_id", help='The header name for the conversation ID, used if --header=True; overridden by --idcolumn; default is text')
     parser.add_argument('--traceback', action='store_true', default=False, help='Give traceback information when an error is thrown (default=False)')
+    parser.add_argument('-v','--version', action='store_true', default=False, help='Print the version of redactomatic')
+
 
     #Check conditional required options.  
     _err_list=[]
     _args=parser.parse_args()
+
+    #Print versioning if this is all that is wanted.
+    if _args.version:
+        print(__version__)
+        quit()
+
+    #Check special regex test mode.
     if ((_args.regextest) and (not _args.testoutputfile)) : _err_list.append("ERROR: The --regextest option requires the --testoutputfile option.")
     
     #warn with deprecated --noredaction option
