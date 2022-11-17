@@ -798,7 +798,7 @@ Redactomatic expects to be given a list of regular expression for the redactor. 
       model-class: redact.RedactorPhraseList
       text:
         #phrase-list: [fred, joe, stacy, kylie]
-        phrase-filename: ./data/employeenames.csv
+        phrase-filename: $REDACT_HOME/data/employeenames.csv
         phrase-field: name
         phrase-column: 1
         phrase-header: True
@@ -826,7 +826,7 @@ Alterntively if no phrase list is specified then the class will attempt to read 
 
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)
 
-The phrase-filename can be an absolute path, or a relative path.  If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set.  if it is not set then it will search relative to installation directory of redactomatic.py.
+The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
 This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
 
@@ -887,7 +887,7 @@ The following parameters are supported
 - prematch.regex-filename - a filename contaning the regular expression (not supported yet)
 - prematch.regex-id - an ID to a regex definition in the regex section/
 
-The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set.  if it is not set then it will search relative to installation directory of redactomatic.py.
+The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
 The `phrase-path` defines the path into the JSON or YML file to find the phrase list.  It is intended that this will eventually follow JPATH but currenlty class only supports one sub-level.
 
@@ -1041,7 +1041,7 @@ entities:
       model-class: anonymize.AnonPhraseList
       text:
         #phrase-list: [fred, joe, stacy, kylie]
-        phrase-filename: ./data/baby-names.csv
+        phrase-filename: $REDACT_HOME/data/baby-names.csv
         phrase-field: name
         phrase-column: 1
         phrase-header: True
@@ -1069,7 +1069,7 @@ Alterntively if no phrase list is specified then the class will attempt to read 
 
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)
 
-The phrase-filename can be an absolute path, or a relative path. If it is a relative path then redactomatic will search relative to the path in the enviornment variable `REDACT_HOME` if it is set. if it is not set then it will search relative to installation directory of redactomatic.py.
+The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
 #### Other Built-In Anonymizers
 
