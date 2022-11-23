@@ -79,3 +79,24 @@ def compile(s,flags,etype):
         return regex.compile(s,flags)
     elif etype==EngineType.RE:
         return re.compile(s,flags)
+
+'''Take a set of regular expressions and combine them into a single regular expression with pipes between each element.'''
+def list_to_regex(regex_set):
+    _regex= f'(({")|(".join(regex_set)}))'
+    #print (f'list_to_regex: {_regex}')
+    return _regex
+
+'''Compile a list of phrases or regular expressions ready for redaction.  Add pre_regex and post_regex to top and tail each set member.  If combine_set=True, complie the list into a single pipe separated regex, otherwise returns a list or regexs.'''
+def compile_set(regex_set,pre_regex='',post_regex='',single_regex=True,flags=0,etype=EngineType.REGEX):
+    #single_regex=True is a lot more efficient. Only set it to false if there is a problem with the size of the combined regular expression.
+    _pattern_set=None
+    if single_regex:
+        #print(f'single_regex: {str(regex_set)},{str(pre_regex)},{str(post_regex)}')
+        _pattern_set = [ compile(pre_regex + list_to_regex(regex_set) + post_regex, flags, etype) ]
+    else:
+        #print(f'multi_regex: {str(regex_set)},{str(pre_regex)},{str(post_regex)}')
+        _pattern_set = [compile(pre_regex + r + post_regex, flags, etype) for r in regex_set]
+
+    print(f'regex: {str(_pattern_set)}')
+    
+    return _pattern_set
