@@ -22,6 +22,15 @@ text_log_l3='text_log_l3.csv'
 text_anonymized_only='text_output_anonymized_only.csv'
 voice_anonymized_only='voice_output_anonymized_only.csv'
 
+#Command line options
+keep_result_files=false
+while getopts "k" flag
+do
+    case "${flag}" in
+        k) keep_result_files=true;;
+    esac
+done
+
 #This should throw an error due to no rules being loaded
 python3 $BINDIR/redactomatic.py --no-defaultrules --regextest --no-redact --testoutputfile $regex_test
 echo "NOTE TO TESTER: Check that redactomatic terminated with the error message 'No rulefiles loaded'. "
@@ -59,16 +68,19 @@ python3 compare-files.py $text_anonymized_only $TESTEXPECTED/$text_anonymized_on
 python3 compare-files.py $voice_anonymized_only $TESTEXPECTED/$voice_anonymized_only 'Is the pure voice anonymization file correct?'
 
 #Now delete the test output files.
-rm -f $regex_test
-rm -f $voice_redacted_l2 
-rm -f $voice_log_l2 
-rm -f $text_redacted_l2    
-rm -f $text_log_l2 
-rm -f $voice_redact_anonymized_l2 
-rm -f $text_redact_anonymized_l2 
-rm -f $voice_redacted_l3 
-rm -f $voice_log_l3 
-rm -f $text_redacted_l3 
-rm -f $text_log_l3 
-rm -f $text_anonymized_only 
-rm -f $voice_anonymized_only 
+if [ "$keep_result_files" = false ] ; then
+    rm -f $regex_test
+    rm -f $voice_redacted_l2 
+    rm -f $voice_log_l2 
+    rm -f $text_redacted_l2    
+    rm -f $text_log_l2 
+    rm -f $voice_redact_anonymized_l2 
+    rm -f $text_redact_anonymized_l2 
+    rm -f $voice_redacted_l3 
+    rm -f $voice_log_l3 
+    rm -f $text_redacted_l3 
+    rm -f $text_log_l3 
+    rm -f $text_anonymized_only 
+    rm -f $voice_anonymized_only 
+fi
+

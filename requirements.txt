@@ -2,7 +2,6 @@ regex==2022.4.24
 spacy==3.3.0
 pandas==1.4.2
 inflect==5.6.0
-pyrsistent==0.18.1
 pyyaml==6.0
 xeger==0.3.5
 https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.3.0/en_core_web_lg-3.3.0.tar.gz#egg=en_core_web_lg

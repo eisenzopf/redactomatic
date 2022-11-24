@@ -128,31 +128,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-output.csv
-audit_log.csv
-log.csv
-custom-data/custom-defs.yml
-rules/custom-test.yml
-rules/custom.yml
-custom-data/custom-test.yml
-rules-custom/custom-defs.yml
-rules-custom/custom-test.yml
 
-rules/custom-defs.yml
-rules/custom-regex.yml
-rules/custom-redactor.yml
-text_log_l2.csv
-text_output_l2.csv
-voice_log_l2.csv
-voice_output_l2.csv
-rules/custom-redactor.yml_
-rules/custom-regex.yml_
-rules/ignore.yml
-rules/custom-anon.yml_
-rules/custom-test.yml_
-test_regex_gen.py
+#Redactomatic specifig
 desktop.ini
-data/desktop.ini
-rules/desktop.ini
-test/desktop.ini
-data/200k_sample_data_voice.csv

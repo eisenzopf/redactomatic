@@ -97,6 +97,6 @@ def compile_set(regex_set,pre_regex='',post_regex='',single_regex=True,flags=0,e
         #print(f'multi_regex: {str(regex_set)},{str(pre_regex)},{str(post_regex)}')
         _pattern_set = [compile(pre_regex + r + post_regex, flags, etype) for r in regex_set]
 
-    print(f'regex: {str(_pattern_set)}')
+    #print(f'regex: {str(_pattern_set)}')
     
     return _pattern_set
