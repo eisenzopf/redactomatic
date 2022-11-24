@@ -830,6 +830,7 @@ This class uses regular expressions to implement that phrase match. It optionall
 The following parameters affect the regular expression matching.
 
 - flags - behaves as described for `redact.RedactorRegex`.  
+- combine-sets - If True, combine all phrases into a single regex for efficiency (Default=True)
 - add-wordbreak - If True, sets the prematch.regex and postmatch.regex t- be '\b'. (Default=True)
 - prematch - A section defining the pattern to match *before* the phrase (optional). One of:
   - regex - an inline regular expression or list ore regular expressions
@@ -900,6 +901,7 @@ The `phrase-path` defines the path into the JSON or YML file to find the phrase 
 This redactor using regular expressions to match the phrases in an identical manner to `redact.RedactorPhraseList`.  It supports the same parameters to affect the regular expression matching.
 
 - flags - behaves as described for `redact.RedactorRegex`.  
+- combine-sets - If True, combine all phrases into a single regex for efficiency (Default=True)
 - add-wordbreak - If True, sets the prematch.regex and postmatch.regex t- be '\b'. (Default=True)
 - prematch - A section defining the pattern to match *before* the phrase (optional). One of:
   - regex - an inline regular expression or list ore regular expressions
@@ -1082,11 +1084,8 @@ The phrase list can be specified directly inline:
 Alterntively if no phrase list is specified then the class will attempt to read the phrase list from a CSV file using the following parameters:
 
 - phrase-filename - The name of a CSV file containing the phrases
-
 - phrase-header - True/False The CSV file has a header row (default=True)
-
 - phrase-field - The name of the column to select (phrase-header=True only)
-
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)
 
 The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
