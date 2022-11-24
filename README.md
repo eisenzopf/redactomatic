@@ -751,11 +751,11 @@ Each redactor or anonymizer takes its configuration from the parameters found in
 
 A default set `entities` are defined in the `./rules/core-defs.yml`file.  Additional `entities `can be added in custom configuration files.  Default `entities `can also have their definition overriden in the custom configuration files.
 
-### Built-In Redactor Classes
+## Built-In Redactor Classes
 
 Redactomatic has three built-in Redactor classes.  New redactors can be added by implementing a new sub-class of the class `redact.RedactorBase`.
 
-#### redact.RedactorRegex
+### redact.RedactorRegex
 
 ```
 ...
@@ -789,7 +789,7 @@ Flags for the regular expression match can be specified via the `flags`value.  T
 
 Redactomatic expects to be given a list of regular expression for the redactor.   If a list of regular expressions is specified then the redactor will attempt to match the given text against each of the patterns in turn.  The matching is done in the order that the list is defined and any matching text is redacted once it is found.  Matching text does not stop any subsequent patterns from also being matched on the text.  For example if a pair of patterns is specified then a given text may match one of the patters in one part of the text and the other pattern in another part of the same text.  The two matching sections cannot overlap.
 
-#### redact.RedactorPhraseList
+### redact.RedactorPhraseList
 
 ```
 ...
@@ -819,16 +819,26 @@ The phrase list can be specified directly inline:
 Alterntively if no phrase list is specified then the class will attempt to read the phrase list from a CSV file using the following parameters:
 
 - phrase-filename - The name of a CSV file containing the phrases
-
 - phrase-header - True/False The CSV file has a header row (default=True)
-
 - phrase-field - The name of the column to select (phrase-header=True only)
-
 - phrase-column - Alternative to phrase-field. An integer column number (Default=0)
 
 The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
-This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
+This class uses regular expressions to implement that phrase match. It optionally allows the definition of  regular expressions to be added to the front and back of each phrase using the ```prematch``` and ```postmatch``` options.  By default, ```prematch.regex='\b'``` and ```postmatch.regex='\b'``` to ensure that whole words are matched.  This can be suppressed using ```add-wordbreak: False``` option or by overriding one or both of them using your own ```prematch``` or ```postmatch``` regular expression.
+
+The following parameters affect the regular expression matching.
+
+- flags - behaves as described for `redact.RedactorRegex`.  
+- add-wordbreak - If True, sets the prematch.regex and postmatch.regex t- be '\b'. (Default=True)
+- prematch - A section defining the pattern to match *before* the phrase (optional). One of:
+  - regex - an inline regular expression or list ore regular expressions
+  - regex-filename - a filename contaning the regular expression (not supported yet) 
+  - regex-id - an ID to a regex definition in the regex section
+- postmatch - A section defining the pattern to match *after* the phrase (optional). One of:
+  - regex - an inline regular expression or list ore regular expressions
+  - regex-filename - a filename contaning the regular expression (not supported yet)
+  - regex-id - an ID to a regex definition in the regex section 
 
 This class is used by in the definition of the `_IGNORE_` entity redactor that can be found in the release file [data/ignore.yml](data/ignore.yml).   Note that the special anonymizer class `anonymize.AnonRestoreEntityText` is used to restore this text again after redaction is completed.
 
@@ -856,7 +866,7 @@ entities:
     anonymizer:
       model-class: anonymize.AnonRestoreEntityText
 ```
-#### redact.RedactorPhraseDict
+### redact.RedactorPhraseDict
 
 ```
 entity:  
@@ -878,18 +888,29 @@ entity:
 
 The `redact.RedactorPhraseDict` class is very similar to `redact.RedactorPhraseList` but it reads its phrase list data from a JSON or YML file rather than a CSV.
 
-The following parameters are supported
+The following parameters are used to define where the phrase list can be found.
 
 - phrase-filename - The name of a JSON or YML file containing the phrases
 - phrase-path - A JSON style path to the elements where the phrases are defined (e.g. toplist.words)
-- prematch - A section defining a regular expression pattern to match before the phrase (optional)
-- prematch.regex - an inline regular expression or list ore regular expressions
-- prematch.regex-filename - a filename contaning the regular expression (not supported yet)
-- prematch.regex-id - an ID to a regex definition in the regex section/
 
 The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
 The `phrase-path` defines the path into the JSON or YML file to find the phrase list.  It is intended that this will eventually follow JPATH but currenlty class only supports one sub-level.
+
+This redactor using regular expressions to match the phrases in an identical manner to `redact.RedactorPhraseList`.  It supports the same parameters to affect the regular expression matching.
+
+- flags - behaves as described for `redact.RedactorRegex`.  
+- add-wordbreak - If True, sets the prematch.regex and postmatch.regex t- be '\b'. (Default=True)
+- prematch - A section defining the pattern to match *before* the phrase (optional). One of:
+  - regex - an inline regular expression or list ore regular expressions
+  - regex-filename - a filename contaning the regular expression (not supported yet) 
+  - regex-id - an ID to a regex definition in the regex section
+- postmatch - A section defining the pattern to match *after* the phrase (optional). One of:
+  - regex - an inline regular expression or list ore regular expressions
+  - regex-filename - a filename contaning the regular expression (not supported yet)
+  - regex-id - an ID to a regex definition in the regex section 
+
+The `prematch` section allows you to define a regular expression that must be true prior to the phrase.     Considering the definition of the `Common_Cardinal_Phrases` entity shown above.  The keywords are drawn from the 'keywords' section of 'keywords.json' file and then the regular expression `/[1-9]+[ ]/` is prepended to these keywords.  This means it will only match these keywords if they are preceded by one or more digits followed by a space and then followed by the keyword.  for example '1 week' will match but 'a bad year' will not.
 
 ```
 {
@@ -903,7 +924,8 @@ The `phrase-path` defines the path into the JSON or YML file to find the phrase 
     ]
 }
 ```
-An example set of keywords in a single dictionary item. (e.g. keywords.json)
+
+**An example JSON file with keywords in a single dictionary item. (e.g. keywords.json)**
 
 In the above example file `phrase-path="keywords"` will take the keywords from the array in the 'keywords' dictionary item.
 
@@ -920,7 +942,7 @@ In the above example file `phrase-path="keywords"` will take the keywords from t
       "text": [
 				"t359"
 			]
-    }
+    },
 		{
 			"label": "A30",
 			"speech": [
@@ -936,14 +958,12 @@ In the above example file `phrase-path="keywords"` will take the keywords from t
 }
 ```
 
+**An example JSON file with keywords in sub-strcutures.**
+
 In the above example file `phrase-path="terms.speech"` will take the keywords from all of the arrays in each of the terms.speech dictionary items.
 
-This class uses regular expressions to implement that phrase match.  It therefore also accepts the `flags `parameter.  The `flags` parameter behaves as described for `redact.RedactorRegex`.
 
-The prematch allows you to define a regular expression that must be true prior to the phrase.     Considering the definition of the Common_Cardinal_Phrases entity shown above.  The keywords are drawn from the 'keywords' section of 'keywords.json' file and then the regular expression `/[1-9]+[ ]/` is prepended to these keywords.  This means it will only match these keywords if they are preceded by one or more digits followed by a space and then followed by the keyword.  for example '1 week' will match but 'a bad year' will not.
-
-
-#### redact.RedactorSpacy
+### redact.RedactorSpacy
 
 ```
 entities:
@@ -973,7 +993,7 @@ By default the *persist*  rule have the value *True* and does not need to be def
 
 If the persist value is set to False then this entity will always be given a new random value even if the same index is repeated through the conversation.  This can be helpful where redacting things that are too generic to reliably be the same entity.  For example imagine a redaction rule that redacts all isolated digits. It may not be desirable to anonymize all redacted digits with the same anonymized digit.
 
-#### anonomizer.AnonRegex
+### anonomizer.AnonRegex
 
 ```
 ...
@@ -1005,7 +1025,7 @@ entities:
 
 An example implementation using inline regular expressions is shown above for the ORDINAL entity.
 
-#### anonymize.AnonRestoreEntityText
+### anonymize.AnonRestoreEntityText
 
 ```
 ...
@@ -1021,7 +1041,7 @@ In the default configuration file [data/ignore.yml](data/ignore.yml) , the \_IGN
 
 As this class restores the original text take care not to accidentially restore PII that needs to remain redacted.
 
-#### anonymize.AnonNullString
+### anonymize.AnonNullString
 
 ```
 entities:
@@ -1032,7 +1052,7 @@ entities:
 
 The `anonomizer.AnonNullString` class is used to remove redaction labels and replace them with a null string.  In the example shown above the LAUGHTER entity (received from a speech recognizer for example) is removed and no text is put in its place.
 
-#### anonymize.AnonPhraseList
+### anonymize.AnonPhraseList
 
 ```
 entities:
@@ -1071,7 +1091,7 @@ Alterntively if no phrase list is specified then the class will attempt to read 
 
 The `phrase-filename` can be an absolute path, or a relative path.  If it is a relative path then redactomatic will look for it relative to the current working directory.  If the path is prefixed with `$REDACT_HOME` then the path will be interpreted relative to the path in the enviornment variable `REDACT_HOME`.  If that environment variable is not set then it will search relative to installation directory of redactomatic.py.
 
-#### Other Built-In Anonymizers
+### Other Built-In Anonymizers
 
 A number of entities are anonymized using custom classes written specifically for that entity.
 
@@ -1100,9 +1120,7 @@ Please see the [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Known Issues
 
-There are no known issue.
-
-Implementations for these will be welcomed from contributors.
+There are no known issues.
 
 ## Authors
 
@@ -1118,20 +1136,3 @@ Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submit
 Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
 Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the code to use a generic rules base.
 
-# Corpus Tools
-
-# Data Checker
-
-Script to check the quality and Talkmap formatting rules for CSV datasets
-
-It requires pandas to be installed. This can be done with command
-
-```bash
-pip3 install pandas
-```
-
-Then to run the script:
-
-```bash
-python3 checker.py file_with_conversations.csv
-```

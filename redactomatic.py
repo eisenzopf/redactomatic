@@ -10,7 +10,7 @@ import sys
 import os
 import traceback
 
-__version__='Redactomatic v1.18'
+__version__='Redactomatic v1.19'
 
 def str_to_bool(value):
     if isinstance(value, bool):
