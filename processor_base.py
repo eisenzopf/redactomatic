@@ -38,7 +38,6 @@ class ProcessorBase():
 # Helper functions - These can be refactored as processors operating on the text field at a later date. 
 
 def clean(texts):
-    print("Cleaning text (Regex)...")
     spaces = regex.compile('\s+')
     dotdot = regex.compile(r'\.\.\.')
     unknown = regex.compile(r'\<UNK\>')
@@ -58,7 +57,6 @@ def clean(texts):
     return new_texts
 
 def convert_to_uppercase(texts):
-    print("Converting letters to uppercase...")
     new_texts=[]
     for text in texts:
         new_text = text.upper()

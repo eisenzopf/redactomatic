@@ -10,7 +10,8 @@ import sys
 import os
 import traceback
 
-__version__='Redactomatic v1.19'
+def __version__():
+    return "1.20"
 
 def str_to_bool(value):
     if isinstance(value, bool):
@@ -38,9 +39,9 @@ def config_args(): # add --anonymize
     parser.add_argument('--large', action='store_true', help='use the spacy model trained on a larger dataset')
     parser.add_argument('--log', required=False, help='logs entities that have been redacted to separate file')
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
-    parser.add_argument('--level', default=2, required=False, help='sets the redaction level (1-3); default is 2')
-    parser.add_argument('--seed', type=int, required=False, help='a seed value for anonymization random selection; default is None i.e. truly random.',default=None)
-    parser.add_argument('--rulefile', nargs="*", required=False, default=[], help='a list of YAML or JSON files containing definitions for entity rules; default is \'rules/*.yml\',\'rules/*.json\'')
+    parser.add_argument('--level', default=2, required=False, help='The redaction level. Choose 1,2, or 3 or a any custom level. Default is 2')
+    parser.add_argument('--seed', type=int, required=False, default=None, help='a seed value for anonymization random selection; default is None i.e. truly random.')
+    parser.add_argument('--rulefile', nargs="*", required=False, default=[], help='A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules).  These are globbable.')
     parser.add_argument('--regextest', required=False, default=False, action='store_true', help='Test the regular rexpressions defeind in the regex-test rules prior to any other processing.')
     parser.add_argument('--testoutputfile', required=False, help='The file to save test results in.')
     parser.add_argument('--chunksize', required=False, default=100000, type=int, help='The number of lines to read before processing a chunk.(default = 100000)' )
@@ -49,17 +50,15 @@ def config_args(): # add --anonymize
     parser.add_argument('--columnname', type=str, default="text", help='The header name for the text; used if --header=True; overridden by --column; default is text')
     parser.add_argument('--idcolumnname', type=str, default="conversation_id", help='The header name for the conversation ID, used if --header=True; overridden by --idcolumn; default is text')
     parser.add_argument('--traceback', action='store_true', default=False, help='Give traceback information when an error is thrown (default=False)')
-    parser.add_argument('-v','--version', action='store_true', default=False, help='Print the version of redactomatic')
+    parser.add_argument('-v','--verbose', action='store_true', default=True, help='Print progress of redaction to standard output as it occurs. Does not affect stderr. (default=True)')
+    parser.add_argument('--no-verbose',   dest='verbose', action='store_false', help='Turn off --verbose')
 
+    #version
+    parser.add_argument('--version', action='version', help='Print the version', version=f'redactomatic {__version__()}')
 
     #Check conditional required options.  
     _err_list=[]
     _args=parser.parse_args()
-
-    #Print versioning if this is all that is wanted.
-    if _args.version:
-        print(__version__)
-        quit()
 
     #Check special regex test mode.
     if ((_args.regextest) and (not _args.testoutputfile)) : _err_list.append("ERROR: The --regextest option requires the --testoutputfile option.")
@@ -120,16 +119,16 @@ class RedactomaticProcessor(pb.ProcessorBase):
             if len(missing_entities)>0:
                 raise Exception(f'ERROR: The following entities are not defined in the redaction_order: {missing_entities}')
 
-            print("Starting redaction at anonymization level:",self._entity_rules.level)
+            if (args.verbose): print("Starting redaction at anonymization level:",self._entity_rules.level)
 
             for rule in redaction_order:
                 #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
                 try:
                     _model=self._entity_rules.get_redactor_model(rule, self._redact_entity_map, self._entity_values)
-                    print("Redacting ",rule,"...")
+                    if (args.verbose): print("Redacting ",rule,"...")
                     texts, self._curr_id, ids = _model.redact(texts, self._curr_id, ids)
                 except(er.NotSupportedException) as e:
-                    print("Skipping ",rule,"...")
+                    if (args.verbose): print("Skipping ",rule,"...")
 
         #Set up for running the anonymizers.  
         if (args.anonymize): 
@@ -142,16 +141,18 @@ class RedactomaticProcessor(pb.ProcessorBase):
             #Get the custom anonymizer model for this rule_label. 
             try:
                 _model=self._entity_rules.get_anonomizer_model(rule, self._anon_entity_map, self._entity_values)
-                print("Anonymizing ",rule,"...")
+                if (args.verbose): print("Anonymizing ",rule,"...")
                 texts=_model.anonymize(texts, ids)
             except(er.NotSupportedException) as e:
-                print("Skipping ",rule,"...")
+                if (args.verbose): print("Skipping ",rule,"...")
 
         # data cleanup
+        if (args.verbose): print("Cleaning text (Regex)...")
         texts = pb.clean(texts) # chats-yes, voice-yes
 
         if args.uppercase:
             texts = pb.convert_to_uppercase(texts)
+            if (args.verbose): print("Converting letters to uppercase...")
 
         # write the redacted data back to the Dataframe
         df.iloc[:, args.column-1] = texts
@@ -163,6 +164,7 @@ def main(args):
     #Initialize an empty rules base and pass the args namespace to it.
     #Load the config rules files (use all files in the rules directory if no globs are given.)
     entity_rules = er.EntityRules(args)
+    #print(f'{args}')
 
     #Generate an array of rulesfile expressions using the default ones and/or any specified on the command line.
     if args.defaultrules:
@@ -190,27 +192,27 @@ def main(args):
         redactomatic.configure(None)
 
         for file in args.inputfile:
-            print("Loading datafile " + file + "...")
+            if (args.verbose): print("Loading datafile " + file + "...")
             df_iter = pd.read_csv(file,chunksize=args.chunksize,header=(0 if args.header else None),dtype=str)
             for df in df_iter:
                 redactomatic.process(df)
-                print("Writing outfile ",args.outputfile, "chunk ",chunk)
+                if (args.verbose): print("Writing outfile ",args.outputfile, "chunk ",chunk)
                 if chunk==0: df.to_csv(args.outputfile, index=False, header=args.header)
                 else: df.to_csv(args.outputfile, mode='a', header=False, index=False)
                 
                 #Quit if the chunklimit has been reached.
                 if (args.chunklimit is not None) and (chunk+1>=args.chunklimit):
-                    print(f"QUIT. chunklimit reached:{args.chunklimit}\n",file=sys.stderr)
+                    if (args.verbose): print(f"QUIT. chunklimit reached:{args.chunklimit}\n")
                     break
 
                 chunk=chunk+1
 
         # write audit log
         if args.log:
-            print("Writing logfile", args.log)
+            if (args.verbose): print("Writing logfile", args.log)
             redactomatic.write_log(args.log)
 
-        print("Done.")
+        if (args.verbose): print("Done.")
 
 if __name__ == "__main__":
     # get command line params.

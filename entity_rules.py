@@ -23,8 +23,8 @@ def get_class(classpath):
     except Exception as err:
         raise Exception("ERROR: Unable to find classname:"+classname+" in module:"+modulename) from err
 
-#Helper function to merge config files as they are
-def merge(source, destination):
+#Helper function to merge config files as they are. 
+def merge(source, destination, verbose=True):
     """
     Deep merge two dictionaries
 
@@ -37,11 +37,11 @@ def merge(source, destination):
         if isinstance(value, dict):
             # get node or create one
             node = destination.setdefault(key, {})
-            merge(value, node)
+            merge(value, node, verbose)
             #print("key:",key,"value",value,"node",node,file=sys.stderr)
         else:
             if key in destination.keys():
-                print("INFORMATION: Overwriting with new value: ",key,value,file=sys.stderr)
+                if (verbose): print("INFORMATION: Overwriting with new value: ",key,value,file=sys.stderr)
             destination[key] = value
 
     return destination
@@ -54,7 +54,7 @@ class EntityRules():
         #Set up a shared randomizer for shared seeding.
         self._random = Random()
         if (self._args.seed is not None):
-            print("Using fixed random seed: ",self._args.seed)
+            if (self._args.verbose): print("Using fixed random seed: ",self._args.seed)
             self._random.seed(args.seed)
 
     @property
@@ -126,24 +126,24 @@ class EntityRules():
 
     def load_rulefile_json(self,filepath):
         '''Load a JSON rulefile to define the entities'''
-        #print("Loading config file:",filepath)
+        #if (self._args.verbose): print("Loading config file:",filepath)
         with open(filepath) as stream:
             try:
                 _new_rules=json.load(stream)
-                self._rules=merge(_new_rules,self._rules)
-                #print("RULES: ",str(self._rules))    
+                self._rules=merge(_new_rules,self._rules,self._args.verbose)
+                #if (self._args.verbose): print("RULES: ",str(self._rules))    
             except Exception as e:
                 raise(e)
 
     def load_rulefile_yaml(self, filepath):
         '''Load a YAML rulefile to define the entities'''
-        #print("Loading rule file:",filepath)
+        #if (self._args.verbose): print("Loading rule file:",filepath)
 
         with open(filepath, "r") as stream:
             try:
                 _new_rules=yaml.safe_load(stream)
-                self._rules=merge(_new_rules,self._rules)
-                #print("RULES: ",str(self._rules))    
+                self._rules=merge(_new_rules,self._rules,self._args.verbose)
+                #if (self._args.verbose): print("RULES: ",str(self._rules))    
             except yaml.YAMLError as e:
                 raise(e)
 
@@ -153,9 +153,9 @@ class EntityRules():
         '''Load rule files using a supplied globlist to find them.  These can be yml or json files.file'''
         for g in globlist:
             pathlist=glob.glob(g)
-            #print("Pathlist:",pathlist)
+            #if (self._args.verbose): print("Pathlist:",pathlist)
             for file in pathlist:
-                print("Loading rulefile " + file + "...",file=sys.stderr)
+                if (self._args.verbose): print("Loading rulefile " + file + "...",file=sys.stderr)
                 fname, fext = os.path.splitext(file)
                 if (fext==".yml" or fext==".yaml"):
                     self.load_rulefile_yaml(file)

@@ -1,6 +1,6 @@
 import pandas as pd
 import regex
-import os
+import sys
 import inflect
 import entity_rules as er
 import regex_utils as ru
@@ -146,7 +146,7 @@ class AnonRegex(AnonymizerBase):
         try:
             self._pattern_set = [ru.compile(r, self._flags, ru.EngineType.RE) for r in _regex_set]
         except Exception as exc:
-            print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc))
+            print("WARNING: Failed to compile regex set for ':"+self._id+"' with error: "+str(exc),file=sys.stderr)
 
     def callback(self, match, i):
         #If there are multiple regexps in a list, then pick one at random.
@@ -161,8 +161,8 @@ class AnonRestoreEntityText(AnonymizerBase):
     def anonymize(self, texts, conversation_ids):
         #If there are no entity values to restore then print a simple abort message ard return.
         #This deals with the situation where anonymization of a set of IGNORE items is being attempted without the --redact option set.
-        if (self._entity_values.is_empty()):
-            print(f'Aborting  {self._id} ...')
+        if (self._entity_values.is_empty()):  
+            if (self._entity_rules.args.verbose):  print(f'Aborting  {self._id} ...')
             return texts
 
         new_texts = []
@@ -178,9 +178,10 @@ class AnonRestoreEntityText(AnonymizerBase):
                 try:
                     newString = newString[:start] + self._entity_values.get_value(name) + newString[end:]
                 except Exception as exc:
-                    #This error should not occur as the exception above should catch it earlier
-                    raise Exception(f'ERROR: entity {name} has no restoration data.')
-                    
+                    #Warn that there is no restoration data for this entity and continue.
+                    print(f'WARNING: entity {name} has no restoration data.',file=sys.stderr)
+                    newString = newString[:start] + "["+name+"]" + newString[end:]
+                   
             new_texts.append(newString)
         return new_texts
 

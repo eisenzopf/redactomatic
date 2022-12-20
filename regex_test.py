@@ -4,6 +4,7 @@ import pandas as pd
 import regex_utils as ru
 import entity_rules as er
 from enum import Enum
+import sys
 
 class MatchType(Enum):
     ONE_OR_MORE_MATCH               =0
@@ -20,7 +21,7 @@ class RegexTest():
         self._entity_rules=entity_rules
 
     def test_regex(self, report_filename):
-        print ("Testing regular expressions...")
+        if self._entity_rules.args.verbose:   print ("Testing regular expressions...")
         _phrase_fail_count=0
         _test_fail_count=0
                 
@@ -29,7 +30,7 @@ class RegexTest():
 
         #Step through each regex-id in the regex-test section
         for _regex_id, _test_rule_set in self._entity_rules.regex_test_set.items():
-            print("Testing ",_regex_id)
+            if self._entity_rules.args.verbose:   print("Testing ",_regex_id)
             #Step through each test rule for this regex-id
             for _test_rule in _test_rule_set:            
                 _group=_test_rule.get("group",0)  
@@ -128,18 +129,18 @@ class RegexTest():
                     df=pd.concat([df,df_utt_result])
 
                     if (not _phrase_test_pass): 
-                        print ("FAIL: regex-id: "+_regex_id +" => '"+str(test_text)+"' "+str(_match_type)+" "+str(_flags))
+                        print ("FAIL: regex-id: "+_regex_id +" => '"+str(test_text)+"' "+str(_match_type)+" "+str(_flags),file=sys.sderr)
                         _test_pass=False
                         _phrase_fail_count +=1
                 if not _test_pass:
                     _test_fail_count += 1
 
         #save the test results
-        print("Saving test report to:",report_filename)
+        if self._entity_rules.args.verbose:   print("Saving test report to:",report_filename)
         df.to_csv(report_filename)
 
-        if (_test_fail_count>0): print("FAIL: Regular expression test failed with "+str(_test_fail_count)+" broken rule(s) and "+str(_phrase_fail_count)+" non-matching phrase(s).")
-        else: print("SUCCESS: Regular expression tests completed successfully.")
+        if (_test_fail_count>0): print("FAIL: Regular expression test failed with "+str(_test_fail_count)+" broken rule(s) and "+str(_phrase_fail_count)+" non-matching phrase(s).",file=sys.stderr)
+        else: print("PASS: Regular expression tests completed successfully.",file=sys.stderr)
         
     def get_pass_fail(self,match_type,exact_match_count,partial_match_count,pattern_count):
         if match_type is MatchType.ONE_OR_MORE_MATCH:
