@@ -32,25 +32,25 @@ do
 done
 
 #This should throw an error due to no rules being loaded
-python3 $BINDIR/redactomatic.py --no-defaultrules --regextest --no-redact --testoutputfile $regex_test
+python3 $BINDIR/redactomatic.py --no-verbose --no-defaultrules --regextest --no-redact --testoutputfile $regex_test
 echo "NOTE TO TESTER: Check that redactomatic terminated with the error message 'No rulefiles loaded'. "
 
 #Test the automatic regular expression testing.
-python3 $BINDIR/redactomatic.py --regextest --no-redact --testoutputfile $regex_test
+python3 $BINDIR/redactomatic.py --no-verbose --regextest --no-redact --testoutputfile $regex_test
 
 #Test redaction and then anonymization at level 2
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --chunksize 20 --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l2 --log $voice_log_l2 --level 2 
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l2 --log $text_log_l2 --level 2
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redact_anonymized_l2 --anonymize --seed 1 --level 2
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redact_anonymized_l2 --anonymize --seed 1 --level 2
+python3 $BINDIR/redactomatic.py --traceback --no-verbose --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --chunksize 20 --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l2 --log $voice_log_l2 --level 2 
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l2 --log $text_log_l2 --level 2
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redact_anonymized_l2 --anonymize --seed 1 --level 2
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redact_anonymized_l2 --anonymize --seed 1 --level 2
 
 #Test redaction at level 3
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l3 --log $voice_log_l3 --level 3
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l3 --log $text_log_l3 --level 3
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l3 --log $voice_log_l3 --level 3
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l3 --log $text_log_l3 --level 3
 
 #Test anonymization for each of the anonymizer tokens
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $text_anonymized_only --anonymize --no-redact --level 3 --seed 2
-python3 $BINDIR/redactomatic.py --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $voice_anonymized_only --anonymize --no-redact --level 3 --seed 2
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $text_anonymized_only --anonymize --no-redact --level 3 --seed 2
+python3 $BINDIR/redactomatic.py --no-verbose --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $voice_anonymized_only --anonymize --no-redact --level 3 --seed 2
 
 # Now compare the results.
 python3 compare-files.py $regex_test $TESTEXPECTED/$regex_test 'Is the regex test output file correct?'
@@ -83,4 +83,3 @@ if [ "$keep_result_files" = false ] ; then
     rm -f $text_anonymized_only 
     rm -f $voice_anonymized_only 
 fi
-
