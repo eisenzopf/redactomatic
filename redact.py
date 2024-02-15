@@ -8,16 +8,13 @@ import regex_utils as ru
 import json
 import yaml
 
-# Pattern and compiled regex to define labels that need to be protected
-REDACT_LABEL_PATTERN="\[\w+(-\d+){0,1}\]"
-REDACT_LABEL_RU=ru.compile(REDACT_LABEL_PATTERN, 0, ru.EngineType.REGEX) 
-
-# Exception classes for redactors
-
 ## Redactor classes ##
 
 #Base class from which all redactors are derived.
 class RedactorBase(pb.ProcessorBase):
+    '''Static class members'''
+    REDACT_LABEL_RU=ru.compile(r'\[\w+(-\d+){0,1}\]', 0, ru.EngineType.REGEX) 
+
     '''Construct a redactor, pass command line arguments that can affect the behaviour of the redactor.'''
     def __init__(self,id,entity_rules):
         self._entity_map=None
@@ -50,7 +47,39 @@ class RedactorBase(pb.ProcessorBase):
     '''Virtual function defining what a redaction should look like.'''
     def redact(self, texts, eCount, ids):
         return texts, eCount, ids
+    
+    '''Return a list of protected zones in the string that contain redaction labels'''
+    def get_redactlabel_spans(self,s):
+        #Find all the existing entity labels in the string, and build a list of protected start./end points
+        entity_matches = list(self.REDACT_LABEL_RU.finditer(s))
+        protect_zones=[]
+        if entity_matches:
+            #print(f'entity_matches: {entity_matches}\'')
+            for e in entity_matches:
+                protect_zones.append([e.start(),e.end(),e.group()])  
+        return protect_zones
 
+    '''Check whether the text between indexes start and end are part of a protected zone, and returns the text of the overlapped label it there is one.'''
+    def overlaps_redactlabel_span(self,start,end,protect_zones):
+        #print(f'in_protect_zones({protect_zones})')
+        is_overlapping=False
+        overlapped_label=''
+        for z in protect_zones:
+            #print(f'in_protect_zones({z})')
+            if ((start>=z[0] and start<=(z[1]-1)) or ((end-1)>=z[0] and (end-1)<=(z[1]-1))):
+                is_overlapping=True
+                overlapped_label=z[2]
+        return is_overlapping,overlapped_label
+    
+    '''Insert the supplied label with a unique index into string s to replace the the string index between start and end.  Also update the entity store with the value and increment the unique index.'''
+    def insert_redactlabel_and_update_entities(self, s, start, end, label, value, conversation_id, eCount):                         
+        ix = self._entity_map.update_entities(value,conversation_id,eCount,label)
+        newLabel=self._entity_values.set_label_value(label,ix,value)
+        s = s[:start] + "[" + newLabel + "]" + s[end:]
+        eCount += 1
+        
+        return s,eCount
+    
 class RedactorRegex(RedactorBase):
     def __init__(self,id, entity_rules):
         #to ignore case set flags= regex.IGNORECASE
@@ -81,7 +110,7 @@ class RedactorRegex(RedactorBase):
 
     def configure(self, params, entity_map, entity_values):
         #Call the base class configurator.
-        super().configure(params,entity_map, entity_values)
+        super().configure(params, entity_map, entity_values)
 
         #Now use the parameters passed, plus the modality in the entity_rules to congifure up this class.
         #Get params.voice or params.text if they are specified.
@@ -111,12 +140,8 @@ class RedactorRegex(RedactorBase):
         for text, d_id in zip(texts,ids):
             newString = text
             for pattern in self._pattern_set:
-                #Find all the existing entity labels in the string, and build a list of protected start./end points
-                entity_matches = list(REDACT_LABEL_RU.finditer(newString))
-                protect_zones=[]
-                if entity_matches:
-                    for e in entity_matches:
-                        protect_zones.append([e.start(),e.end()])    
+                #Find all the existing entity labels in the string.
+                protect_zones=self.get_redactlabel_spans(newString)
 
                 #Find the entities matching in the string
                 matches = list(pattern.finditer(newString))
@@ -129,22 +154,12 @@ class RedactorRegex(RedactorBase):
                         name = e.group()
                         start = e.span()[0]
                     end = start + len(name)
+                    
+                    #Check if we have matched part of an entity label, and add the redaction label if we are not.
+                    is_overlapping,overlapped_label=self.overlaps_redactlabel_span(start,end,protect_zones)
+                    if not is_overlapping:
+                        newString, eCount=self.insert_redactlabel_and_update_entities(newString, start, end, self._id, name, d_id, eCount)   
 
-                    #Check if we have matched part of an entity label
-                    protected=False
-                    for z in protect_zones:
-                        if ((start>=z[0] and start<=(z[1]-1)) or ((end-1)>=z[0] and (end-1)<=(z[1]-1))):
-                            protected=True
-                            #print(f'INFORMATION: The match string: \'{name}\' is part of an existing redaction label: \'{newString[z[0]:z[1]]}\' and will not be redacted.')
-
-                    #Add a redaction label if the thing we matched wasn't already part of a redaction label.
-                    #if (REDACT_LABEL_RU.match(name) is None): 
-                    if not protected:
-                        ix = self._entity_map.update_entities(name,d_id,eCount,self._id)
-                        end = start + len(name)
-                        newLabel=self._entity_values.set_label_value(self._id,ix,name)
-                        newString = newString[:start] + "["+ newLabel + "]" + newString[end:]
-                        eCount += 1
             new_texts.append(newString)
         return new_texts, eCount, ids
 
@@ -324,7 +339,7 @@ class RedactorPhraseDict(RedactorRegex):
 class RedactorSpacy(RedactorBase):
     def __init__(self,id, entity_rules):
         super().__init__(id, entity_rules)
-    
+        
     #was ner_ml()
     def redact(self, texts, eCount, ids):
         from spacy.lang.en import English
@@ -334,11 +349,14 @@ class RedactorSpacy(RedactorBase):
         else:
             nlp = spacy.load("en_core_web_sm")
         new_texts = []
+
         #Spacy version of the_redactor function...
         for doc, d_id in zip(nlp.pipe(texts, disable=["tagger", "parser", "lemmatizer"], n_process=4, batch_size=1000),ids):
             newString = doc.text
+            protect_zones=self.get_redactlabel_spans(newString)
+ 
             for e in reversed(doc.ents): #reversed to not modify the offsets of other entities when substituting
-                # redact if the recognized entity is in the list of entities from the config.json file
+                # redact if the recognized entity is in the list of entities from the config.json file            
                 if e.label_ in self._entity_rules.entities:
                     name = e.text
                     value = name
@@ -350,16 +368,81 @@ class RedactorSpacy(RedactorBase):
                             name = n
                             start = e.start_char + sum([len(w)+1 for w in broken[:i]])
                             end = start + len(name)
-                            c = self._entity_map.update_entities(name,d_id,eCount,e.label_)
-                            newString = newString[:start] + " [" + e.label_ +"-"+ str(c) + "]" + newString[end:]
-                            eCount += 1
+
+                            #If the matched item is not in a protected zone (i.e a redaction label) then redact it.
+                            is_overlapping,overlapped_label=self.overlaps_redactlabel_span(start,end,protect_zones)
+                            if not is_overlapping:
+                                newString, eCount=self.insert_redactlabel_and_update_entities(newString, start, end, e.label_, name, d_id, eCount)   
                     else:
-                        ix = self._entity_map.update_entities(name,d_id,eCount,e.label_)
                         start = e.start_char
                         end = start + len(name)
-                        newLabel=self._entity_values.set_label_value(e.label_,ix,name)
-                        newString = newString[:start] + "[" + newLabel + "]" + newString[end:]
-                        eCount += 1
+
+                        #If the matched item is not in a protected zone (i.e a redaction label) then redact it.
+                        is_overlapping,overlapped_label=self.overlaps_redactlabel_span(start,end,protect_zones)
+                        if not is_overlapping:
+                            newString, eCount=self.insert_redactlabel_and_update_entities(newString, start, end, e.label_, name, d_id, eCount)   
             newString = newString.replace('$','')
             new_texts.append(newString)
+        return new_texts, eCount, ids
+    
+'''A redactor class to implement the mapping from token map patterns to redaction labels.'''
+class RedactorTokenMap(RedactorBase):
+    def __init__(self,id, entity_rules):
+        super().__init__(id, entity_rules)
+        self._token_map={}
+        self._flags= 0
+        self._token_pattern={}
+        self._all_patterns=None
+
+    def configure(self, params, entity_map, entity_values):
+        super().configure(params, entity_map, entity_values)
+
+        #Now use the parameters passed, plus the modality in the entity_rules to congifure up this class.
+        #Get params.voice or params.text if they are specified.
+        _model_params=params.get(self._entity_rules.args.modality,None)
+
+        #If the paramters do not contain a definition for the current modality then assume that the model is not designed for this and return None.
+        if _model_params is None: 
+            print("WARNING. Using a null model. No model defined for id:",self._id,"modality:",self._entity_rules.args.modality,file=sys.stderr)
+            return None
+
+        #Get the token map for this modality
+        self._token_map=_model_params.get("token-map",{})   
+        #print(f'RedactorTokenMap.configure(modality={self._entity_rules.args.modality})._token_map: {str(self._token_map)}',file=sys.stderr)
+
+        #Get any regular expression flags from the array parameter 'flags'. 
+        #Allowed items: "ASCII", "A", "IGNORECASE", "I", "MULTILINE", "M", "DOTALL", "S", "VERBOSE", "X", "LOCALE", "L" in any combination.
+        self._flags=ru.flags_from_array(_model_params.get("flags",[]),ru.EngineType.REGEX)
+
+        #Now cache the compiled regex patterns for this map
+        all_patterns=[]
+        for type,pattern_list in self._token_map.items():
+            TOKEN_PATTERN=ru.list_to_regex(pattern_list)
+            #print(f'RedactorTokenMap.redact(). token_patterns[{type}]={TOKEN_PATTERN}',file=sys.stderr)
+            try:
+                self._token_pattern[type]=ru.compile(TOKEN_PATTERN, self._flags, ru.EngineType.REGEX) 
+                all_patterns.extend(pattern_list)
+            except Exception as exc:
+                print(f'WARNING. Invalid regular expression \'{TOKEN_PATTERN}\' built from the token map definitions in redactor class RedactorTokenMap for entity \'{type}\'.  This token map will be ignored.',file=sys.stderr)
+
+        #print(f'RedactorTokenMap.redact(). all_patterns={all_patterns}',file=sys.stderr)
+        self._all_patterns=ru.compile(ru.list_to_regex(all_patterns), self._flags, ru.EngineType.REGEX) 
+        
+    #Find any tokens that are in the token map and replace them with their canonical redaction tokens  
+    def redact(self, texts, eCount, ids):
+        new_texts = []
+        for text, d_id in zip(texts,ids):
+            new_text = text
+            #Check if there are any relevant patterns and only run the relatively costly map if there are:
+            if ru.search(self._all_patterns,new_text,0,ru.EngineType.REGEX):
+                for type,pattern in self._token_pattern.items():
+                    #Replace all the matching expressions with a canonical redaction token
+                    #We won't bother adding an index or incrementing the eCount becuase this is a generic match not a specific match.
+                    if pattern is not None:
+                        #print(f'RedactorTokenMap.redact(). TOKEN_PATTERN={pattern}',file=sys.stderr)
+                        new_text =  ru.sub(new_text,pattern,f'[{type}]',0, ru.EngineType.REGEX) 
+                #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
+            
+            new_texts.append(new_text)
+
         return new_texts, eCount, ids

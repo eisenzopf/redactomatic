@@ -1,7 +1,10 @@
 import regex
 import re
 from enum import Enum
-import sys
+
+'''Module to support choice of regex engine at runtime (re or regex)'''
+
+_regex_engine=[re,regex]
 
 class EngineType(Enum):
     RE               =0
@@ -13,6 +16,12 @@ def to_engine_type(s):
     except:
         raise NameError("Unrecognized regex engine type",name=s)
     return t
+
+def to_regex_engine(etype):
+    try:
+        return _regex_engine[etype.value]
+    except:
+        raise NameError(f'Unrecognized regex engine index {etype}')
 
 def flags_from_array(flist,etype):
     #flip a string to an array
@@ -27,36 +36,19 @@ def flags_from_array(flist,etype):
     return _flags
 
 def flag_from_string(s,etype):
-    if etype==EngineType.REGEX:
-        if (s=="ASCII" or s=="A"): return regex.ASCII	
-        if (s=="IGNORECASE" or s=="I"): return regex.IGNORECASE
-        if (s=="MULTILINE" or s=="M"): return regex.MULTILINE
-        if (s=="DOTALL" or s=="S"): return regex.DOTALL
-        if (s=="VERBOSE" or s=="X"): return regex.VERBOSE
-        if (s=="LOCALE" or s=="L"): return regex.LOCALE
-        else: return 0
-
-    elif etype==EngineType.RE:
-        if (s=="ASCII" or s=="A"): return re.ASCII	
-        if (s=="IGNORECASE" or s=="I"): return re.IGNORECASE
-        if (s=="MULTILINE" or s=="M"): return re.MULTILINE
-        if (s=="DOTALL" or s=="S"): return re.DOTALL
-        if (s=="VERBOSE" or s=="X"): return re.VERBOSE
-        if (s=="LOCALE" or s=="L"): return re.LOCALE
-        else: return 0
-
-    else:
-        return 0   #Can't happen
+    if (s=="ASCII" or s=="A"): return to_regex_engine(etype).ASCII	
+    elif (s=="IGNORECASE" or s=="I"): return to_regex_engine(etype).IGNORECASE
+    elif (s=="MULTILINE" or s=="M"): return to_regex_engine(etype).MULTILINE
+    elif (s=="DOTALL" or s=="S"): return to_regex_engine(etype).DOTALL
+    elif (s=="VERBOSE" or s=="X"): return to_regex_engine(etype).VERBOSE
+    elif (s=="LOCALE" or s=="L"): return to_regex_engine(etype).LOCALE
+    else: return 0
 
 def recursive_sub(s,find,replace,flags,etype):
     input=s
 
     while True:
-        if etype==EngineType.REGEX:
-            output = regex.sub(find, replace, input)
-        elif etype==EngineType.RE:
-            output = re.sub(find, replace, input)
-
+        output = to_regex_engine(etype).sub(find, replace, input,flags=flags)
         if input == output:
             break
         else:
@@ -64,21 +56,14 @@ def recursive_sub(s,find,replace,flags,etype):
 
     return output
 
+def search(find,s,flags,etype):
+    return to_regex_engine(etype).search(find, s, flags=flags)
+
 def sub(s,find,replace,flags,etype):
-    if etype==EngineType.REGEX:
-        output = regex.sub(find, replace, s)
-        if not output==s:
-            print("FIXED:",s,"=>",output,file=sys.stderr)
-    elif etype==EngineType.RE:
-        output = re.sub(find, replace, s)
-
-    return output
-
+    return to_regex_engine(etype).sub(find, replace, s, flags=flags)
+    
 def compile(s,flags,etype):
-    if etype==EngineType.REGEX:
-        return regex.compile(s,flags)
-    elif etype==EngineType.RE:
-        return re.compile(s,flags)
+    return to_regex_engine(etype).compile(s,flags=flags)
 
 '''Take a set of regular expressions and combine them into a single regular expression with pipes between each element.'''
 def list_to_regex(regex_set):

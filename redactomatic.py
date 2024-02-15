@@ -9,9 +9,12 @@ import regex_test as rt
 import sys
 import os
 import traceback
+import redact
 
 def __version__():
-    return "1.20"
+    return "1.21"
+    
+TOKENMAP_RULENAME="_TOKEN_MAP_"
 
 def str_to_bool(value):
     if isinstance(value, bool):
@@ -103,38 +106,50 @@ class RedactomaticProcessor(pb.ProcessorBase):
                 if (args.idcolumn is None): args.idcolumn=df.columns.get_loc(args.idcolumnname)+1
             except: raise KeyError("The essential ID field '"+args.idcolumnname+"' was not found in the input file.")
 
-        df.iloc[:, args.column-1].replace(np.nan,'', inplace=True)
+        #df.iloc[:, args.column-1].replace(np.nan,'', inplace=True)
+        
+        df.fillna({args.column-1:''}, inplace=True)
         texts = df.iloc[:, args.column-1].tolist()
         ids = df.iloc[:, args.idcolumn-1].tolist()
 
+        #get the entities to be redacted and anonymized. Make sure the token map default rule is added if there is a token map and its not in the list.
         entities=self._entity_rules.entities
+        if (TOKENMAP_RULENAME not in entities): entities[:0]=[TOKENMAP_RULENAME] 
 
         #Now run redaction on the ordered list of redactors that are needed to meet the current redaction level.
+        redaction_order=self._entity_rules.redaction_order
+        redaction_order[:0] = [i for i in self._entity_rules.always_redact if i not in redaction_order]
+        if args.verbose: print(f'redaction_order = {redaction_order}',file=sys.stderr)
+
         if args.redact:
             #Get a list of the entities in the level specified on the command line ordered by the redaction_order.
-            redaction_order=[x for x in self._entity_rules.redaction_order if x in entities]
+            redaction_order=[x for x in redaction_order if x in entities]
+        else:
+            redaction_order=self._entity_rules.always_redact
 
-            #Terminate with error message if any entities are not in the redaction_order
-            missing_entities=[x for x in entities if not x in self._entity_rules.redaction_order]
-            if len(missing_entities)>0:
-                raise Exception(f'ERROR: The following entities are not defined in the redaction_order: {missing_entities}')
+        #Terminate with error message if any entities are not in the redaction_order
+        missing_entities=[x for x in entities if not x in self._entity_rules.redaction_order]
+        if len(missing_entities)>0:
+            raise Exception(f'ERROR: The following entities are not defined in the redaction_order: {missing_entities}')
 
-            if (args.verbose): print("Starting redaction at anonymization level:",self._entity_rules.level)
+        if (args.verbose): print("Starting redaction at anonymization level:",self._entity_rules.level)
 
-            for rule in redaction_order:
-                #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
-                try:
-                    _model=self._entity_rules.get_redactor_model(rule, self._redact_entity_map, self._entity_values)
-                    if (args.verbose): print("Redacting ",rule,"...")
-                    texts, self._curr_id, ids = _model.redact(texts, self._curr_id, ids)
-                except(er.NotSupportedException) as e:
-                    if (args.verbose): print("Skipping ",rule,"...")
+        for rule in redaction_order:
+            #Get the custom redactor model for this rule_label. (The redactor model will get the modality from the args if it is modality specific.)
+            try:
+                _model=self._entity_rules.get_redactor_model(rule, self._redact_entity_map, self._entity_values)
+                if (args.verbose): print("Redacting ",rule,"...")
+                texts, self._curr_id, ids = _model.redact(texts, self._curr_id, ids)
+            except(er.NotSupportedException) as e:
+                if (args.verbose): print("Skipping ",rule,"...")
 
         #Set up for running the anonymizers.  
         if (args.anonymize): 
             anonymization_order=[x for x in self._entity_rules.anonymization_order if x in entities]
         else:
             anonymization_order=[x for x in self._entity_rules.anonymization_order if x in self._entity_rules.always_anonymize]
+        
+        if args.verbose: print(f'anonymization_order = {anonymization_order}',file=sys.stderr)
 
         #Now re-precess all the text and execute the associated anonumizers.
         for rule in anonymization_order:
@@ -175,6 +190,27 @@ def main(args):
 
     if (entity_rules.load_rule_globlist(rulefiles) ==0):
         raise Exception("ERROR. No rulesfiles loaded.")
+
+    #Now add in a special token mapper if there is a token-map defined (would like to deprecate this later).
+    token_map_config={
+        "entities": {
+            TOKENMAP_RULENAME : {
+                "redactor": {
+                    "model-class": "redact.RedactorTokenMap",
+                    "text": {
+                        "token-map": entity_rules.token_map
+                    },
+                    "voice": {
+                        "token-map": entity_rules.token_map
+                    }
+                }
+            }
+        }
+    }
+
+    #Now merge the rules into the configuration. Note that if there is a _TOKEN_MAP already defined then it will simply be merged with this one.  This is ok.
+    entity_rules.merge_rules(token_map_config)
+    #print(f'Created _TOKEN_MAP_: {entity_rules.get_entityid_rule(TOKENMAP_RULENAME)}',file=sys.stderr)
 
     #Now run the regex tests if required
     if args.regextest:

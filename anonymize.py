@@ -64,7 +64,7 @@ class AnonymizerBase(pb.ProcessorBase):
         #If we have then use that value otherwise use the value we were given and remember it for later calls.
         #If the tag does not match the pattern then just return the value we were given.
 
-        this_match = regex.fullmatch('\[?(.*)-(.*?)\]?', tag)
+        this_match = regex.fullmatch(r'\[?(.*)-(.*?)\]?', tag)
 
         if (this_match and self._params.get("persist",True)):   # handling for ENTITY-dddd tags    
             m_ix=this_match[2]
@@ -80,15 +80,15 @@ class AnonymizerBase(pb.ProcessorBase):
         token_map=self._entity_rules.token_map
 
         counter=0
-        this_regex=""
+        this_regex=r''
         if type in anon_map.keys():
             for entity in anon_map[type]:
                 if (counter>0): this_regex=this_regex+'|' 
-                this_regex = this_regex + "\[" + entity + "(-\d+)?\]"
+                this_regex = this_regex + r'\[' + entity + r'(-\d+)?\]'
                 counter+=1
         if type in token_map.keys():
             for entity in token_map[type]:
-                if (counter>0): this_regex=this_regex+'|' 
+                if (counter>0): this_regex=this_regex+r'|' 
                 this_regex = this_regex + entity
                 counter+=1
 

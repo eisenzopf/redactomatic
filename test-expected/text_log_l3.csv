@@ -1,7 +1,8 @@
 _IGNORE_-0,first and
 _IGNORE_-1,today
 _IGNORE_-2,CV
-_IGNORE_-4,tomorrow
+_IGNORE_-3,tomorrow
+_IGNORE_-4,PIN
 ADDRESS-5,413 main street in Deluth GA in the United Sta
 CCARD-6,4012 0000 9876 5439
 PHONE-7,1249874623
@@ -12,6 +13,7 @@ ZIP-11,55812
 EMAIL-12,eisen@discourse.ai
 PIN-13,1168
 ORG-14,General Corporation
+PERSON-15,Firth
 PERSON-16,David
 ORDINAL-18,1st
 MONEY-19,500.43
@@ -19,10 +21,9 @@ ORG-20,Wells Fargo
 MONEY-21,500
 CARDINAL-22,three
 CARDINAL-23,412
-ORG-25,PIN
+CARDINAL-25,one
 CARDINAL-26,four
 TIME-27,11:59 AM
 DATE-28,August 11th
 PERCENT-30,100%
 CARDINAL-31,23
-CARDINAL-32,one

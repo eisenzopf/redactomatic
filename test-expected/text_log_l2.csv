@@ -1,7 +1,8 @@
 _IGNORE_-0,first and
 _IGNORE_-1,today
 _IGNORE_-2,CV
-_IGNORE_-4,tomorrow
+_IGNORE_-3,tomorrow
+_IGNORE_-4,PIN
 ADDRESS-5,413 main street in Deluth GA in the United Sta
 CCARD-6,4012 0000 9876 5439
 PHONE-7,1249874623
@@ -11,6 +12,7 @@ SSN-10,234-23-2343
 ZIP-11,55812
 EMAIL-12,eisen@discourse.ai
 PIN-13,1168
+PERSON-14,Firth
 PERSON-15,David
 MONEY-17,500.43
 MONEY-18,500

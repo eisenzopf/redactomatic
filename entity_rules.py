@@ -21,7 +21,7 @@ def get_class(classpath):
         class_ = getattr(module, classname)
         return class_
     except Exception as err:
-        raise Exception("ERROR: Unable to find classname:"+classname+" in module:"+modulename) from err
+        raise Exception(f'ERROR: Unable to load classname: {classname} in module: {modulename}. Underlying error = {err}') from err
 
 #Helper function to merge config files as they are. 
 def merge(source, destination, verbose=True):
@@ -40,8 +40,9 @@ def merge(source, destination, verbose=True):
             merge(value, node, verbose)
             #print("key:",key,"value",value,"node",node,file=sys.stderr)
         else:
-            if key in destination.keys():
-                if (verbose): print("INFORMATION: Overwriting with new value: ",key,value,file=sys.stderr)
+            if (key in destination.keys()) and (destination[key] != value):
+            #if key in destination.keys():
+                if (verbose): print(f'INFORMATION: Overwriting configuration key \'{key}\'. Value: \'{destination[key]}\' => \'{value}\'',file=sys.stderr)
             destination[key] = value
 
     return destination
@@ -88,6 +89,12 @@ class EntityRules():
         '''Return the restore_order list set in the rules. If none are specified return '_IGNORE_ for backwards compatibility.'''
         _item=self._rules.get('always-anonymize',['_IGNORE_'])
         return _item
+    
+    @property  
+    def always_redact(self):
+        '''Return the restore_order list set in the rules. If none are specified return '_TOKEN_MAP_' for backwards compatibility.'''
+        _item=self._rules.get('always-readact',['_TOKEN_MAP_'])
+        return _item
 
     @property  
     def anonymization_order(self):
@@ -124,13 +131,16 @@ class EntityRules():
         '''return the args object.'''
         return self._args
 
+    def merge_rules(self,rules):
+        self._rules=merge(rules,self._rules,self._args.verbose)
+
     def load_rulefile_json(self,filepath):
         '''Load a JSON rulefile to define the entities'''
         #if (self._args.verbose): print("Loading config file:",filepath)
         with open(filepath) as stream:
             try:
                 _new_rules=json.load(stream)
-                self._rules=merge(_new_rules,self._rules,self._args.verbose)
+                self.merge_rules(_new_rules)
                 #if (self._args.verbose): print("RULES: ",str(self._rules))    
             except Exception as e:
                 raise(e)
@@ -142,7 +152,7 @@ class EntityRules():
         with open(filepath, "r") as stream:
             try:
                 _new_rules=yaml.safe_load(stream)
-                self._rules=merge(_new_rules,self._rules,self._args.verbose)
+                self.merge_rules(_new_rules)
                 #if (self._args.verbose): print("RULES: ",str(self._rules))    
             except yaml.YAMLError as e:
                 raise(e)
@@ -172,7 +182,7 @@ class EntityRules():
 
     def resolve_regex_includes(self,s):
         #extract the regexp ID for any text of the form: ?INCLUDE<one_to_9-voice>
-        include_pattern=regex.compile('\?INCLUDE<(?<rule_id>([^>]*))>')
+        include_pattern=regex.compile(r'\?INCLUDE<(?<rule_id>([^>]*))>')
         e = regex.search(include_pattern,s)
         if (e is None):
             return s

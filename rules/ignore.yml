@@ -9,6 +9,7 @@ entities:
           - today
           - yesterday
           - CV
+          - PIN
           - tomorrow
       voice:
         regex:
@@ -17,6 +18,7 @@ entities:
           - today
           - yesterday
           - CV
+          - PIN
           - tomorrow
           - this one
           - that one

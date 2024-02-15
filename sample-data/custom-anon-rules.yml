@@ -13,8 +13,8 @@ anon-map:
     ZIP: [ ZIP, zipcode ]
 
 token-map:
-    ZIP: [ "<ZIP\/>" ]
-    PIN: [ "<PIN\/>", "<CVV\/>" ]
-    CCARD: [ "<ccNum\/>" ]
-    DATE: [ "<expDate\/>" ]
-    MONEY: ["\\b0z\\b"]
+    ZIP: [ "<ZIP\/>" ]  
+    PIN: [ "<PIN\/>", "<CVV/>" ]
+    CCARD: [ "<ccnum\/>" ]
+    DATE: [ "<expdate\/>" ]
+    MONEY: ["\\b0z\\b"]      

@@ -48,10 +48,6 @@ Redactomatic implements this feature by first redacting the text to be ignored a
 
 By default, a special redaction entity  *\_IGNORE\_*  is defined in the file [rules/ignore.yml](../rules/ignore.yml)   
 
-
-
-
-
 ```
 entities:
   _IGNORE_:
@@ -135,12 +131,15 @@ Also, its easy to run out of memory.  if you don't chunk the file then you will 
 Redactomatic needs at a minimum:
 
 1. The name of the input conversation file (`--inputfile`) in CSV format,
+
 2. The modaility (`--modality` which must be voice or text)
+
 3. Either:
    
    1. The column in the CSV containing the text to redact (`--column`), the column containing the conversation ID (`--idcolumn`).
    
    2. The` --header` option which uses the first line of the CSV file as headers.  By default this will look for the columns named 'text' and 'conversation_id'.
+
 4. The name of the output file (`--outputfile`) 
 
 ```
@@ -174,34 +173,36 @@ usage: redactomatic.py
       [--no-verbose]
       [--traceback]
 ```
+
 ### Command Line Parameters
-| Paramter            | Description                                                                                                                                        | Required/Default |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `-h`,`--help`       | Print the usage                                                                                                                                    | *TERMINAL*       |         
-| `--header`          | If set to True then the first line of the input files will be treated as a header and the output file will also have a header line. `              | no-header (*)    |
-| `--column`          | The column number containing the text to redact                                                                                                    | *REQUIRED* (*)   |
-| `--idcolumn`        | the column number containing the unique conversation id                                                                                            | *REQUIRED* (*)   |
-| `--columnname`      | The name of the column to be redacted (used with `--header`)                                                                                       | text             |
-| `--idcolumname`     | The name of the column containing the conversation IDs (used with `--header`)                                                                      | conversation_id  |
-| `--inputfile`       | The filename containing the conversations to process                                                                                               | *REQUIRED*       |
-| `--outputfile`      | The filename that will contain the redacted output                                                                                                 | *REQUIRED*       |
-| `--modality`        | Can be voice or text depending on the type of conversations contained in the inputfile                                                             | *REQUIRED*       |
-| `--chunksize`       | The number of lines to read in as a chunk before processing them.                                                                                  | 100000           |
-| `--chunklimit`      | An integer number of chunks to process before stopping.   Included primarily to support benchmarking.   Default=None (i.e. all of them)            | None             |
-| `--anonymize`</br>`--no-anonymize`  | Replace redaction tags with randomized values. Useful if you need simulated data.                                                  | no-anonymize     |
-| `--redact`</br>`--no-redact`      | Redact the text (This is the default)                                                                                                | redact           |
-| `--defaultrules` </br> `--no-defaultrules` | Use the default rules in addition to any rules specified using `--rulefile`                                                 | defaultrules     |
-| `--large`           | Use the large Spacy language model instead of the small one. Not recommended unless you have a GPU or don't mind waiting a long time.              | small            |
-| `--log`             | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes.           | *OPTIONAL*       |
-| `--uppercase`       | Convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps.                        | *OPTIONAL*       |
-| `--level`           | The redaction level. Choose 1,2, or 3 or a any custom level. See documentation below on what the levels mean.                                      | '2'              |
-| `--seed`            | A seed value for anonymization random selection; default is None i.e. truly random.  Use this if you want deterministic results.                   | *OPTIONAL*       |
-|`--rulefile`         | A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules).  These are globbable.             | *OPTIONAL*       |
-| `--regextest`       | Test the regular rexpressions defiend in the regex-test rules prior to any other processing.                                                       | *OPTIONAL*       |
-| `--testoutputfile`  | The file to save the regular expression test results in.                                                                                           | *OPTIONAL*       |
-| `--traceback`</br>`--no-traceback  `   | Give traceback information when an exceptin causes the program to halt.                                                         | no-traceback     |
-| `--version`           |         Print the version and exit                       | *TERMINAL*       |
-| `--verbose`</br>`--no-verbose` | Print the status of processing steps to standard output.                                                                                | verbose          |
+
+| Paramter                                   | Description                                                                                                                              | Required/Default |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `-h`,`--help`                              | Print the usage                                                                                                                          | *TERMINAL*       |
+| `--header`                                 | If set to True then the first line of the input files will be treated as a header and the output file will also have a header line. `    | no-header (*)    |
+| `--column`                                 | The column number containing the text to redact                                                                                          | *REQUIRED* (*)   |
+| `--idcolumn`                               | the column number containing the unique conversation id                                                                                  | *REQUIRED* (*)   |
+| `--columnname`                             | The name of the column to be redacted (used with `--header`)                                                                             | text             |
+| `--idcolumname`                            | The name of the column containing the conversation IDs (used with `--header`)                                                            | conversation_id  |
+| `--inputfile`                              | The filename containing the conversations to process                                                                                     | *REQUIRED*       |
+| `--outputfile`                             | The filename that will contain the redacted output                                                                                       | *REQUIRED*       |
+| `--modality`                               | Can be voice or text depending on the type of conversations contained in the inputfile                                                   | *REQUIRED*       |
+| `--chunksize`                              | The number of lines to read in as a chunk before processing them.                                                                        | 100000           |
+| `--chunklimit`                             | An integer number of chunks to process before stopping.   Included primarily to support benchmarking.   Default=None (i.e. all of them)  | None             |
+| `--anonymize`</br>`--no-anonymize`         | Replace redaction tags with randomized values. Useful if you need simulated data.                                                        | no-anonymize     |
+| `--redact`</br>`--no-redact`               | Redact the text (This is the default)                                                                                                    | redact           |
+| `--defaultrules` </br> `--no-defaultrules` | Use the default rules in addition to any rules specified using `--rulefile`                                                              | defaultrules     |
+| `--large`                                  | Use the large Spacy language model instead of the small one. Not recommended unless you have a GPU or don't mind waiting a long time.    | small            |
+| `--log`                                    | Logs all recognized entities that have been redacted including the unique entity ID and the entity value. Can be use for audit purposes. | *OPTIONAL*       |
+| `--uppercase`                              | Convert all letters to uppercase. Useful when using NICE or other speech to text engines that transcribe voice to all caps.              | *OPTIONAL*       |
+| `--level`                                  | The redaction level. Choose 1,2, or 3 or a any custom level. See documentation below on what the levels mean.                            | '2'              |
+| `--seed`                                   | A seed value for anonymization random selection; default is None i.e. truly random.  Use this if you want deterministic results.         | *OPTIONAL*       |
+| `--rulefile`                               | A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules).  These are globbable.   | *OPTIONAL*       |
+| `--regextest`                              | Test the regular rexpressions defiend in the regex-test rules prior to any other processing.                                             | *OPTIONAL*       |
+| `--testoutputfile`                         | The file to save the regular expression test results in.                                                                                 | *OPTIONAL*       |
+| `--traceback`</br>`--no-traceback  `       | Give traceback information when an exceptin causes the program to halt.                                                                  | no-traceback     |
+| `--version`                                | Print the version and exit                                                                                                               | *TERMINAL*       |
+| `--verbose`</br>`--no-verbose`             | Print the status of processing steps to standard output.                                                                                 | verbose          |
 
 (\*) ** *The command must either specifiy the --header option or give the --column and --idcolumn options.* **
 
@@ -424,6 +425,7 @@ Redactomatic configuration files can be in YAML format or JSON format and can be
         voice:
           regex: ['[a-z]{5} underscore [a-z]{5} at one bank dot com']
 ```
+
 **Example custom.yml rules file** 
 
 An example custom rule file is shown above.  It can be loaded using the option `--rulesfile custom.yml`.  When redactomatic ruls it first loads the core rules files and then it loads the custom rules files.
@@ -434,7 +436,7 @@ Reading the custom rules file above will do the following :
 
 - Add an extra level `my_custom_level` to the built in list of '1', '2', and '3'.  This can then be invoked using the switch `--level my_custom_level`.
 - Override the `always-anonymize` section to ensure that we restore the phrases identified using the `_CUSTOM_IGNORE_` rule in addition to keeping the core ones.
-Override the `redaction-order` section to include the new rules `_CUSTOM_IGNORE_` and `_CUSTOM_EMAIL_`.  Note how we keep entities that are not defined in `my-custom-level` level so that core levels `1`, `2` and `3` continue to work if needed. If you don't want to keep this backwards compatiblity then its ok to include just the entities that are in the custom level.
+  Override the `redaction-order` section to include the new rules `_CUSTOM_IGNORE_` and `_CUSTOM_EMAIL_`.  Note how we keep entities that are not defined in `my-custom-level` level so that core levels `1`, `2` and `3` continue to work if needed. If you don't want to keep this backwards compatiblity then its ok to include just the entities that are in the custom level.
 - Map XML labels `\<PIN/>`, `\<SEC_CODE/>` and `\<ccNum/>` in the input data to the build in anonymizer labels.  This enables the anonymization of data that was already redacted by an external process prior to being input to redactomatic.
 - Define a new entity `_CUSTOM_IGNORE_` which looks for the phrase *'one world bank'* and ensures that this phrase is never redacted.  
 - Define a new entity `CUSTOM_EMAIL` which redacts email like *'amy_grant@onebank.com'* or spoken input of the form *'amy underscore grant at one bank dot com'*.   An anonymizer is also defined which anonymizes this entity to strings like *'anvfg_kujyg@onebank.com'* for text or *'anvfg underscore kujyg at one bank dot com'* for voice..
@@ -539,6 +541,23 @@ This section is optional and if it is omitted then the rule shown above is imple
 The always-anonymize section can be used to anonymize entities with any kind of anonymizer defined. This feature can be used for things other than restoring ignored text. You can also have multiple entities in this section if desired.
 
 The default `always-anonymize` rule is defined in the `../rules/config.ym`l file.  This rule can be overriden using a custom configuration file.
+
+### always-redact
+
+```
+always-redact:
+    - _TOKEN_MAP_
+```
+
+**Default always-redact (YAML) rule**
+
+The `always-redact` section lists entities that are redacted even if the `--no-redact` flag is set. This feature is primarily to support the underlying implementation of the `token-map` feature.
+
+This section is optional and if it is omitted then the rule shown above is implemented by default. This is to provide backwards compatibility. It is recommended that this section is included for clarity. If this section is defined then it overrides the default. 
+
+The `always-redact` section can be used to redact entities with any kind of redactor defined. This feature can be used for things other than token-mapping.  You can also have multiple entities in this section if desired.
+
+The default `always-redact` rule is defined in the `../rules/config.yml` file.  This rule can be overriden using a custom configuration file.  If you override the `always-redact` definition, you should explicitly include the *\_TOKEN_MAP\_* entity if you with to continue to use the token mapping feature.
 
 ### anonymization-order (optional)
 
@@ -898,6 +917,7 @@ entities:
     anonymizer:
       model-class: anonymize.AnonRestoreEntityText
 ```
+
 ### redact.RedactorPhraseDict
 
 ```
@@ -948,7 +968,7 @@ The `prematch` section allows you to define a regular expression that must be tr
 ```
 {
     "keywords": [
-      "adjustment",		
+      "adjustment",        
       "activated",
       ...
       "weeks",
@@ -964,37 +984,36 @@ In the above example file `phrase-path="keywords"` will take the keywords from t
 
 ```
 {
-	"terms": [
-		{
-			"label": ":) t359",
-			"speech": [
-				"smiley t three five nine",
-				"smiley t three hundred fifty nine",
-				"smiley t three fifty nine"
-			],
+    "terms": [
+        {
+            "label": ":) t359",
+            "speech": [
+                "smiley t three five nine",
+                "smiley t three hundred fifty nine",
+                "smiley t three fifty nine"
+            ],
       "text": [
-				"t359"
-			]
+                "t359"
+            ]
     },
-		{
-			"label": "A30",
-			"speech": [
-				"A thirty"
-			],
- 			"text": [
-				"a30"
-			]
-		},
+        {
+            "label": "A30",
+            "speech": [
+                "A thirty"
+            ],
+             "text": [
+                "a30"
+            ]
+        },
 
         ....
-	]
+    ]
 }
 ```
 
 **An example JSON file with keywords in sub-strcutures.**
 
 In the above example file `phrase-path="terms.speech"` will take the keywords from all of the arrays in each of the terms.speech dictionary items.
-
 
 ### redact.RedactorSpacy
 
@@ -1006,6 +1025,48 @@ entities:
 ```
 
 The `redact.RedactorSpacy` class implements the redaction of text using the Spacy NL ML models.  It takes no parameters but its configuration is affected by the command line  `--large` option.
+
+### redact.RedactorTokenMap
+
+```
+entities:
+  _TOKEN_MAP_:
+    redactor:
+      model-class: redact.RedactorTokenMap
+      text:
+        token-map:
+          PIN: [ "<pin\/>", "<cvv/>" ]
+          CCARD: [ "<ccnum\/>" ]
+      voice:
+        token-map:
+          PIN: [ "<pin\/>", "<cvv/>" ]
+          CCARD: [ "<ccnum\/>" ]
+```
+
+**Example redact.RedactorTokenMap entity definition**
+
+The `redact.RedactorTokenMap` class is a special class used by redactomatic to implement the `token-map`.  The top-level `token-map` definition automatically creates a redactor of this type with the reserved label: *\_TOKEN_MAP\_*.  For example the following `token-map` definition will generate the entity defintion above.
+
+```
+token-map:
+  PIN: [ "<pin\/>", "<cvv/>" ]
+  CCARD: [ "<ccnum\/>" ]
+```
+**Example token-map definition that automatically generates the redactor definition shown above**
+
+The *\_TOKEN_MAP\_* entity will **always** be used to redact the input prior to any further processing.  This is true even if `no-redact` option is set.  There is also no need to this entity to be in the `level definitions` or the `redaction-order` but we recommend that you include it for clarity.  This automatic behaviour is implemented by performing the following steps prior to redaction or anonymization being performed.
+
+- An `entity` definition for *\_TOKEN_MAP\_* will be added with a `redactor` of `model-type : redact.RedactorTokenMap`
+- Any entries in the `token-map` section will be added as `voice` and `text` configurations into the entity definition
+- The entity *\_TOKEN_MAP\_* will be added to each `level` definition if it is not already there to ensure that the token map is always used.
+- The entity *\_TOKEN_MAP\_* will be added as the first item in `redaction-order` unless it is already in the list at another location.
+- If the `always-redact` section is not defined then it will be created containing the entity *\_TOKEN_MAP\_*.
+
+There is nothing to prevent users putting the *\_TOKEN_MAP\_* in a different location in the `redaction-order`.  This means that users can perform certain redactions prior to token mapping.  By default however token-mapping is always first.
+
+There is also nothing to prevent users defining their own additional token maps.  These will **not** automatically be added to `level`, `redacton-order` or `always-redact` so take care to add these to get the desired result.  Also take care to add *\_TOKEN_MAP\_* to the `always-redact` section if one is defined or the default definition is overridden.
+
+Users can also directly define the redactor *\_TOKEN_MAP\_* as shown above instead of using the token-map section.  The two are functionally equivalent and can even be mixed together in a single definition if desired.  If there is a `token-map` and a definition of the redactor *\_TOKEN_MAP\_* then the two definitions will simply be merged. The `token-map` will override the direct definition if any parts of the two definitions clash with each other.  The user will be informed of this.
 
 ## Built-In Anonymizer Classes
 
@@ -1136,9 +1197,57 @@ The following are specializations of `anonymize.AnonPhraseList`.  They accept th
 - `anonymize.AnonZipC`
 - `anonymize.AnonEmail`
 
+## Known Issues
+
+There are no known issues.
+
+## Version History
+
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Date         |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| 1.0     | Redactomatic redacts and anonymizes personally identifiable information (PII) in transcribed calls and chat logs with context. It uses a multi-pass approach utilizing both machine learning named entity recognition and regular expressions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Aug 9 2021   |
+| 1.1     | Added redaction levels 1-3, 1 being the least strict and 3 being the most strict. The default is 2.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Aug 13 2021  |
+| 1.2     | Adds the ability to add abbreviations to entity token names. This makes it possible to do some tokenization of entities prior to using redactomatic. For example, if you pre-processed zip codes and tagged them as [zipcode], you could map this tag to [ZIP] in config.json, run redactomatic with the --anonymization flag turned on, and it would replace all instances of [ZIP] and [zipcode] with randomized zip codes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |              |
+| 1.3     | Minor release that prints the Redactomatic version.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Sept 28 2021 |
+| 1.4     | Fixed anonymization so that a previously redacted file can be anonymized with the --noredaction switch.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Sept 29 2021 |
+| 1.5     | - Added support for new entity type PIN. Added voice support for zip and phone. </br>- Also added the ability to map existing tags to entity types, which can be configured in config.json.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Oct 1 2021   |
+| 1.6     | Addressed anonymization bug. Updated sample CSV files for additional test cases.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Oct 2 2021   |
+| 1.7     | Refactored anonymization functions to fix a number of bugs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Jan 27 2022  |
+| 1.8     | Added the ability to define regular expressions and redaction and anonymization rules using YML or JSON rules files.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Feb 9 2022   |
+| 1.9     | -All hard-coded paths have been removed from the core anonymizers by adding Anonymize.AnonPhraseList class.</br>-  Configuration is now entirely done via rules files.</br>-  Some custom anonymization classes remain for core entities such as ADDRESS and ZIP code but these are now simple specializations of of the PhraseList class. </br>- As part of this release we have also further refactored the Anonymization so that only the callback() functions need to be defined to create your own anonymizer class.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Feb 9 2022   |
+| 1.10    | Anonymize.AnonPhraseList has been extended to allow multiple phrase lists to be randomly concatenated. This allows the construction of things like email addresses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Feb 9 2022   |
+| 1.11    | - Bug fix for multi-rule regular expressions. Previous version only ran one of the defined regular expressions.</br>- Added ?DEFINE macro support in regular expressions with a couple of core rules changed to showcase the feature.</br>- Added regextest example file and test which can be built upon in later releases.</br>- Added voice support for credit card number.</br>- Refactored config.json into config.yml to make all configuration files yml rather than json.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Feb 21 2022  |
+| 1.12    | Added voice support for US SSN and credit cards.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Mar 5 2022   |
+| 1.13    | -Added batching to prevent the need to load the whole file in before processing it.</br>- Added optional support for named headers with defaults. Files with headers are now correctly concatenated into an output file with a single header line and there is no need to specify the column numbers if your file has headers.</br>- Relative file paths to redaction and anonymization file resources are now resolved relative to the program directory not the current working directory. This means that you do not have to run redactomatic in its home directory any more. Also added support for $REDATC_HOME environment variable to overload this if neccessary.</br>- Tidied up and checked all the test files so that they return True.                                                                                                                                                                                                                                                                                                                                                                                     | Mar 31 2022  |
+| 1.14    | This release should be backwards compatible with v1.13 apart from the renaming of the -noredaction flag.</br>- Added --chunklimit to allow benchmarking of different chunk sizes without having to run the whole file.</br>- Tided up the command-line switches for --anonymize and --redact.</br>- Deprecated --noredaction and made it --no-redact instead in line with above.</br>- Removed self-mappings from anon_map and changed the self-mapping to be define in entity_rules.py properties instead of anonymize.py</br>- Added the always-anonymize section to remove all special meaning from the IGNORE entity. You can now have multiple ignore sets if you want to. If this section is missing however it adds 'IGNORE' as a default to keep backwards compatibility.                                                                                                                                                                                                                                                                                                                                                      | Apr 12 2022  |
+| 1.15    | Added the ability to add Perist: False to anonymizers to support random anonymization of things like isolated digits without persisting specific values across the whole dialog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | May 6 2022   |
+| 1.16    | Updated the Spacy models to 3.3.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Jun 1 2022   |
+| 1.17    | Brought in line with the Talkmap internal version of corpustools as of 20/10/2022.</br>- added --default rules to allow separation of custom rules and default rule set</br>- Made redactomatic a processor like any other.</br>- Moved the clean() routines from redactomatic to processorbase so they can be shared.</br>- Moved reading of config files from redactomatic to entity_rules so they can be used by other programs.</br>- Tidied up the imports in redactomatic to stop it importing things it did not need.</br>- Added substitution and recursive substitution rules to regex_utils</br>- Added fixes to cardinal digit anonymization to stop digits being concatenated without spaces</br>- Updated ignore.yml to use regular expressions rather than phrase lists and added protection for common cardinal phrases and contexts.</br>- Created a test-script area and moved redactomatic tests into there.</br>- Moved documentation for redactomatic into docs and put in a more general top level README.</br>- Added a more comprehensive fix for the bug where cardinal rules redacted other redaction labels. | Oct 20 2022  |
+| 1.18    | Add and abort message when trying to restore ignored text with --no-redact set.</br>- Bugfix for wrong left/right ordering </br>- Add RedactorPhraseDict class to support JSON and YML phrase lists.</br>- Add RedactorPhraseDict documentation</br>- Upgrade the protection for stopping regular expressions overwriting other redaction labels.</br>- Fixed a bug where multi-line regex definition could result in corrupted text.</br>- Add --traceback option for debugging</br>- And warning for missing entity definitions</br>- Clean up the default config.yml</br>- Separate cardinal text and voice rules</br>- Remove 'oh' from cardinal rules</br>- Add sample custom 'redactanon' YML file</br>- Move aboslute_path to processor base.</br>- Add explicit support for $REDACT_HOME and local paths in the current working directory</br>- Add --version option.                                                                                                                                                                                                                                                          | Nov 2022     |
+| 1.19    | - Added default option to compile a single regex for a whole phrase list to make it more efficient to RedactorPhraseDict and RedactorPhraseList</br>- Added combine-sets parameter to support turning this off if required</br>- Added complete prematch and postmatch support for RedactorPhraseDict and RedactorPhraseList</br>- Added add-wordbreak parameter to RedactorPhraseDict and RedactorPhraseList</br>- Documented all of the above changes in README                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Nov 2022     |
+| 1.20    | - Added --verbose and --no-verbose command line options</br>- Changed entity restoration error from an exeption to at stops execution to a warning that restoration failed.             | 16 Dec 2022  |
+| 1.21    | - Add RedactorTokenMap to refactor token-map processing </br>- Added anonymiztion and redaction order debug to redactomatic </br>- Correct redactomatic bug that did not correctly track split names for anonymization </br>- Add protect_zones to Spacy redactor </br>- Refactor regex_utils and add search() </br>- Added indexed redaction labels to split spacy names.</br>- Refactor insertion of indexed labels to share common code </br>- add verbosity flag to test-redactomatic.sh   | 14 Feb 2024  |
+
 ## License
 
 Please see the [LICENSE](LICENSE) 
+
+## Authors
+
+Jonathan Eisenzopf, David Attwater
+
+## Copyright
+
+Copyright (C) 2020, Jonathan Eisenzopf
+Copyright (c) 2020, Open source contributors.
+All rights reserved.
+
+
+## Contributors
+
+Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes. </br>
+Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions. </br>
+Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the code to use a generic rules base and maintaining the code.
 
 ## Contribution
 
@@ -1147,47 +1256,3 @@ for inclusion in the work by you, as defined in the MIT license, shall
 be licensed as above, without any additional terms or conditions.
 
 Please see the [Contribution Guidelines](CONTRIBUTING.md).
-
-## Known Issues
-
-There are no known issues.
-
-## Authors
-
-Jonathan Eisenzopf, David Attwater
-
-## Copyright
-
-Copyright 2021, Jonathan Eisenzopf, All rights reserved.
-
-## Contributors
-
-Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes.
-Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
-Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the code to use a generic rules base.
-
-## Version History
-
-| Version  | Description                                                                                    | Date |
-| -------- | ---------------------------------------------------------------------------------------------- | ---------- |
-| 1.0       | Redactomatic redacts and anonymizes personally identifiable information (PII) in transcribed calls and chat logs with context. It uses a multi-pass approach utilizing both machine learning named entity recognition and regular expressions. |Aug 9 2021 |
-| 1.1      |Added redaction levels 1-3, 1 being the least strict and 3 being the most strict. The default is 2. |Aug 13 2021|
-| 1.2      | Adds the ability to add abbreviations to entity token names. This makes it possible to do some tokenization of entities prior to using redactomatic. For example, if you pre-processed zip codes and tagged them as [zipcode], you could map this tag to [ZIP] in config.json, run redactomatic with the --anonymization flag turned on, and it would replace all instances of [ZIP] and [zipcode] with randomized zip codes. | |
-| 1.3      | Minor release that prints the Redactomatic version. |Sept 28 2021|
-| 1.4      |Fixed anonymization so that a previously redacted file can be anonymized with the --noredaction switch. | Sept 29 2021|
-| 1.5      |- Added support for new entity type PIN. Added voice support for zip and phone. </br>- Also added the ability to map existing tags to entity types, which can be configured in config.json. |Oct 1 2021 |
-| 1.6      | Addressed anonymization bug. Updated sample CSV files for additional test cases.|Oct 2 2021 |
-| 1.7      | Refactored anonymization functions to fix a number of bugs. | Jan 27 2022|
-| 1.8      |Added the ability to define regular expressions and redaction and anonymization rules using YML or JSON rules files.| Feb 9 2022|
-| 1.9      |-All hard-coded paths have been removed from the core anonymizers by adding Anonymize.AnonPhraseList class.</br>-  Configuration is now entirely done via rules files.</br>-  Some custom anonymization classes remain for core entities such as ADDRESS and ZIP code but these are now simple specializations of of the PhraseList class. </br>- As part of this release we have also further refactored the Anonymization so that only the callback() functions need to be defined to create your own anonymizer class. |Feb 9 2022 |
-| 1.10      |Anonymize.AnonPhraseList has been extended to allow multiple phrase lists to be randomly concatenated. This allows the construction of things like email addresses. | Feb 9 2022|
-| 1.11      |- Bug fix for multi-rule regular expressions. Previous version only ran one of the defined regular expressions.</br>- Added ?DEFINE macro support in regular expressions with a couple of core rules changed to showcase the feature.</br>- Added regextest example file and test which can be built upon in later releases.</br>- Added voice support for credit card number.</br>- Refactored config.json into config.yml to make all configuration files yml rather than json. |Feb 21 2022 |
-| 1.12      | Added voice support for US SSN and credit cards.|Mar 5 2022 |
-| 1.13      |-Added batching to prevent the need to load the whole file in before processing it.</br>- Added optional support for named headers with defaults. Files with headers are now correctly concatenated into an output file with a single header line and there is no need to specify the column numbers if your file has headers.</br>- Relative file paths to redaction and anonymization file resources are now resolved relative to the program directory not the current working directory. This means that you do not have to run redactomatic in its home directory any more. Also added support for $REDATC_HOME environment variable to overload this if neccessary.</br>- Tidied up and checked all the test files so that they return True. |Mar 31 2022 |
-| 1.14      |This release should be backwards compatible with v1.13 apart from the renaming of the -noredaction flag.</br>- Added --chunklimit to allow benchmarking of different chunk sizes without having to run the whole file.</br>- Tided up the command-line switches for --anonymize and --redact.</br>- Deprecated --noredaction and made it --no-redact instead in line with above.</br>- Removed self-mappings from anon_map and changed the self-mapping to be define in entity_rules.py properties instead of anonymize.py</br>- Added the always-anonymize section to remove all special meaning from the IGNORE entity. You can now have multiple ignore sets if you want to. If this section is missing however it adds 'IGNORE' as a default to keep backwards compatibility. | Apr 12 2022 |
-| 1.15      | Added the ability to add Perist: False to anonymizers to support random anonymization of things like isolated digits without persisting specific values across the whole dialog.| May 6 2022|
-| 1.16      | Updated the Spacy models to 3.3.0| Jun 1 2022|
-| 1.17      |  Brought in line with the Talkmap internal version of corpustools as of 20/10/2022.</br>- added --default rules to allow separation of custom rules and default rule set</br>- Made redactomatic a processor like any other.</br>- Moved the clean() routines from redactomatic to processorbase so they can be shared.</br>- Moved reading of config files from redactomatic to entity_rules so they can be used by other programs.</br>- Tidied up the imports in redactomatic to stop it importing things it did not need.</br>- Added substitution and recursive substitution rules to regex_utils</br>- Added fixes to cardinal digit anonymization to stop digits being concatenated without spaces</br>- Updated ignore.yml to use regular expressions rather than phrase lists and added protection for common cardinal phrases and contexts.</br>- Created a test-script area and moved redactomatic tests into there.</br>- Moved documentation for redactomatic into docs and put in a more general top level README.</br>- Added a more comprehensive fix for the bug where cardinal rules redacted other redaction labels. |Oct 20 2022 |
-| 1.18      | Add and abort message when trying to restore ignored text with --no-redact set.</br>- Bugfix for wrong left/right ordering </br>- Add RedactorPhraseDict class to support JSON and YML phrase lists.</br>- Add RedactorPhraseDict documentation</br>- Upgrade the protection for stopping regular expressions overwriting other redaction labels.</br>- Fixed a bug where multi-line regex definition could result in corrupted text.</br>- Add --traceback option for debugging</br>- And warning for missing entity definitions</br>- Clean up the default config.yml</br>- Separate cardinal text and voice rules</br>- Remove 'oh' from cardinal rules</br>- Add sample custom 'redactanon' YML file</br>- Move aboslute_path to processor base.</br>- Add explicit support for $REDACT_HOME and local paths in the current working directory</br>- Add --version option. |  Nov 2022  |
-| 1.19      | - Added default option to compile a single regex for a whole phrase list to make it more efficient to RedactorPhraseDict and RedactorPhraseList</br>- Added combine-sets parameter to support turning this off if required</br>- Added complete prematch and postmatch support for RedactorPhraseDict and RedactorPhraseList</br>- Added add-wordbreak parameter to RedactorPhraseDict and RedactorPhraseList</br>- Documented all of the above changes in README  | Nov 2022  |
-| 1.20 | - Added --verbose and --no-verbose command line options</br>- Changed entity restoration error from an exeption to at stops execution to a warning that restoration failed.  |16 Dec 2022 |

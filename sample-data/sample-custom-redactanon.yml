@@ -58,6 +58,24 @@ token-map:
 
 #Now define our own custom ignore and email redaction and anonymization rules.
 entities:
+  _TOKEN_MAP_:
+    redactor:
+      model-class: redact.RedactorTokenMap
+      text:
+        token-map:
+          ZIP: [ "<ZIP\/>" ]
+          PIN: [ "<PIN\/>", "<CVV/>" ]
+          CCARD: [ "<ccNum\/>" ]
+          DATE: [ "<expDate\/>" ]
+          MONEY: ["\\b0z\\b"]
+      voice:
+        token-map:
+          ZIP: [ "<ZIP\/>" ]
+          PIN: [ "<PIN\/>", "<CVV/>" ]
+          CCARD: [ "<ccNum\/>" ]
+          DATE: [ "<expDate\/>" ]
+          MONEY: ["\\b0z\\b"]      
+
   _CUSTOM_IGNORE_:
     redactor:
       model-class: redact.RedactorRegex

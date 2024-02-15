@@ -1,5 +1,6 @@
 level:
     '1': 
+        - _TOKEN_MAP_
         - _IGNORE_
         - _SPACY_
         - PHONE
@@ -10,6 +11,7 @@ level:
         - SSN
         - PIN
     '2':
+        - _TOKEN_MAP_
         - _IGNORE_
         - _SPACY_
         - PHONE
@@ -23,6 +25,7 @@ level:
         - ZIP
         - PIN
     '3':
+        - _TOKEN_MAP_
         - _IGNORE_
         - _SPACY_
         - PHONE
@@ -55,7 +58,11 @@ level:
 always-anonymize:
     - _IGNORE_
 
+always-redact:
+    - _TOKEN_MAP_
+
 redaction-order:
+    - _TOKEN_MAP_
     - _IGNORE_
     - PERSON
     - ADDRESS
