@@ -19,11 +19,11 @@ level:
         - ADDRESS
         - CCARD
         - MONEY
+        - SSN
+        - PIN
+        - ZIP
         - LOC
         - EMAIL
-        - SSN
-        - ZIP
-        - PIN
     '3':
         - _TOKEN_MAP_
         - _IGNORE_
@@ -33,27 +33,42 @@ level:
         - ADDRESS
         - CCARD
         - MONEY
+        - SSN
+        - PIN
+        - ZIP
         - LOC
+        - EMAIL
         - CARDINAL
-        - DATE
-        - EVENT
+    '4':
+        - _TOKEN_MAP_
+        - _IGNORE_
+        - _SPACY_
+        - PHONE
+        - PERSON
+        - ADDRESS
+        - CCARD
+        - MONEY
+        - SSN
+        - PIN
+        - ZIP
+        - LOC
+        - EMAIL
+        - CARDINAL
         - FAC
         - GPE
         - LANGUAGE
-        - LAUGHTER
-        - LAW
         - NORP
-        - ORG
-        - ORDINAL
         - PERCENT
         - PRODUCT
+        - DATE
+        - EVENT
+        - LAUGHTER
+        - LAW
+        - ORG
         - QUANTITY
         - TIME
         - WORK_OF_ART
-        - ZIP
-        - SSN
-        - EMAIL
-        - PIN
+        - ORDINAL
 
 always-anonymize:
     - _IGNORE_

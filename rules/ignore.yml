@@ -3,53 +3,22 @@ entities:
     redactor:
       model-class: redact.RedactorRegex
       text:
-        regex:
-          - first name
-          - first and
-          - today
-          - yesterday
-          - CV
-          - PIN
-          - tomorrow
+        regex-id: protected_phrases
       voice:
-        regex:
-          - first name
-          - first and
-          - today
-          - yesterday
-          - CV
-          - PIN
-          - tomorrow
-          - this one
-          - that one
-          - another one
-          - some one
-          - last one
-          - next one
-          - previous one
-          - new one
-          - old one
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth) one
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) moment(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) times(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) phones(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) devices(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) account(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) (person|people)
-          - (one|two|three|four|five|siz|seven|eight|nine) second(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine) minute(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four) hour(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seve|twenty eight|twenty nine|thirty|thirty one) day(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seve|twenty eight|twenty nine|thirty|thirty one) month(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seve|twenty eight|twenty nine|thirty|thirty one) week(s)?
-          - (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|siz|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seve|twenty eight|twenty nine|thirty|thirty one) years(s)?
-          - three g
-          - four g
-          - five g
-          - one off
-          - one of
-          - one time
-          - one by one
-          - one more time
+        regex-id: protected_phrases
+
     anonymizer:
       model-class: anonymize.AnonRestoreEntityText
+
+regex:
+    protected_phrases:
+        - first name
+        - first and
+        - today|yesterday
+        - CV|PIN
+        - (tomorrow|today|yesterday)
+        - (this|that|another|some|last|next|previous|new|old) (one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seven|twenty eight|twenty nine|thirty|thirty one)
+        - (1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth) (one)
+        - (1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty one|twenty two|twenty three|twenty four|twenty five|twenty six|twenty seven|twenty eight|twenty nine|thirty|thirty one|[0-9]{1,2}) (moment(s)?||phones(s)?|devices(s)?|account(s)?|(person|people)| minute(s)?|second(s)?|hour(s)?|day(s)?|month(s)?|week(s)?|years(s)?|times(s)?|of|more time(s)?)
+        - (2|3|4|5two|three|four|five)[ -]?g
+        - one (off|by one)

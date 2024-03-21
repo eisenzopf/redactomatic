@@ -229,7 +229,7 @@ def main(args):
 
         for file in args.inputfile:
             if (args.verbose): print("Loading datafile " + file + "...")
-            df_iter = pd.read_csv(file,chunksize=args.chunksize,header=(0 if args.header else None),dtype=str)
+            df_iter = pd.read_csv(file,chunksize=args.chunksize,header=(0 if args.header else None),dtype=str, keep_default_na=False)
             for df in df_iter:
                 redactomatic.process(df)
                 if (args.verbose): print("Writing outfile ",args.outputfile, "chunk ",chunk)

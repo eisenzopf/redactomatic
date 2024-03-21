@@ -57,7 +57,10 @@ def recursive_sub(s,find,replace,flags,etype):
     return output
 
 def search(find,s,flags,etype):
-    return to_regex_engine(etype).search(find, s, flags=flags)
+    try:
+       return to_regex_engine(etype).search(find, s, flags=flags)
+    except Exception as e:
+       raise Exception(f"Regex search error. etype={str(etype)}, regex='{find}', s='{s}', type(regex)={type(find)}, type(s)={type(s)}. Underlying error ={e}")
 
 def sub(s,find,replace,flags,etype):
     return to_regex_engine(etype).sub(find, replace, s, flags=flags)

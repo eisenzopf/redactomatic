@@ -256,7 +256,7 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 
 ## Redaction Levels
 
-You can define the entities that will be redacted (and hence anonymized). By default three levels are defined '1', '2', and '3'.  Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. If maximum security is needed where all kinds of numbers are always redacted whether they are a recognized type or not, you should use Level 3.
+You can define the entities that will be redacted (and hence anonymized). By default four levels are defined '1', '2', '3' and '4'.  Level 1 means that Redactomatic will only use the machine learning NER parser, which captures many entities but is not reliable and does not match addresses, phone numbers, SSN, and other kinds of numbers that are probably important to recognize. Level 2 is the default level and matches most PII entities. However, it can miss numbers that aren't supported or are formatting in a way that Redactomatic hasn't seen before. Level '3' adds in Ordinals (e.g. '123 or one two three') so that orginal numbers are always redacted whether they are a recognized type or not. It does not redact cardinals (e.g. 'first', 'second', 'third').    Finally we have added an additional level '4' which also contains all the entities from the machine learning NER parser and also adds in Ordinals.  It is unlikely that level 4 will be helpful but it is included as the highest level of redaction possible. 
 
 You can also define your own levels by editing the [config.yml](../rules/config.yml) or better still adding your own custom configuration file.   For example if you define the redaction labels that you want to redact in a new subsection of the `'level'` section called called `'custom' `then the command line switch `--level custom` will cause this new set of labels to be redacted or anonymized.
 
@@ -485,7 +485,7 @@ level:
 
 **Example level definition (YAML)**
 
-Any number of level definitions may be set.  The defalt configuration files contain three level keys '1', '2' and '3', an extract of which is shown above.     The ` --level` option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
+Any number of level definitions may be set.  The defalt configuration files contain three level keys '1', '2', '3' and '4', an extract of which is shown above.     The ` --level` option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
 
 To define a custom level you can add a custom configuraton file with its own level entry as shown below:
 

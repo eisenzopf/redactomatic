@@ -432,17 +432,21 @@ class RedactorTokenMap(RedactorBase):
     def redact(self, texts, eCount, ids):
         new_texts = []
         for text, d_id in zip(texts,ids):
-            new_text = text
+            new_text = str(text)
             #Check if there are any relevant patterns and only run the relatively costly map if there are:
-            if ru.search(self._all_patterns,new_text,0,ru.EngineType.REGEX):
-                for type,pattern in self._token_pattern.items():
-                    #Replace all the matching expressions with a canonical redaction token
-                    #We won't bother adding an index or incrementing the eCount becuase this is a generic match not a specific match.
-                    if pattern is not None:
-                        #print(f'RedactorTokenMap.redact(). TOKEN_PATTERN={pattern}',file=sys.stderr)
-                        new_text =  ru.sub(new_text,pattern,f'[{type}]',0, ru.EngineType.REGEX) 
-                #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
-            
+            try:
+                if ru.search(self._all_patterns,new_text,0,ru.EngineType.REGEX):
+                    for type,pattern in self._token_pattern.items():
+                        #Replace all the matching expressions with a canonical redaction token
+                        #We won't bother adding an index or incrementing the eCount becuase this is a generic match not a specific match.
+                        if pattern is not None:
+                            #print(f'RedactorTokenMap.redact(). TOKEN_PATTERN={pattern}',file=sys.stderr)
+                            new_text =  ru.sub(new_text,pattern,f'[{type}]',0, ru.EngineType.REGEX) 
+                        #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
+            except Exception as e:
+                print(f'WARNING: Ignoring error: {e}',file=sys.stderr)
+                pass
+           
             new_texts.append(new_text)
 
         return new_texts, eCount, ids
