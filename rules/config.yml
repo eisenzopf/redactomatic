@@ -42,6 +42,9 @@ level:
         - LOC
         - EMAIL
         - CARDINAL
+        - DATE
+        - PERCENT
+        - TIME        
     '4':
         - _TOKEN_MAP_
         - _IGNORE_
