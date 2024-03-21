@@ -1,33 +1,31 @@
-_IGNORE_-0,first and
-_IGNORE_-1,today
-_IGNORE_-2,CV
-_IGNORE_-3,tomorrow
-_IGNORE_-4,one moment
-_IGNORE_-5,PIN
-CCARD-6,four oh one two zero zero zero zero nine eight seven six five four three nine
-PHONE-7, one two four nine eight seven four six two three
-PHONE-8," five nine one, two six eight, five five nine one"
-PHONE-9, two one eight seven three oh four three oh oh
-SSN-10,two three four two three two three four three
-ZIP-11,five five eight one two
-EMAIL-12,eisen@discourse.ai
-PIN-13,one one six eight
-ORG-14,General Corporation
-PERSON-15,Firth
-PERSON-16,David
-ORDINAL-19,first
-MONEY-20,Five hundred dollars and fourty three cents
-ORG-21,Wells Fargo
+PIN-0,<CVV/>
+ZIP-1,<ZIP/>
+PIN-2,<PIN/>
+_IGNORE_-3,first and
+_IGNORE_-4,today
+_IGNORE_-5,CV
+_IGNORE_-6,tomorrow
+_IGNORE_-7,one moment
+_IGNORE_-8,PIN
+CCARD-9,four oh one two zero zero zero zero nine eight seven six five four three nine
+PHONE-10, one two four nine eight seven four six two three
+PHONE-11," five nine one, two six eight, five five nine one"
+PHONE-12, two one eight seven three oh four three oh oh
+SSN-13,two three four two three two three four three
+ZIP-14,five five eight one two
+EMAIL-15,eisen@discourse.ai
+PIN-16,one one six eight
+PERSON-17,Firth
+PERSON-18,David
+MONEY-21,Five hundred dollars and fourty three cents
 CARDINAL-22,five hundred
 DATE-23,July of two thousand twenty three
 CARDINAL-24,three
 CARDINAL-25,two
 MONEY-26,five hundred dollars
-GPE-27,the United States
-GPE-28,Deluth Georgia
-CARDINAL-29,four
-QUANTITY-31,fifty nine AM
-DATE-32,August eleventh
-PERCENT-34,one hundred percent
-CARDINAL-35,one
-CARDINAL-39,eleven
+CARDINAL-27,four
+DATE-29,August eleventh
+PERCENT-31,one hundred percent
+CARDINAL-32,one
+CARDINAL-36,fifty nine
+CARDINAL-37,eleven

@@ -6,13 +6,16 @@ EMAIL-4,eisen@discourse.ai
 PERSON-5,Firth
 PERSON-6,David
 MONEY-9,Five hundred dollars and fourty three cents
-_IGNORE_-10,CV
-_IGNORE_-11,tomorrow
-_IGNORE_-12,one moment
-_IGNORE_-13,PIN
-CCARD-14,four oh one two zero zero zero zero nine eight seven six five four three nine
-PHONE-15," five nine one, two six eight, five five nine one"
-PHONE-16, two one eight seven three oh four three oh oh
-ZIP-17,five five eight one two
-PIN-18,one one six eight
-MONEY-19,five hundred dollars
+PIN-10,<CVV/>
+ZIP-11,<ZIP/>
+PIN-12,<PIN/>
+_IGNORE_-13,CV
+_IGNORE_-14,tomorrow
+_IGNORE_-15,one moment
+_IGNORE_-16,PIN
+CCARD-17,four oh one two zero zero zero zero nine eight seven six five four three nine
+PHONE-18," five nine one, two six eight, five five nine one"
+PHONE-19, two one eight seven three oh four three oh oh
+ZIP-20,five five eight one two
+PIN-21,one one six eight
+MONEY-22,five hundred dollars

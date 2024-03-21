@@ -1,45 +1,45 @@
 conversation_id,speaker,date_time,text
-1011432,Agent,11/08/2019 00:00,Hello and thank you for contacting [ORG-14]. Before we start may I have your first and last name?
-1011432,Client,11/08/2019 00:00,[PERSON-16] [PERSON-15]
+1011432,Agent,11/08/2019 00:00,Hello and thank you for contacting General Corporation. Before we start may I have your first and last name?
+1011432,Client,11/08/2019 00:00,[PERSON-19] [PERSON-18]
 1011432,Agent,11/08/2019 00:00,And what is your account number?
-1011432,Client,11/08/2019 00:00,It's [PHONE-7] I think.
+1011432,Client,11/08/2019 00:00,It's [PHONE-11] I think.
 1011432,Agent,11/08/2019 00:00,And your social security number?
-1011432,Client,11/08/2019 00:00,It's [SSN-10].
+1011432,Client,11/08/2019 00:00,It's [SSN-14].
 1011432,Agent,11/08/2019 00:00,And what is your email address?
-1011432,Client,11/08/2019 00:00,It's [EMAIL-12]
-1011432,Agent,11/08/2019 00:00,Thank you [PERSON-16]. How may I help you today?
+1011432,Client,11/08/2019 00:00,It's [EMAIL-16]
+1011432,Agent,11/08/2019 00:00,Thank you [PERSON-19]. How may I help you today?
 1011432,Client,11/08/2019 00:00,I'm trying to pay my bill but it's not working.
-1011432,Agent,11/08/2019 00:00,Ok is this the [ORDINAL-18] time you've tried to make the payment?
+1011432,Agent,11/08/2019 00:00,Ok is this the 1st time you've tried to make the payment?
 1011432,Client,11/08/2019 00:00,yes
 1011432,Agent,11/08/2019 00:00,I can help you with that. Are you trying to pay with a bank draft or a credit card?
 1011432,Client,11/08/2019 00:00,I'm paying with my debit card.
 1011432,Agent,11/08/2019 00:00,What amount are you trying to pay?
-1011432,Client,11/08/2019 00:00,[MONEY-19]
+1011432,Client,11/08/2019 00:00,[MONEY-21]
 1011432,Agent,11/08/2019 00:00,What is the name of the bank for your debit card?
-1011432,Client,11/08/2019 00:00,Sorry I meant [MONEY-21] even. My bank is [ORG-20].
+1011432,Client,11/08/2019 00:00,Sorry I meant [MONEY-22] even. My bank is Wells Fargo.
 1011432,Agent,11/08/2019 00:01,Can you please confirm the debit card number for me please?
-1011432,Client,11/08/2019 00:01,It's [CCARD-6]
+1011432,Client,11/08/2019 00:01,It's [CCARD-10]
 1011432,Agent,11/08/2019 00:01,and the expiration?
 1011432,Client,11/08/2019 00:01,Dec-[CARDINAL-31]
 1011432,Agent,11/08/2019 00:01,And the CV code?
 1011432,Client,11/08/2019 00:01,What is that?
-1011432,Agent,11/08/2019 00:01,It's a [CARDINAL-22] digit number usually on the back of your debit card next to the signature strip.
-1011432,Client,11/08/2019 00:01,Oh ok. It's [PIN] or [CARDINAL-23]
+1011432,Agent,11/08/2019 00:01,It's a [CARDINAL-23] digit number usually on the back of your debit card next to the signature strip.
+1011432,Client,11/08/2019 00:01,Oh ok. It's [PIN-0] or [CARDINAL-24]
 1011432,Agent,11/08/2019 00:01,When did you want the payment to process?
 1011432,Client,11/08/2019 00:01,Can you make the payment process tomorrow please?
-1011432,Agent,11/08/2019 00:01,Do I have your authorization to run your debit card in the amount of [MONEY-21]?
+1011432,Agent,11/08/2019 00:01,Do I have your authorization to run your debit card in the amount of [MONEY-22]?
 1011432,Client,11/08/2019 00:01,Yes.
-1011432,Agent,11/08/2019 00:02,Ok [CARDINAL-25] moment please while I run your debit card.
+1011432,Agent,11/08/2019 00:02,Ok one moment please while I run your debit card.
 1011432,Client,11/08/2019 00:02,Ok
 1011432,Agent,11/08/2019 00:03,The system is telling me that it needs your physical address associated with the card.
-1011432,Client,11/08/2019 00:04,Ok. It's [ADDRESS-5] tes. The zip is [ZIP-11] or [ZIP].
+1011432,Client,11/08/2019 00:04,Ok. It's [ADDRESS-9] tes. The zip is [ZIP-15] or [ZIP-1].
 1011432,Agent,11/08/2019 00:05,I also need a phone number associated with the account.
-1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's [PHONE-9]. It could also be my land line which is [PHONE-8]
+1011432,Client,11/08/2019 00:06,It’s probably my cell phone. That's [PHONE-13]. It could also be my land line which is [PHONE-12]
 1011432,Agent,11/08/2019 00:06,And what is your [CARDINAL-26] digit PIN code?
-1011432,Client,11/08/2019 00:06,I believe it's [PIN]. Or it could be [PIN-13]
+1011432,Client,11/08/2019 00:06,I believe it's [PIN-2]. Or it could be [PIN-17]
 1011432,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.
 1011432,Client,11/08/2019 00:07,Ok thanks.
-1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of [MONEY-21] was made on [DATE-28] at [TIME-27]. Is there anything else I can help you with?
+1011432,Agent,11/08/2019 00:08,The payment was successful. You should get an email confirmation that a payment in the amount of [MONEY-22] was made on [DATE-28] at [TIME-27]. Is there anything else I can help you with?
 1011432,Client,11/08/2019 00:09,And you're [PERCENT-30] sure it went through?
 1011432,Agent,11/08/2019 00:09,Yes the payment was successful.
 1011432,Client,11/08/2019 00:10,Nope that's it.
