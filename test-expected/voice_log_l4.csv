@@ -1,0 +1,36 @@
+PIN-0,<CVV/>
+ZIP-1,<ZIP/>
+PIN-2,<PIN/>
+_IGNORE_-3,first and
+_IGNORE_-4,today
+_IGNORE_-5,CV
+_IGNORE_-6,tomorrow
+_IGNORE_-7,one moment
+_IGNORE_-8,PIN
+CCARD-9,four oh one two zero zero zero zero nine eight seven six five four three nine
+PHONE-10, one two four nine eight seven four six two three
+PHONE-11," five nine one, two six eight, five five nine one"
+PHONE-12, two one eight seven three oh four three oh oh
+SSN-13,two three four two three two three four three
+ZIP-14,five five eight one two
+EMAIL-15,eisen@discourse.ai
+PIN-16,one one six eight
+ORG-17,General Corporation
+PERSON-18,Firth
+PERSON-19,David
+ORDINAL-22,first
+MONEY-23,Five hundred dollars and fourty three cents
+ORG-24,Wells Fargo
+CARDINAL-25,five hundred
+DATE-26,July of two thousand twenty three
+CARDINAL-27,three
+CARDINAL-28,two
+MONEY-29,five hundred dollars
+GPE-30,the United States
+GPE-31,Deluth Georgia
+CARDINAL-32,four
+QUANTITY-34,fifty nine AM
+DATE-35,August eleventh
+PERCENT-37,one hundred percent
+CARDINAL-38,one
+CARDINAL-42,eleven
