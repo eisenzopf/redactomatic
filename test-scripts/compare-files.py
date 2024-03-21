@@ -8,13 +8,13 @@ def compare_files(resultfile, expectedfile, message):
         print(f"PASS: {message}", file=sys.stderr)
         return True
     else:
-        print(f"FAIL: {message}", file=sys.stderr)
+        print(f"FAIL: {message} [Try: sdiff {resultfile} {expectedfile}]", file=sys.stderr)
         return False
 
 def config_args(): # add --anonymize
     parser = argparse.ArgumentParser(description='Redact call transcriptions or chat logs.')
-    parser.add_argument('expectfile', help='The expected result file')
     parser.add_argument('resultfile', help='The test being performed')
+    parser.add_argument('expectfile', help='The expected result file')
     parser.add_argument('message',    help='The result file to test')
     
     _args=parser.parse_args()
