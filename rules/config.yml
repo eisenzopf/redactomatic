@@ -1,4 +1,6 @@
 level:
+    '0':
+        - _TOKEN_MAP_
     '1': 
         - _TOKEN_MAP_
         - _IGNORE_
