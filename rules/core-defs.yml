@@ -464,18 +464,18 @@ regex:
       ) # End DEFINE
 
   cardinal-text:
-    # Detects written numbers such as 'one hundred and twenty' and also every instance of [0-9] that is not followed by 'st|nd|rd|th' to defend ordinals.
+    # Detects written numbers such as 'one hundred and twenty' and also every instance of [0-9] with a modest attempt to protect cardinals, percentages, dates and money sums.
     # The RedactorRegex class then specifically defends these tokens to make sure that the (\d+) 
     # pattern doesn't redact existing labels.
     >  
       ?INCLUDE<cardinal-definitions>
-      (?&bignumber)|((\d+)(?!(st|nd|rd|th))
+      ((?&bignumber)|(\d+))(?!\s*(st|nd|rd|th|%|percent|((of )?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))|dollar|pound|cent|pence))
   
   cardinal-voice:
     # detect written numbers such as 'one hundred and twenty' but do not detect [0-9].
     - >  
       ?INCLUDE<cardinal-definitions>
-      (?&bignumber)
+      (?&bignumber)(?!\s*(%|percent|((of )?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))|dollar|pound|cent|pence))
 
   address:
     # chat-yes, voice-no
