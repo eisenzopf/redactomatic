@@ -464,13 +464,12 @@ regex:
       ) # End DEFINE
 
   cardinal-text:
-    # Detects written numbers such as 'one hundred and twenty' and also every instance of [0-9]
-    # The rule \[\w+-\d+\] detects existing redacted tokens such as [PERSON-1]. 
+    # Detects written numbers such as 'one hundred and twenty' and also every instance of [0-9] that is not followed by 'st|nd|rd|th' to defend ordinals.
     # The RedactorRegex class then specifically defends these tokens to make sure that the (\d+) 
     # pattern doesn't redact existing labels.
     >  
       ?INCLUDE<cardinal-definitions>
-      (?&bignumber)|(\d+)
+      (?&bignumber)|((\d+)(?!(st|nd|rd|th))
   
   cardinal-voice:
     # detect written numbers such as 'one hundred and twenty' but do not detect [0-9].
