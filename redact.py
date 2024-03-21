@@ -54,7 +54,7 @@ class RedactorBase(pb.ProcessorBase):
         entity_matches = list(self.REDACT_LABEL_RU.finditer(s))
         protect_zones=[]
         if entity_matches:
-            print(f'entity_matches: {entity_matches}\'')
+            #print(f'entity_matches: {entity_matches}\'')
             for e in entity_matches:
                 protect_zones.append([e.start(),e.end(),e.group()])  
         return protect_zones
@@ -455,7 +455,7 @@ class RedactorTokenMap(RedactorBase):
                                 is_overlapping,overlapped_label=self.overlaps_redactlabel_span(start,end,protect_zones)
                                 if not is_overlapping:
                                     #Parameters: s, start, end, label, value, conversation_id, eCount):       
-                                    c, eCount=self.insert_redactlabel_and_update_entities(matched_text, start, end, type, matched_text, d_id, eCount)
+                                    new_text, eCount=self.insert_redactlabel_and_update_entities(new_text, start, end, type, matched_text, d_id, eCount)
 
                     #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
             except Exception as e:
