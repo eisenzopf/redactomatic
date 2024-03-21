@@ -19,6 +19,10 @@ voice_redacted_l3='voice_output_l3.csv'
 voice_log_l3='voice_log_l3.csv'
 text_redacted_l3='text_output_l3.csv'
 text_log_l3='text_log_l3.csv'
+voice_redacted_l4='voice_output_l4.csv'
+voice_log_l4='voice_log_l4.csv'
+text_redacted_l4='text_output_l4.csv'
+text_log_l4='text_log_l4.csv'
 text_anonymized_only='text_output_anonymized_only.csv'
 voice_anonymized_only='voice_output_anonymized_only.csv'
 
@@ -54,9 +58,13 @@ python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality 
 python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l3 --log $voice_log_l3 --level 3
 python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l3 --log $text_log_l3 --level 3
 
+#Test redaction at level 4
+python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_voice --outputfile $voice_redacted_l4 --log $voice_log_l4 --level 4
+python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text  --rulefile $CUSTOMRULES --inputfile $INPUTDIR/$sample_text --outputfile $text_redacted_l4 --log $text_log_l4 --level 4
+
 #Test anonymization for each of the anonymizer tokens
-python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $text_anonymized_only --anonymize --no-redact --level 3 --seed 2
-python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $voice_anonymized_only --anonymize --no-redact --level 3 --seed 2
+python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $text_anonymized_only --anonymize --no-redact --level 4 --seed 2
+python3 $BINDIR/redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR/anonymized_sample_data.csv --outputfile $voice_anonymized_only --anonymize --no-redact --level 4 --seed 2
 
 # Now compare the results.
 python3 compare-files.py $regex_test $TESTEXPECTED/$regex_test 'Is the regex test output file correct?' 
@@ -70,6 +78,10 @@ python3 compare-files.py $voice_log_l3 $TESTEXPECTED/$voice_log_l3 'Is the L3 vo
 python3 compare-files.py $voice_redacted_l3 $TESTEXPECTED/$voice_redacted_l3 'Is the L3 redacted voice output file correct'
 python3 compare-files.py $text_log_l3 $TESTEXPECTED/$text_log_l3 'Is the L3 text redaction log correct?'
 python3 compare-files.py $text_redacted_l3 $TESTEXPECTED/$text_redacted_l3 'Is the L3 redacted text output file correct'
+python3 compare-files.py $voice_log_l4 $TESTEXPECTED/$voice_log_l4 'Is the L4 voice redaction log correct?'
+python3 compare-files.py $voice_redacted_l4 $TESTEXPECTED/$voice_redacted_l4 'Is the L4 redacted voice output file correct'
+python3 compare-files.py $text_log_l4 $TESTEXPECTED/$text_log_l4 'Is the L4 text redaction log correct?'
+python3 compare-files.py $text_redacted_l4 $TESTEXPECTED/$text_redacted_l4 'Is the L4 redacted text output file correct'
 
 python3 compare-files.py $text_anonymized_only $TESTEXPECTED/$text_anonymized_only 'Is the pure text anonymization file correct?'
 python3 compare-files.py $voice_anonymized_only $TESTEXPECTED/$voice_anonymized_only 'Is the pure voice anonymization file correct?'
