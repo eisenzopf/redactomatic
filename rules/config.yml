@@ -1,10 +1,10 @@
 level:
     '0':
-        - _IGNORE_
         - _TOKEN_MAP_
+        - _IGNORE_
     '1': 
-        - _IGNORE_
         - _TOKEN_MAP_
+        - _IGNORE_
         - _SPACY_
         - PHONE
         - PERSON
@@ -14,8 +14,8 @@ level:
         - SSN
         - PIN
     '2':
-        - _IGNORE_
         - _TOKEN_MAP_
+        - _IGNORE_
         - _SPACY_
         - PHONE
         - PERSON
@@ -28,8 +28,8 @@ level:
         - LOC
         - EMAIL
     '3':
-        - _IGNORE_
         - _TOKEN_MAP_
+        - _IGNORE_
         - _SPACY_
         - PHONE
         - PERSON
@@ -43,8 +43,8 @@ level:
         - EMAIL
         - CARDINAL
     '4':
-        - _IGNORE_
         - _TOKEN_MAP_
+        - _IGNORE_
         - _SPACY_
         - PHONE
         - PERSON
