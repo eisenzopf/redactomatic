@@ -54,7 +54,7 @@ class RedactorBase(pb.ProcessorBase):
         entity_matches = list(self.REDACT_LABEL_RU.finditer(s))
         protect_zones=[]
         if entity_matches:
-            #print(f'entity_matches: {entity_matches}\'')
+            print(f'entity_matches: {entity_matches}\'')
             for e in entity_matches:
                 protect_zones.append([e.start(),e.end(),e.group()])  
         return protect_zones
@@ -435,16 +435,31 @@ class RedactorTokenMap(RedactorBase):
             new_text = str(text)
             #Check if there are any relevant patterns and only run the relatively costly map if there are:
             try:
-                if ru.search(self._all_patterns,new_text,0,ru.EngineType.REGEX):
+                if ru.search(self._all_patterns,new_text,0,ru.EngineType.REGEX):  
                     for type,pattern in self._token_pattern.items():
                         #Replace all the matching expressions with a canonical redaction token
                         #We won't bother adding an index or incrementing the eCount becuase this is a generic match not a specific match.
                         if pattern is not None:
                             #print(f'RedactorTokenMap.redact(). TOKEN_PATTERN={pattern}',file=sys.stderr)
-                            new_text =  ru.sub(new_text,pattern,f'[{type}]',0, ru.EngineType.REGEX) 
-                        #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
+                            #Find all the existing entity labels in the string.
+                            protect_zones=self.get_redactlabel_spans(new_text)
+
+                            #Find the entities matching in the string
+                            matches = list(pattern.finditer(new_text))
+                            for e in reversed(matches): #reversed to not modify the offsets of other entities when substituting
+                                matched_text = e.group()
+                                start = e.span()[0]
+                                end = start + len(matched_text)
+
+                                #Check if we have matched part of an entity label, and add the redaction label if we are not.
+                                is_overlapping,overlapped_label=self.overlaps_redactlabel_span(start,end,protect_zones)
+                                if not is_overlapping:
+                                    #Parameters: s, start, end, label, value, conversation_id, eCount):       
+                                    c, eCount=self.insert_redactlabel_and_update_entities(matched_text, start, end, type, matched_text, d_id, eCount)
+
+                    #if new_text != text: print(f'CHANGED: \'{text}\' => \'{new_text}\'')
             except Exception as e:
-                print(f'WARNING: Ignoring error: {e}',file=sys.stderr)
+                print(f'WARNING: Ignoring error: {e} whilst matching string \'{str(new_text)}\'',file=sys.stderr)
                 pass
            
             new_texts.append(new_text)
