@@ -12,7 +12,7 @@ import traceback
 import redact
 
 def __version__():
-    return "1.21"
+    return "1.22"
     
 TOKENMAP_RULENAME="_TOKEN_MAP_"
 
