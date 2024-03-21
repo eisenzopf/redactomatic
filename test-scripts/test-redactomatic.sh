@@ -99,6 +99,10 @@ if [ "$keep_result_files" = false ] ; then
     rm -f $voice_log_l3 
     rm -f $text_redacted_l3 
     rm -f $text_log_l3 
+    rm -f $voice_redacted_l4
+    rm -f $voice_log_l4 
+    rm -f $text_redacted_l4 
+    rm -f $text_log_l4 
     rm -f $text_anonymized_only 
     rm -f $voice_anonymized_only 
 fi
