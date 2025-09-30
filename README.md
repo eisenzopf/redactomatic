@@ -87,24 +87,54 @@ You can use any kind of redactor to identify phrases to be ignored, and you can 
 
 ## Installation
 
-To install RedactoMatic, run:
+### UNIX/Linux/macOS
+
+To install RedactoMatic on UNIX-based systems, run:
 
 ```sh
 sh setup.sh
+```
+
+### Windows
+
+To install python on Windows, run:
+
+```powershell
+> winget install Python.Python.3.10
+>python --version
+Python 3.10.11
+```
+
+To install RedactoMatic on Windows, in the root redactomatic directory run:
+
+```powershell
+> powershell -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
 This will install required Python libraries and download the small (en_core_web_sm) and large (en_core_web_lg) Spacy models.
 
 ## Test
 
-To test the new installation run:
+### UNIX/Linux/macOS
+
+To test the new installation on UNIX-based systems, run:
 
 ```sh
 cd test-scripts
 sh test-redactomatic.sh
 ```
-
 This should report a number of clean test results as shown below:
+
+### Windows
+
+To test the new installation on Windows, run:
+
+```powershell
+cd test-scripts
+powershell -ExecutionPolicy Bypass -File .\test-redactomatic.ps1
+```
+
+Test results under Windows do not give exactly the same outputs, so expect the tests to report 'FAIL'.To check that the redaction is happening effectively use the `-k` option on the test script to keep the results files and inspect them to check that they look credible.
 
 ```
 PASS: Is the regex test output file correct?
@@ -1258,6 +1288,7 @@ There are no known issues.
 | 1.21    | - Add RedactorTokenMap to refactor token-map processing </br>- Added anonymiztion and redaction order debug to redactomatic </br>- Correct redactomatic bug that did not correctly track split names for anonymization </br>- Add protect_zones to Spacy redactor </br>- Refactor regex_utils and add search() </br>- Added indexed redaction labels to split spacy names.</br>- Refactor insertion of indexed labels to share common code </br>- add verbosity flag to test-redactomatic.sh   | 14 Feb 2024  |
 | 1.22    | - Remove FAC, GPE, LANGUAGE, NORP, PRODUCT, EVENT, LAUGHTER, LAW, ORG, QUANTITY, WORK_OF_ART, ORDINAL from Level 3. </br>- Create level 4 which does what level 3 used to do. </br>- Create level 0 which simply redacts the Token Map and nothing else. </br>- Log Token Mappings in the output log. </br>- Defend existing labels correctly in TokenMap. </br>- Log changes made by the TokenMap. </br>- Make a modest attempt to defend dates and sums of money in the cardinal rule. </br>- TokenMaps are now case sensitive. Fix test case. </br>- Defend ordinals in the cardinal text rule. | 21 March 2024 |
 | 1.23    | - Add --startdate --enddate -chunkoutstem --instem --outstem options. | 10 June 2025 |
+| 1.24    | - Added Windows setup and test support | 30 September 2025  |
 
 ## License
 

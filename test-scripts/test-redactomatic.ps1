@@ -1,0 +1,138 @@
+# Parse command line arguments
+param(
+    [switch]$k,
+    [switch]$v
+)
+
+# Directory and file configuration
+$BINDIR = '..'
+$INPUTDIR = '..\sample-data'
+$TESTEXPECTED = '..\test-expected'
+$CUSTOMRULES = Join-Path $INPUTDIR 'custom-anon-rules.yml'
+
+# Input file names
+$sample_voice = 'sample_data_voice.csv'
+$sample_text = 'sample_data.csv'
+
+# Output file names
+$regex_test = 'regextest.csv'
+$voice_redacted_l2 = 'voice_output_l2.csv'
+$voice_log_l2 = 'voice_log_l2.csv'
+$text_redacted_l2 = 'text_output_l2.csv'
+$text_log_l2 = 'text_log_l2.csv'
+$voice_redact_anonymized_l2 = 'voice_output_anonymized_l2.csv'
+$text_redact_anonymized_l2 = 'text_output_anonymized_l2.csv'
+$voice_redacted_l3 = 'voice_output_l3.csv'
+$voice_log_l3 = 'voice_log_l3.csv'
+$text_redacted_l3 = 'text_output_l3.csv'
+$text_log_l3 = 'text_log_l3.csv'
+$voice_redacted_l4 = 'voice_output_l4.csv'
+$voice_log_l4 = 'voice_log_l4.csv'
+$text_redacted_l4 = 'text_output_l4.csv'
+$text_log_l4 = 'text_log_l4.csv'
+$text_anonymized_only = 'text_output_anonymized_only.csv'
+$voice_anonymized_only = 'voice_output_anonymized_only.csv'
+$instem = 'input'
+$outstem = 'output'
+$chunkoutstem = 'chunkout'
+$date_chunked_log = 'date_chunked_log.csv'
+
+# Command line options
+$keep_result_files = $false
+$VERBOSE_OPT = '--no-verbose'
+
+
+
+if ($k) {
+    $keep_result_files = $true
+}
+
+if ($v) {
+    $VERBOSE_OPT = '--verbose'
+}
+
+# This should throw an error due to no rules being loaded
+try {
+    $OUTPUT = python $BINDIR\redactomatic.py $VERBOSE_OPT --no-defaultrules --regextest --no-redact --testoutputfile $regex_test 2>&1 | Out-String
+    if ($OUTPUT -match "No rulesfiles loaded") {
+        Write-Host 'PASS. Correctly detected no rules being loaded.' -ForegroundColor Green
+    } else {
+        Write-Host "FAIL. Redactomatic failed to detect missing rules files. Instead it returned: $OUTPUT" -ForegroundColor Red
+    }
+} catch {
+    Write-Host "Error during no-rules test: $_" -ForegroundColor Red
+}
+
+# Test the automatic regular expression testing
+$OUTPUT = python $BINDIR\redactomatic.py $VERBOSE_OPT --regextest --no-redact --testoutputfile $regex_test
+
+# Test redaction and then anonymization at level 2
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --chunksize 20 --inputfile $INPUTDIR\$sample_voice --outputfile $voice_redacted_l2 --log $voice_log_l2 --level 2
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_text --outputfile $text_redacted_l2 --log $text_log_l2 --level 2
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_voice --outputfile $voice_redact_anonymized_l2 --anonymize --seed 1 --level 2
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_text --outputfile $text_redact_anonymized_l2 --anonymize --seed 1 --level 2
+
+# Test redaction at level 3
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_voice --outputfile $voice_redacted_l3 --log $voice_log_l3 --level 3
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_text --outputfile $text_redacted_l3 --log $text_log_l3 --level 3
+
+# Test redaction at level 4
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_voice --outputfile $voice_redacted_l4 --log $voice_log_l4 --level 4
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR\$sample_text --outputfile $text_redacted_l4 --log $text_log_l4 --level 4
+
+# Test anonymization for each of the anonymizer tokens
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --inputfile $INPUTDIR\anonymized_sample_data.csv --outputfile $text_anonymized_only --anonymize --no-redact --level 4 --seed 2
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality voice --rulefile $CUSTOMRULES --inputfile $INPUTDIR\anonymized_sample_data.csv --outputfile $voice_anonymized_only --anonymize --no-redact --level 4 --seed 2
+
+# Test date based redaction and gathered chunks
+python $BINDIR\redactomatic.py $VERBOSE_OPT --column 4 --idcolumn 1 --modality text --rulefile $CUSTOMRULES --instem $INPUTDIR\$instem -sd '2024-01-01' -ed '2024-01-31' --outstem $outstem --chunkoutstem $chunkoutstem --chunksize 10 --chunkgather 1 --log $date_chunked_log --level 1 --startdate 2024-01-01 --enddate 2024-01-31 --chunkgather 1
+
+# Now compare the results
+python compare-files.py $regex_test $TESTEXPECTED\$regex_test 'Is the regex test output file correct?'
+python compare-files.py $voice_log_l2 $TESTEXPECTED\$voice_log_l2 'Is the L2 voice redaction log correct?'
+python compare-files.py $voice_redacted_l2 $TESTEXPECTED\$voice_redacted_l2 'Is the L2 redacted voice output file correct'
+python compare-files.py $text_log_l2 $TESTEXPECTED\$text_log_l2 'Is the L2 text redaction log correct?'
+python compare-files.py $text_redacted_l2 $TESTEXPECTED\$text_redacted_l2 'Is the L2 redacted text output file correct?'
+python compare-files.py $voice_redact_anonymized_l2 $TESTEXPECTED\$voice_redact_anonymized_l2 'Is the L2 redacted and anonymized voice output file correct?'
+python compare-files.py $text_redact_anonymized_l2 $TESTEXPECTED\$text_redact_anonymized_l2 'Is the L2 redacted and anonymized text output file correct?'
+python compare-files.py $voice_log_l3 $TESTEXPECTED\$voice_log_l3 'Is the L3 voice redaction log correct?'
+python compare-files.py $voice_redacted_l3 $TESTEXPECTED\$voice_redacted_l3 'Is the L3 redacted voice output file correct'
+python compare-files.py $text_log_l3 $TESTEXPECTED\$text_log_l3 'Is the L3 text redaction log correct?'
+python compare-files.py $text_redacted_l3 $TESTEXPECTED\$text_redacted_l3 'Is the L3 redacted text output file correct'
+python compare-files.py $voice_log_l4 $TESTEXPECTED\$voice_log_l4 'Is the L4 voice redaction log correct?'
+python compare-files.py $voice_redacted_l4 $TESTEXPECTED\$voice_redacted_l4 'Is the L4 redacted voice output file correct'
+python compare-files.py $text_log_l4 $TESTEXPECTED\$text_log_l4 'Is the L4 text redaction log correct?'
+python compare-files.py $text_redacted_l4 $TESTEXPECTED\$text_redacted_l4 'Is the L4 redacted text output file correct'
+python compare-files.py $text_anonymized_only $TESTEXPECTED\$text_anonymized_only 'Is the pure text anonymization file correct?'
+python compare-files.py $voice_anonymized_only $TESTEXPECTED\$voice_anonymized_only 'Is the pure voice anonymization file correct?'
+python compare-files.py chunkout_2024-01-01_2024-01-31_0.csv $TESTEXPECTED\chunkout_2024-01-01_2024-01-31_0.csv 'Is chunk 1 correct?'
+python compare-files.py chunkout_2024-01-01_2024-01-31_1.csv $TESTEXPECTED\chunkout_2024-01-01_2024-01-31_1.csv 'Is chunk 2 correct?'
+python compare-files.py chunkout_2024-01-01_2024-01-31_2.csv $TESTEXPECTED\chunkout_2024-01-01_2024-01-31_2.csv 'Is chunk 3 correct?'
+python compare-files.py chunkout_2024-01-01_2024-01-31_3.csv $TESTEXPECTED\chunkout_2024-01-01_2024-01-31_3.csv 'Is chunk 4 correct?'
+python compare-files.py chunkout_2024-01-01_2024-01-31_4.csv $TESTEXPECTED\chunkout_2024-01-01_2024-01-31_4.csv 'Is chunk 5 correct?'
+
+# Now delete the test output files
+if (-not $keep_result_files) {
+    Remove-Item -Path $regex_test -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_redacted_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_log_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_redacted_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_log_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_redact_anonymized_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_redact_anonymized_l2 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_redacted_l3 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_log_l3 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_redacted_l3 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_log_l3 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_redacted_l4 -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_log_l4 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_redacted_l4 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_log_l4 -ErrorAction SilentlyContinue
+    Remove-Item -Path $text_anonymized_only -ErrorAction SilentlyContinue
+    Remove-Item -Path $voice_anonymized_only -ErrorAction SilentlyContinue
+    Remove-Item -Path $date_chunked_log -ErrorAction SilentlyContinue
+    Remove-Item -Path "$outstem*" -ErrorAction SilentlyContinue
+    Remove-Item -Path "$chunkoutstem*" -ErrorAction SilentlyContinue
+}
+
+Write-Host "`nTest script completed." -ForegroundColor Cyan
