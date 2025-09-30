@@ -172,6 +172,11 @@ usage: redactomatic.py
       [--verbose]
       [--no-verbose]
       [--traceback]
+      [-sd, --startdate]
+      [-ed, --enddate]
+      [-co, --chunkoutstem]
+      [-is, --instem]
+      [-os, --outstem]
 ```
 
 ### Command Line Parameters
@@ -200,11 +205,18 @@ usage: redactomatic.py
 | `--rulefile`                               | A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules).  These are globbable.   | *OPTIONAL*       |
 | `--regextest`                              | Test the regular rexpressions defiend in the regex-test rules prior to any other processing.                                             | *OPTIONAL*       |
 | `--testoutputfile`                         | The file to save the regular expression test results in.                                                                                 | *OPTIONAL*       |
-| `--traceback`</br>`--no-traceback  `       | Give traceback information when an exceptin causes the program to halt.                                                                  | no-traceback     |
+| `--traceback`</br>`--no-traceback`         | Give traceback information when an exceptin causes the program to halt.                                                                  | no-traceback     |
 | `--version`                                | Print the version and exit                                                                                                               | *TERMINAL*       |
 | `--verbose`</br>`--no-verbose`             | Print the status of processing steps to standard output.                                                                                 | verbose          |
+| `-sd`,`--startdate`                        | Start date for date-based processing                                                                                                     | *OPTIONAL*       |
+| `-ed`,`--enddate`                          | End date for date-based processing                                                                                                       | *OPTIONAL*       |
+| `-co`,`--chunkoutstem`                     | Base name for chunked output files when using date-based processing                                                                      | *OPTIONAL*       |
+| `-is`,`--instem`                           | Base name for input files when using date-based processing                                                                               | *OPTIONAL*       |
+| `-os`,`--outstem`                          | Base name for output files when using date-based processing                                                                              | *OPTIONAL*       |
+| `--chunkgather`                            | The number of chunks to gather into separate chunked output files using the `outstem` as the base name.                           | *OPTIONAL*       |
 
-(\*) ** *The command must either specifiy the --header option or give the --column and --idcolumn options.* **
+
+d must either specifiy the --header option or give the --column and --idcolumn options.* **
 
 ### Example 1: Redact a text file with no header
 
@@ -253,6 +265,23 @@ python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./da
 ```sh
 python3 redactomatic.py --column 4 --idcolumn 1 --modality text --inputfile ./data/output.csv --outputfile output2.csv --anonymize --no-redact
 ```
+
+### Example 6: Using date-based filenames and gathered chunks
+
+In order to support date-based file naming, redactomatic supports the ability to take input and output file stems plus start date and end date postfixes and create the input and output file names from them.  It can also create a final output that is chopped into gathered chunks if you do not want to have a number of smaller files in the output rather than one large one.
+
+```sh
+python3 redactomatic.py --column 4 --idcolumn 1 --modality text --instem mydir/input -sd '2024-01-01' -ed '2024-01-31' --outstem myotherdir/ouput --chunkoutstem andanotherdir/chunk --chunksize 1000 --chunkgather 40  
+```
+
+The command above does the following:
+
+- Reads the input from the file `mydir/input_2024-01-01_2024-01-31.csv`
+- Reads this input file in chunks of 1000 lines
+- Appends these chunks into the output file `myotherdir/ouput_2024-01-01_2024-01-31.csv` as they are processed
+- Every 40 chunks, the output file is copied to `andanotherdir/chunk_2024-01-01_2024-01-31_{chunk_no}.csv`  where {chunk_no} will be 0,39,79,119 etc.
+
+When the process has completed the output file `myotherdir/ouput_2024-01-01_2024-01-31.csv` is deleted leaving just the chunked output files.
 
 ## Redaction Levels
 
@@ -485,7 +514,7 @@ level:
 
 **Example level definition (YAML)**
 
-Any number of level definitions may be set.  The defalt configuration files contain three level keys '1', '2', '3' and '4', an extract of which is shown above.     The ` --level` option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
+Any number of level definitions may be set.  The defalt configuration files contain five level keys '0', '1', '2', '3' and '4', an extract of which is shown above.     The ` --level` option uses the entity list that is found in the relevant matching section.  Level keys do not need to be numeric.  You can add as many levels as you want.
 
 To define a custom level you can add a custom configuraton file with its own level entry as shown below:
 
@@ -1227,7 +1256,8 @@ There are no known issues.
 | 1.19    | - Added default option to compile a single regex for a whole phrase list to make it more efficient to RedactorPhraseDict and RedactorPhraseList</br>- Added combine-sets parameter to support turning this off if required</br>- Added complete prematch and postmatch support for RedactorPhraseDict and RedactorPhraseList</br>- Added add-wordbreak parameter to RedactorPhraseDict and RedactorPhraseList</br>- Documented all of the above changes in README                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Nov 2022     |
 | 1.20    | - Added --verbose and --no-verbose command line options</br>- Changed entity restoration error from an exeption to at stops execution to a warning that restoration failed.             | 16 Dec 2022  |
 | 1.21    | - Add RedactorTokenMap to refactor token-map processing </br>- Added anonymiztion and redaction order debug to redactomatic </br>- Correct redactomatic bug that did not correctly track split names for anonymization </br>- Add protect_zones to Spacy redactor </br>- Refactor regex_utils and add search() </br>- Added indexed redaction labels to split spacy names.</br>- Refactor insertion of indexed labels to share common code </br>- add verbosity flag to test-redactomatic.sh   | 14 Feb 2024  |
-| 1.22    | - Remove FAC, GPE, LANGUAGE, NORP, PRODUCT, EVENT, LAUGHTER, LAW, ORG, QUANTITY, WORK_OF_ART, ORDINAL from Level 3. </br>- Create level 4 which does what level 3 used to do. </br>- Create level 0 which simply redacts the Token Map and nothing else. </br>- Log Token Mappings in the output log. </br>- Defend existing labels correctly in TokenMap. </br>- Log changes made by the TokenMap. </br>- Make a modest attempt to defend dates and sums of money in the cardinal rule. </br>- TokenMaps are now case sensitive. Fix test case. </br>- Defend ordinals in the cardinal text rule. |
+| 1.22    | - Remove FAC, GPE, LANGUAGE, NORP, PRODUCT, EVENT, LAUGHTER, LAW, ORG, QUANTITY, WORK_OF_ART, ORDINAL from Level 3. </br>- Create level 4 which does what level 3 used to do. </br>- Create level 0 which simply redacts the Token Map and nothing else. </br>- Log Token Mappings in the output log. </br>- Defend existing labels correctly in TokenMap. </br>- Log changes made by the TokenMap. </br>- Make a modest attempt to defend dates and sums of money in the cardinal rule. </br>- TokenMaps are now case sensitive. Fix test case. </br>- Defend ordinals in the cardinal text rule. | 21 March 2024 |
+| 1.23    | - Add --startdate --enddate -chunkoutstem --instem --outstem options. | 10 June 2025 |
 
 ## License
 
@@ -1243,11 +1273,10 @@ Copyright (C) 2020, Jonathan Eisenzopf
 Copyright (c) 2020, Open source contributors.
 All rights reserved.
 
-
 ## Contributors
 
-Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes. </br>
-Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions. </br>
+Thanks to [@kavdev](https://github.com/kavdev) for reviewing the code and submitting bug fixes.
+Thanks to [@wmjg-alt](https://github.com/wmjg-alt) for adding context to anonymization functions.
 Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the code to use a generic rules base and maintaining the code.
 
 ## Contribution
@@ -1255,5 +1284,4 @@ Thanks to [@davidattwater](https://github.com/davidattwater) for refactoring the
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the MIT license, shall
 be licensed as above, without any additional terms or conditions.
-
 Please see the [Contribution Guidelines](CONTRIBUTING.md).

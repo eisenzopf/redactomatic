@@ -1,0 +1,10 @@
+1011437,Client,11/08/2019 00:01,Yes.
+1011437,Agent,11/08/2019 00:02,Ok one moment please while I run your debit card.
+1011437,Client,11/08/2019 00:02,Ok
+1011437,Agent,11/08/2019 00:03,The system is telling me that it needs your physical address associated with the card.
+1011437,Client,11/08/2019 00:04,Ok. It's [ADDRESS-18] tes. The zip is [PIN-21] 2 or [ZIP-14].
+1011438,Agent,11/08/2019 00:05,I also need a phone number associated with the account.
+1011438,Client,11/08/2019 00:06,It’s probably my cell phone. That's [PHONE-20]. It could also be my land line which is [PHONE-19]
+1011438,Agent,11/08/2019 00:06,And what is your four digit PIN code?
+1011439,Client,11/08/2019 00:06,I believe it's [PIN-15]. Or it could be [PIN-22]
+1011439,Agent,11/08/2019 00:06,Thank you for that information. I will try running the transaction again.

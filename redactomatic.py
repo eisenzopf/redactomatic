@@ -10,9 +10,10 @@ import sys
 import os
 import traceback
 import redact
+import shutil
 
 def __version__():
-    return "1.22"
+    return "1.23"
     
 TOKENMAP_RULENAME="_TOKEN_MAP_"
 
@@ -44,7 +45,7 @@ def config_args(): # add --anonymize
     parser.add_argument('--uppercase', required=False, action='store_true', help='converts all letters to uppercase')
     parser.add_argument('--level', default=2, required=False, help='The redaction level. Choose 1,2, or 3 or a any custom level. Default is 2')
     parser.add_argument('--seed', type=int, required=False, default=None, help='a seed value for anonymization random selection; default is None i.e. truly random.')
-    parser.add_argument('--rulefile', nargs="*", required=False, default=[], help='A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules).  These are globbable.')
+    parser.add_argument('--rulefile', nargs="*", required=False, default=[], help='A list of filenames defining custom rules in YML or JSON. Add to or override default rules (see --defaultrules). These are globbable.')
     parser.add_argument('--regextest', required=False, default=False, action='store_true', help='Test the regular rexpressions defeind in the regex-test rules prior to any other processing.')
     parser.add_argument('--testoutputfile', required=False, help='The file to save test results in.')
     parser.add_argument('--chunksize', required=False, default=100000, type=int, help='The number of lines to read before processing a chunk.(default = 100000)' )
@@ -55,6 +56,12 @@ def config_args(): # add --anonymize
     parser.add_argument('--traceback', action='store_true', default=False, help='Give traceback information when an error is thrown (default=False)')
     parser.add_argument('-v','--verbose', action='store_true', default=True, help='Print progress of redaction to standard output as it occurs. Does not affect stderr. (default=True)')
     parser.add_argument('--no-verbose',   dest='verbose', action='store_false', help='Turn off --verbose')
+    parser.add_argument('-sd','--startdate', type=str, default=None, help='Start date for date-based processing (default=None)')
+    parser.add_argument('-ed','--enddate', type=str, default=None, help='End date for date-based processing (default=None)')
+    parser.add_argument('-co','--chunkoutstem', type=str, default=None, help='Base name for chunked output files when using date-based processing (default=None)')
+    parser.add_argument('-is','--instem', type=str, default=None, help='Base name for input files when using date-based processing (default=None)')
+    parser.add_argument('-os','--outstem', type=str, default=None, help='Base name for output files when using date-based processing (default=None)')
+    parser.add_argument('--chunkgather', type=int, default=None, help='Number of chunks to process before moving to final destination. If not specified, no chunking is performed.')
 
     #version
     parser.add_argument('--version', action='version', help='Print the version', version=f'redactomatic {__version__()}')
@@ -77,8 +84,23 @@ def config_args(): # add --anonymize
         if (not _args.header):
             if (not _args.column): _err_list.append("ERROR: The --column option is required when --header is False.")
             if (not _args.idcolumn): _err_list.append("ERROR: The --idcolumn option is required when --header is False.")
-        if (not _args.inputfile): _err_list.append("ERROR: The --inputfile option is required.")
-        if (not _args.outputfile): _err_list.append("ERROR: The --outputfile option is required.")
+        
+        # Check date-based processing requirements
+        if (_args.startdate is not None or _args.enddate is not None):
+            if _args.startdate is None: _err_list.append("ERROR: The --startdate option is required when using date-based processing.")
+            if _args.enddate is None: _err_list.append("ERROR: The --enddate option is required when using date-based processing.")
+            if _args.chunkgather is not None and _args.chunkoutstem is None: _err_list.append("ERROR: The --chunkoutstem option is required when using chunked output.")
+            if _args.instem is None: _err_list.append("ERROR: The --instem option is required when using date-based processing.")
+            if _args.outstem is None: _err_list.append("ERROR: The --outstem option is required when using date-based processing.")
+            
+            # Construct date-based filenames
+            _args.inputfile = [f"{_args.instem}_{_args.startdate}_{_args.enddate}.csv"]
+            _args.outputfile = f"{_args.outstem}_{_args.startdate}_{_args.enddate}.csv"
+            _args.chunkoutstem = f"{_args.chunkoutstem}_{_args.startdate}_{_args.enddate}"
+        else:
+            if (not _args.inputfile): _err_list.append("ERROR: The --inputfile option is required when not using date-based processing.")
+            if (not _args.outputfile): _err_list.append("ERROR: The --outputfile option is required when not using date-based processing.")
+        
         if (not _args.modality): _err_list.append("ERROR: The --modality option is required.")
     if _err_list:
         parser.error("\n".join(_err_list))
@@ -229,12 +251,22 @@ def main(args):
 
         for file in args.inputfile:
             if (args.verbose): print("Loading datafile " + file + "...")
-            df_iter = pd.read_csv(file,chunksize=args.chunksize,header=(0 if args.header else None),dtype=str, keep_default_na=False)
+            df_iter = pd.read_csv(file, chunksize=args.chunksize, header=(0 if args.header else None), dtype=str, keep_default_na=False)
+            
             for df in df_iter:
                 redactomatic.process(df)
-                if (args.verbose): print("Writing outfile ",args.outputfile, "chunk ",chunk)
-                if chunk==0: df.to_csv(args.outputfile, index=False, header=args.header)
-                else: df.to_csv(args.outputfile, mode='a', header=False, index=False)
+                if (args.verbose): print("Writing outfile ", args.outputfile, "chunk ", chunk)
+                
+                if chunk == 0: 
+                    df.to_csv(args.outputfile, index=False, header=args.header)
+                elif args.chunkgather is not None and chunk % args.chunkgather == 0:
+                    # Move current output to chunked destination and start new output file
+                    final_file = f"{args.chunkoutstem}_{chunk-1}.csv"
+                    shutil.move(args.outputfile, final_file)
+                    if (args.verbose): print(f"{args.outputfile} moved to {final_file}")
+                    df.to_csv(args.outputfile, index=False, header=args.header)
+                else: 
+                    df.to_csv(args.outputfile, mode='a', header=False, index=False)
                 
                 #Quit if the chunklimit has been reached.
                 if (args.chunklimit is not None) and (chunk+1>=args.chunklimit):
@@ -242,6 +274,12 @@ def main(args):
                     break
 
                 chunk=chunk+1
+
+            # Move final chunk to destination if using chunked output
+            if args.chunkgather is not None:
+                final_file = f"{args.chunkoutstem}_{chunk-1}.csv"
+                shutil.move(args.outputfile, final_file)
+                if (args.verbose): print(f"{args.outputfile} moved to {final_file}")
 
         # write audit log
         if args.log:
