@@ -13,7 +13,7 @@ import redact
 import shutil
 
 def __version__():
-    return "1.23"
+    return "1.25"
     
 TOKENMAP_RULENAME="_TOKEN_MAP_"
 
@@ -62,6 +62,7 @@ def config_args(): # add --anonymize
     parser.add_argument('-is','--instem', type=str, default=None, help='Base name for input files when using date-based processing (default=None)')
     parser.add_argument('-os','--outstem', type=str, default=None, help='Base name for output files when using date-based processing (default=None)')
     parser.add_argument('--chunkgather', type=int, default=None, help='Number of chunks to process before moving to final destination. If not specified, no chunking is performed.')
+    parser.add_argument('--encoding', type=str, default='utf-8', help='Character encoding for reading CSV files (default=utf-8)')
 
     #version
     parser.add_argument('--version', action='version', help='Print the version', version=f'redactomatic {__version__()}')
@@ -251,7 +252,7 @@ def main(args):
 
         for file in args.inputfile:
             if (args.verbose): print("Loading datafile " + file + "...")
-            df_iter = pd.read_csv(file, chunksize=args.chunksize, header=(0 if args.header else None), dtype=str, keep_default_na=False)
+            df_iter = pd.read_csv(file, chunksize=args.chunksize, header=(0 if args.header else None), dtype=str, keep_default_na=False, encoding=args.encoding)
             
             for df in df_iter:
                 redactomatic.process(df)

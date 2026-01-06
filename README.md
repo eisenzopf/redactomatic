@@ -207,6 +207,7 @@ usage: redactomatic.py
       [-co, --chunkoutstem]
       [-is, --instem]
       [-os, --outstem]
+      [--encoding ENCODING]
 ```
 
 ### Command Line Parameters
@@ -244,9 +245,10 @@ usage: redactomatic.py
 | `-is`,`--instem`                           | Base name for input files when using date-based processing                                                                               | *OPTIONAL*       |
 | `-os`,`--outstem`                          | Base name for output files when using date-based processing                                                                              | *OPTIONAL*       |
 | `--chunkgather`                            | The number of chunks to gather into separate chunked output files using the `outstem` as the base name.                           | *OPTIONAL*       |
+| `--encoding`                               | Character encoding for reading CSV files                                                                                             | utf-8            |
 
 
-d must either specifiy the --header option or give the --column and --idcolumn options.* **
+***(\*)** Either specifiy the --header option or give the --column and --idcolumn options.*
 
 ### Example 1: Redact a text file with no header
 
@@ -1289,6 +1291,7 @@ There are no known issues.
 | 1.22    | - Remove FAC, GPE, LANGUAGE, NORP, PRODUCT, EVENT, LAUGHTER, LAW, ORG, QUANTITY, WORK_OF_ART, ORDINAL from Level 3. </br>- Create level 4 which does what level 3 used to do. </br>- Create level 0 which simply redacts the Token Map and nothing else. </br>- Log Token Mappings in the output log. </br>- Defend existing labels correctly in TokenMap. </br>- Log changes made by the TokenMap. </br>- Make a modest attempt to defend dates and sums of money in the cardinal rule. </br>- TokenMaps are now case sensitive. Fix test case. </br>- Defend ordinals in the cardinal text rule. | 21 March 2024 |
 | 1.23    | - Add --startdate --enddate -chunkoutstem --instem --outstem options. | 10 June 2025 |
 | 1.24    | - Added Windows setup and test support | 30 September 2025  |
+| 1.25    | - Added --encoding option | 6 January 2026 |
 
 ## License
 
